@@ -1,0 +1,56 @@
+---
+/**
+ * Cloudflare Turnstile widget.
+ *
+ * The widget is only half the control — the token it produces is verified
+ * server-side in src/lib/turnstile.ts. Rendering this without that check would
+ * reproduce the original site's client-only captcha, which was bypassable by
+ * POSTing directly to the endpoint.
+ *
+ * The site key is public by design. Configure it as PUBLIC_TURNSTILE_SITE_KEY.
+ */
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+---
+
+{
+  siteKey ? (
+    <>
+      <div
+        class="cf-turnstile"
+        data-sitekey={siteKey}
+        data-theme="light"
+        data-size="flexible"
+        data-action="website-form"
+      />
+      <script
+        is:inline
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileReady"
+        async
+        defer
+      />
+      <script is:inline>
+        // Explicit render so the widget survives Astro view transitions, which
+        // swap the DOM out from under the auto-render observer.
+        window.onTurnstileReady = function () {
+          document.querySelectorAll('.cf-turnstile').forEach(function (el) {
+            if (el.dataset.rendered) return;
+            el.dataset.rendered = '1';
+            window.turnstile.render(el);
+          });
+        };
+        document.addEventListener('astro:page-load', function () {
+          if (window.turnstile) window.onTurnstileReady();
+        });
+      </script>
+    </>
+  ) : (
+    <p
+      class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+      data-turnstile-missing
+    >
+      Captcha is not configured for this environment. Set
+      <code class="font-mono">PUBLIC_TURNSTILE_SITE_KEY</code> before going live — the API will
+      reject submissions without a valid token.
+    </p>
+  )
+}

@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+
+/**
+ * Partner logo strip. Pure CSS marquee (see .marquee-track in global.css) —
+ * replaces the Owl Carousel instance the original site used for this row.
+ * Pauses on hover and on focus-within, and falls back to a static wrapped
+ * grid under prefers-reduced-motion.
+ */
+const logoModules = import.meta.glob<{ default: ImageMetadata }>(
+  '@/assets/partners/*.{png,jpg,jpeg,svg,webp}',
+  { eager: true }
+);
+
+const logos = Object.entries(logoModules)
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([path, mod]) => ({
+    src: mod.default,
+    // Filename is the only name we have for these marks.
+    name: path.split('/').pop()?.replace(/\.\w+$/, '') ?? 'Partner',
+  }));
+
+// Duplicated once so the -50% translate loops seamlessly.
+const track = [...logos, ...logos];
+---
+
+<section class="cc-white border-y border-brand-100 py-12">
+  <div class="container-page">
+    <p class="script-accent text-center">Our trusted partners</p>
+  </div>
+
+  <div
+    class="marquee relative mt-8 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+  >
+    <ul class="marquee-track items-center gap-14 px-7">
+      {
+        track.map((logo, i) => (
+          <li class="shrink-0">
+            <Image
+              src={logo.src}
+              alt={i < logos.length ? logo.name : ''}
+              aria-hidden={i >= logos.length ? 'true' : undefined}
+              height={40}
+              densities={[1, 2]}
+              loading="lazy"
+              class="h-10 w-auto opacity-60 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

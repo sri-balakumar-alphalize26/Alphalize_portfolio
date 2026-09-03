@@ -1,0 +1,50 @@
+---
+import Icon from './Icon.astro';
+import Reveal from './Reveal.astro';
+import { contact } from '@/config/site';
+
+interface Props {
+  title?: string;
+  body?: string;
+}
+
+const {
+  title = 'Ready to see what automation would change?',
+  body = 'Tell us how your operation runs today. We will come back with a straight assessment of what an ERP or BI rollout would actually move — and what it would not.',
+} = Astro.props;
+---
+
+<section class="container-page py-16 lg:py-20">
+  <Reveal
+    direction="scale"
+    class="cc-plum relative isolate overflow-hidden rounded-[--radius-card] px-6 py-14 text-center sm:px-12 lg:py-18"
+  >
+    <div
+      aria-hidden="true"
+      class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_80%_at_50%_-10%,rgba(255,255,255,0.18),transparent_65%)]"
+    >
+    </div>
+
+    <h2 class="mx-auto max-w-2xl text-[length:--text-section] leading-[1.15] text-white">
+      {title}
+    </h2>
+    <p class="lead mx-auto mt-4 max-w-2xl text-plum-100">{body}</p>
+
+    <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+      <a
+        href="/contact"
+        class="btn btn-light"
+      >
+        Start a conversation
+        <Icon name="arrow-right" class="size-4" />
+      </a>
+      <a
+        href={contact.phoneHref}
+        class="btn btn-outline text-white"
+      >
+        <Icon name="phone" class="size-4" />
+        {contact.phone}
+      </a>
+    </div>
+  </Reveal>
+</section>

@@ -1,0 +1,96 @@
+---
+import Field from './Field.astro';
+import Icon from './Icon.astro';
+import Turnstile from './Turnstile.astro';
+
+interface Props {
+  /** Open roles, plus a general option. */
+  positions: string[];
+}
+
+const { positions } = Astro.props;
+---
+
+<form
+  id="apply"
+  action="/api/careers"
+  method="post"
+  enctype="multipart/form-data"
+  data-enhance
+  class="rounded-[--radius-card] border border-brand-100 bg-white p-6 sm:p-8"
+>
+  <h2 class="text-xl font-semibold text-ink">Apply to join the team</h2>
+  <p class="mt-1.5 text-sm text-muted">
+    Attach your CV and tell us which role you are after. We read every application.
+  </p>
+
+  <div class="mt-5 empty:mt-0" role="status" aria-live="polite">
+    <p data-form-banner class="hidden"></p>
+  </div>
+
+  <div class="mt-5 grid gap-5 sm:grid-cols-2">
+    <Field name="name" label="Name" required autocomplete="name" placeholder="Your full name" />
+    <Field
+      name="email"
+      label="Email"
+      type="email"
+      required
+      autocomplete="email"
+      placeholder="you@example.com"
+    />
+    <Field
+      name="phone"
+      label="Phone"
+      type="tel"
+      required
+      autocomplete="tel"
+      placeholder="+91 00000 00000"
+    />
+    <Field
+      name="position"
+      label="Position"
+      type="select"
+      required
+      options={positions}
+    />
+    <Field
+      name="resume"
+      label="CV / Résumé"
+      type="file"
+      required
+      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      hint="PDF, DOC or DOCX. Maximum 5MB."
+      class="sm:col-span-2"
+    />
+    <Field
+      name="message"
+      label="Anything else?"
+      type="textarea"
+      rows={4}
+      class="sm:col-span-2"
+      placeholder="Optional — a note on what you are looking for, or a link to your work."
+    />
+  </div>
+
+  <div class="mt-5">
+    <Turnstile />
+  </div>
+
+  <button
+    type="submit"
+    class="btn btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+  >
+    Submit application
+    <Icon name="upload" class="size-4" />
+  </button>
+
+  <p class="mt-3 text-xs text-muted">
+    Your CV is used only to assess this application. See our
+    <a href="/legal/privacy-policy" class="text-brand-700 underline">privacy policy</a>.
+  </p>
+</form>
+
+<script>
+  import { initForms } from './form-enhance';
+  document.addEventListener('astro:page-load', initForms);
+</script>

@@ -1,0 +1,99 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'textarea' | 'file' | 'select';
+  required?: boolean;
+  placeholder?: string;
+  autocomplete?: string;
+  rows?: number;
+  accept?: string;
+  hint?: string;
+  options?: string[];
+  class?: string;
+}
+
+const {
+  name,
+  label,
+  type = 'text',
+  required = false,
+  placeholder,
+  autocomplete,
+  rows = 5,
+  accept,
+  hint,
+  options = [],
+  class: className,
+} = Astro.props;
+
+const id = `f-${name}`;
+const errorId = `${id}-error`;
+const hintId = hint ? `${id}-hint` : undefined;
+const describedBy = [hintId, errorId].filter(Boolean).join(' ');
+
+const base =
+  'w-full rounded-lg border border-brand-200 bg-white px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted/60 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/20 aria-[invalid=true]:border-red-500 aria-[invalid=true]:ring-red-500/20';
+---
+
+<div class={className}>
+  <label for={id} class="block text-sm font-medium text-ink">
+    {label}
+    {required && <span class="text-red-600" aria-hidden="true"> *</span>}
+  </label>
+
+  {hint && <p id={hintId} class="mt-1 text-xs text-muted">{hint}</p>}
+
+  <div class="mt-1.5">
+    {
+      type === 'textarea' ? (
+        <textarea
+          id={id}
+          name={name}
+          rows={rows}
+          required={required}
+          placeholder={placeholder}
+          aria-describedby={describedBy || undefined}
+          class={`${base} resize-y`}
+        />
+      ) : type === 'select' ? (
+        <select
+          id={id}
+          name={name}
+          required={required}
+          aria-describedby={describedBy || undefined}
+          class={base}
+        >
+          <option value="">Select…</option>
+          {options.map((o) => (
+            <option value={o}>{o}</option>
+          ))}
+        </select>
+      ) : type === 'file' ? (
+        <input
+          id={id}
+          name={name}
+          type="file"
+          required={required}
+          accept={accept}
+          aria-describedby={describedBy || undefined}
+          class="w-full cursor-pointer rounded-lg border border-dashed border-brand-300 bg-brand-50/50 px-3.5 py-3 text-sm text-muted file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-brand-700 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white aria-[invalid=true]:border-red-500"
+        />
+      ) : (
+        <input
+          id={id}
+          name={name}
+          type={type}
+          required={required}
+          placeholder={placeholder}
+          autocomplete={autocomplete}
+          aria-describedby={describedBy || undefined}
+          class={base}
+        />
+      )
+    }
+  </div>
+
+  <!-- Populated from the API's per-field errors. -->
+  <p id={errorId} data-error-for={name} class="mt-1 hidden text-xs text-red-600"></p>
+</div>

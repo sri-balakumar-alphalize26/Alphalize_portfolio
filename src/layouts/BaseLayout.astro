@@ -1,0 +1,86 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import Footer from '@/components/Footer.astro';
+import Header from '@/components/Header.astro';
+import Seo from '@/components/Seo.astro';
+import { contact, offices, site } from '@/config/site';
+import '@/styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  canonicalPath?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const { title, description, canonicalPath, ogType, noindex, jsonLd = [] } = Astro.props;
+
+// Sitewide Organization graph — emitted once, on every page.
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  '@id': `${site.url}/#organization`,
+  name: site.legalName,
+  url: site.url,
+  logo: `${site.url}/favicon.png`,
+  email: `${contact.emailUser}@${contact.emailDomain}`,
+  telephone: contact.phone,
+  description: site.description,
+  address: offices.map((o) => ({
+    '@type': 'PostalAddress',
+    streetAddress: o.street,
+    addressLocality: o.locality,
+    addressRegion: o.region,
+    postalCode: o.postalCode,
+    addressCountry: o.countryCode,
+  })),
+};
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="theme-color" content="#004b80" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Caveat:wght@400..700&display=swap"
+    />
+
+    <Seo
+      title={title}
+      description={description}
+      canonicalPath={canonicalPath}
+      ogType={ogType}
+      noindex={noindex}
+      jsonLd={[organization, ...jsonLd]}
+    />
+
+    <!-- Cross-fade page transitions. Static HTML, SPA-like navigation. -->
+    <ClientRouter />
+  </head>
+
+  <body class="flex min-h-dvh flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-brand-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+    >
+      Skip to content
+    </a>
+
+    <Header />
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

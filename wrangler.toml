@@ -1,0 +1,31 @@
+name = "alphalize"
+compatibility_date = "2025-08-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Deployment target: Cloudflare Workers with static assets.
+# The Astro Cloudflare adapter (v14) sets `main` and the ASSETS binding itself
+# and writes the resolved config to dist/server/wrangler.json at build time.
+# Deploy with `npm run deploy` (astro build + wrangler deploy).
+
+# Resume uploads from the careers form. Create the bucket once in the dashboard.
+[[r2_buckets]]
+binding = "RESUMES"
+bucket_name = "alphalize-resumes"
+
+# Per-IP rate limiting for the two form endpoints. No `id`: Wrangler provisions
+# the namespace automatically on first deploy and emulates it locally.
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+
+# (The adapter adds its own SESSION KV binding for Astro sessions; nothing to do.)
+
+[vars]
+PUBLIC_TURNSTILE_SITE_KEY = "REPLACE_WITH_TURNSTILE_SITE_KEY"
+CONTACT_TO_EMAIL = "info@alphalize.com"
+CAREERS_TO_EMAIL = "hr@alphalize.com"
+MAIL_FROM = "website@alphalize.com"
+
+# Secrets (set with `wrangler secret put <NAME>`, never committed):
+#   RESEND_API_KEY
+#   TURNSTILE_SECRET_KEY
+# Locally these come from .dev.vars (gitignored).

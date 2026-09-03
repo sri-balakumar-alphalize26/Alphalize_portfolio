@@ -1,0 +1,30 @@
+---
+import { filledIcons, iconPaths, type IconName } from './icons';
+
+interface Props {
+  name: IconName;
+  class?: string;
+  /** Supply to expose the icon to assistive tech; otherwise it is decorative. */
+  label?: string;
+}
+
+const { name, class: className = 'size-6', label } = Astro.props;
+
+// `instagram` is drawn as a line icon despite being a brand mark.
+const isFilled = filledIcons.includes(name) && name !== 'instagram';
+const path = iconPaths[name];
+---
+
+<svg
+  class={className}
+  viewBox="0 0 24 24"
+  fill={isFilled ? 'currentColor' : 'none'}
+  stroke={isFilled ? 'none' : 'currentColor'}
+  stroke-width={isFilled ? undefined : 1.75}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  set:html={path}
+/>

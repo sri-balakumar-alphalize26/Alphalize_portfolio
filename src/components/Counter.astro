@@ -1,0 +1,65 @@
+---
+/**
+ * Count-up statistic. Replaces jquery.counterup + waypoints (~14KB) with a
+ * ~1KB IntersectionObserver island. Renders the final value in the HTML so
+ * the number is correct with JS disabled and for crawlers.
+ */
+interface Props {
+  value: number;
+  suffix?: string;
+  label: string;
+}
+
+const { value, suffix = '', label } = Astro.props;
+---
+
+<div class="text-center">
+  <p class="text-4xl font-semibold text-white lg:text-5xl">
+    <span class="counter-value" data-counter={value}>{value}</span><span>{suffix}</span>
+  </p>
+  <p class="mt-1.5 text-sm text-brand-200">{label}</p>
+</div>
+
+<script>
+  function initCounters() {
+    const nodes = document.querySelectorAll<HTMLElement>('.counter-value[data-counter]');
+    if (!nodes.length) return;
+
+    // Respect the user's motion preference — just show the final number.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const run = (el: HTMLElement) => {
+      const target = Number(el.dataset.counter ?? 0);
+      const duration = 1400;
+      const start = performance.now();
+
+      const tick = (now: number) => {
+        const p = Math.min((now - start) / duration, 1);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = String(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = String(target);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          run(entry.target as HTMLElement);
+          io.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.4 }
+    );
+
+    nodes.forEach((n) => {
+      n.textContent = '0';
+      io.observe(n);
+    });
+  }
+
+  document.addEventListener('astro:page-load', initCounters);
+</script>

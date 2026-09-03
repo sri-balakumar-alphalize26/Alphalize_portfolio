@@ -1,0 +1,51 @@
+---
+import PageHero from '@/components/PageHero.astro';
+import BaseLayout from './BaseLayout.astro';
+import { legalNav } from '@/config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  updated: string;
+}
+
+const { title, description, updated } = Astro.props;
+const path = Astro.url.pathname;
+---
+
+<BaseLayout title={title} description={description}>
+  <PageHero title={title} eyebrow="Legal" />
+
+  <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
+    <article class="lg:col-span-8">
+      <p class="text-xs text-muted">Last updated: {updated}</p>
+      <div class="prose-content mt-4">
+        <slot />
+      </div>
+    </article>
+
+    <aside class="lg:col-span-4">
+      <nav class="lg:sticky lg:top-28" aria-label="Legal pages">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-ink">Legal</h2>
+        <ul class="mt-3 divide-y divide-brand-100">
+          {
+            legalNav.map((l) => (
+              <li>
+                <a
+                  href={l.href}
+                  aria-current={path === l.href ? 'page' : undefined}
+                  class:list={[
+                    'block py-2.5 text-sm transition-colors',
+                    path === l.href ? 'font-semibold text-brand-700' : 'text-muted hover:text-brand-700',
+                  ]}
+                >
+                  {l.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </aside>
+  </div>
+</BaseLayout>

@@ -1,0 +1,48 @@
+---
+import Reveal from './Reveal.astro';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  align?: 'left' | 'center';
+  /** Use on dark backgrounds. */
+  invert?: boolean;
+  class?: string;
+}
+
+const { eyebrow, title, lead, align = 'center', invert = false, class: className } = Astro.props;
+---
+
+<Reveal
+  class:list={[
+    'max-w-3xl',
+    align === 'center' && 'mx-auto text-center',
+    className,
+  ]}
+>
+  {
+    eyebrow && (
+      <p
+        class="script-accent"
+      >
+        {eyebrow}
+      </p>
+    )
+  }
+  <h2
+    class:list={[
+      'mt-2 text-[length:--text-section] leading-[1.15]',
+      invert ? 'text-white' : 'text-ink',
+    ]}
+  >
+    {title}
+  </h2>
+  {
+    lead && (
+      <p class:list={['mt-4 text-base leading-relaxed', invert ? 'text-brand-200' : 'text-muted']}>
+        {lead}
+      </p>
+    )
+  }
+</Reveal>

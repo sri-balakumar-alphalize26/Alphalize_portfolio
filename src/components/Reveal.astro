@@ -1,0 +1,29 @@
+---
+/**
+ * Scroll reveal wrapper.
+ *
+ * Ships ZERO JavaScript: the animation is driven by the native CSS
+ * `animation-timeline: view()` rule in global.css. Browsers without support
+ * simply render the content visible, and the whole thing is disabled under
+ * `prefers-reduced-motion: reduce`.
+ *
+ * Replaces WOW.js + animate.css from the original site (~60KB of JS/CSS).
+ */
+interface Props {
+  direction?: 'up' | 'left' | 'right' | 'fade' | 'scale';
+  /** Stagger index — multiplied into a small animation-delay. */
+  delay?: number;
+  as?: keyof HTMLElementTagNameMap;
+  class?: string;
+}
+
+const { direction = 'up', delay = 0, as: Tag = 'div', class: className } = Astro.props;
+---
+
+<Tag
+  data-reveal={direction}
+  class={className}
+  style={delay ? `animation-delay:${delay * 90}ms` : undefined}
+>
+  <slot />
+</Tag>

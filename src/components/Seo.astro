@@ -1,0 +1,59 @@
+---
+import { site } from '@/config/site';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Omit to derive from Astro.url — set only for canonicalising odd routes. */
+  canonicalPath?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  /** JSON-LD objects to embed. Serialised as-is. */
+  jsonLd?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description,
+  canonicalPath,
+  ogType = 'website',
+  noindex = false,
+  jsonLd = [],
+} = Astro.props;
+
+// With `build.format: 'file'` the build-time pathname is `/about.html`, but
+// Cloudflare Pages serves it at `/about` and the sitemap lists `/about`. Strip
+// the extension (and a trailing `/index`) so every signal agrees.
+const cleanPath =
+  (canonicalPath ?? Astro.url.pathname).replace(/\.html$/, '').replace(/\/index$/, '/') || '/';
+const canonical = new URL(cleanPath, site.url).href;
+const isHome = cleanPath === '/';
+// Home keeps the bare brand name; every other page is suffixed.
+const fullTitle = isHome ? title : `${title} | ${site.name}`;
+const ogImage = new URL('/og-default.png', site.url).href;
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:site_name" content={site.name} />
+<meta property="og:type" content={ogType} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+{
+  jsonLd.map((block) => (
+    <script type="application/ld+json" set:html={JSON.stringify(block)} is:inline />
+  ))
+}

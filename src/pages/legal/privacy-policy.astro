@@ -1,0 +1,87 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { contact, site } from '@/config/site';
+
+const email = `${contact.emailUser}@${contact.emailDomain}`;
+---
+
+<LegalLayout
+  title="Privacy Policy"
+  description="How Alphalize collects, uses and protects the personal information you submit through this website."
+  updated="3 September 2026"
+>
+  <p>
+    This policy explains what personal information {site.legalName} collects through
+    <strong>alphalize.com</strong>, why we collect it, and what we do with it. It covers this
+    website only — separate terms apply to client engagements under contract.
+  </p>
+
+  <h2>What we collect</h2>
+  <p>We collect information in two situations, both of which you initiate:</p>
+  <ul>
+    <li>
+      <strong>Contact enquiries.</strong> When you submit the contact form we receive your name,
+      email address, phone number, subject and message.
+    </li>
+    <li>
+      <strong>Job applications.</strong> When you apply through the careers form we receive your
+      name, email address, phone number, the role you applied for, your CV, and any message you
+      add.
+    </li>
+  </ul>
+  <p>
+    We also process a limited amount of technical data — your IP address and request headers — for
+    the sole purposes of spam prevention and rate limiting on those two forms.
+  </p>
+
+  <h2>Why we collect it</h2>
+  <ul>
+    <li>To respond to your enquiry.</li>
+    <li>To assess your application for a role at Alphalize.</li>
+    <li>To protect the forms from automated abuse.</li>
+  </ul>
+  <p>
+    We do not sell your information, we do not share it with advertisers, and we do not use it to
+    send marketing you did not ask for.
+  </p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li><strong>Enquiries</strong> are retained for as long as needed to handle the conversation and any resulting engagement.</li>
+    <li>
+      <strong>Applications and CVs</strong> are retained for up to 12 months so we can consider you
+      for future openings. Ask us and we will delete yours sooner.
+    </li>
+    <li>
+      <strong>Rate-limiting records</strong> hold a counter against a hashed key and expire
+      automatically within the hour.
+    </li>
+  </ul>
+
+  <h2>Who processes it</h2>
+  <p>
+    This site is hosted on Cloudflare. Form submissions are delivered by email through Resend, and
+    submitted CVs are stored in Cloudflare R2. Spam protection uses Cloudflare Turnstile. These
+    providers process the data on our behalf and are not permitted to use it for their own
+    purposes.
+  </p>
+
+  <h2>Cookies and analytics</h2>
+  <p>
+    This website sets no advertising or tracking cookies and does not build a profile of you across
+    sites. Cloudflare Turnstile may set a short-lived token on the pages that carry a form, solely
+    to confirm the submission is not automated.
+  </p>
+
+  <h2>Your rights</h2>
+  <p>
+    You can ask us for a copy of the personal information we hold about you, ask us to correct it,
+    or ask us to delete it. Email <a href={`mailto:${email}`}>{email}</a> and we will respond within
+    a reasonable period.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Questions about this policy: <a href={`mailto:${email}`}>{email}</a> or {contact.phone}.
+  </p>
+</LegalLayout>

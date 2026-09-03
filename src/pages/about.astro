@@ -1,0 +1,126 @@
+---
+import CtaBand from '@/components/CtaBand.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import PartnerMarquee from '@/components/PartnerMarquee.astro';
+import Reveal from '@/components/Reveal.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { offices } from '@/config/site';
+
+const reasons = [
+  {
+    icon: 'award' as const,
+    title: 'Proven expertise and track record',
+    body: 'When it comes to ERP software, choosing a trusted and experienced partner is crucial. Our team has delivered numerous ERP implementations for clients across a range of industries.',
+  },
+  {
+    icon: 'layers' as const,
+    title: 'Tailored to your requirements',
+    body: 'Every business is unique, with its own requirements and goals. We take a consultative approach — understanding your processes, challenges and objectives before proposing a solution.',
+  },
+  {
+    icon: 'users' as const,
+    title: 'Service and support that continues',
+    body: 'From the initial consultation through implementation and beyond, our team stays available. Go-live is the start of the relationship, not the end of the engagement.',
+  },
+];
+---
+
+<BaseLayout
+  title="About Alphalize"
+  description="Alphalize helps businesses turn manual processes into automated workflows — ERP implementation, business intelligence and custom software, from Clearwater, Florida and Kollam, Kerala."
+>
+  <PageHero
+    eyebrow="About us"
+    title="We help implement your ideas into automation"
+    lead="We understand the power of automation in streamlining business processes and unlocking operational efficiency — and we are more interested in what it changes for you than in the technology itself."
+  />
+
+  <!-- Narrative -->
+  <section class="container-page py-16 lg:py-20">
+    <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
+      <Reveal direction="left" class="lg:col-span-7">
+        <div class="prose-content">
+          <p>
+            At Alphalize, we understand the power of automation in streamlining business processes
+            and unlocking operational efficiency. We are passionate about helping our clients bring
+            their ideas to life and transforming manual tasks into automated workflows. Whether you
+            have a specific automation concept in mind or need guidance in identifying
+            opportunities for automation, our team of experts is here to guide you through the
+            implementation process.
+          </p>
+          <h2>It starts with your vision</h2>
+          <p>
+            We believe that successful automation begins with a clear understanding of your vision.
+            Our team takes the time to listen and comprehend your ideas, goals and pain points. We
+            collaborate closely with you to gain insight into your existing processes, identify
+            areas that can benefit from automation, and tailor solutions that align with your
+            vision.
+          </p>
+          <p>
+            We combine your expertise in your industry with our technical proficiency to create
+            automation solutions that drive tangible results — because the person who knows where
+            the time is being lost is usually already inside your business.
+          </p>
+        </div>
+      </Reveal>
+
+      <Reveal direction="right" class="lg:col-span-5">
+        <div class="cc-surface rounded-[--radius-card] border border-brand-100 p-7">
+          <h2 class="text-base font-semibold text-ink">Where we work</h2>
+          <ul class="mt-4 space-y-5">
+            {
+              offices.map((o) => (
+                <li class="flex gap-3">
+                  <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[--radius-btn] bg-white text-plum-600">
+                    <Icon name="pin" class="size-4" />
+                  </span>
+                  <span class="text-sm leading-relaxed text-muted">
+                    <span class="block font-semibold text-ink">{o.label}</span>
+                    {o.street}
+                    <br />
+                    {o.locality}, {o.region} {o.postalCode}
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+          <p class="mt-6 border-t border-brand-200/60 pt-5 text-sm leading-relaxed text-muted">
+            Two offices across two time zones means implementation support that overlaps with both
+            US and Indian business hours.
+          </p>
+        </div>
+      </Reveal>
+    </div>
+  </section>
+
+  <!-- Why choose us -->
+  <section class="cc-surface border-t border-brand-100 py-18 lg:py-24">
+    <div class="container-page">
+      <SectionHeading
+        eyebrow="Why choose us"
+        title="What you get from working with Alphalize"
+      />
+      <div class="mt-12 grid gap-6 md:grid-cols-3">
+        {
+          reasons.map((r, i) => (
+            <Reveal as="article" delay={i}>
+              <div class="h-full rounded-[--radius-card] border border-brand-100 bg-white p-7 shadow-[--shadow-card]">
+                <span class="flex size-12 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600">
+                  <Icon name={r.icon} class="size-6" />
+                </span>
+                <h3 class="mt-5 text-lg font-semibold text-ink">{r.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-muted">{r.body}</p>
+              </div>
+            </Reveal>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <PartnerMarquee />
+
+  <CtaBand />
+</BaseLayout>

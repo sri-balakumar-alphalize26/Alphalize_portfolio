@@ -1,0 +1,55 @@
+---
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { contact, site } from '@/config/site';
+
+const email = `${contact.emailUser}@${contact.emailDomain}`;
+---
+
+<LegalLayout
+  title="Disclaimer"
+  description="The basis on which information is provided on the Alphalize website."
+  updated="3 September 2026"
+>
+  <h2>General information only</h2>
+  <p>
+    The information on <strong>alphalize.com</strong> is provided for general information about
+    {site.legalName} and the services we offer. It is not professional, technical, financial or
+    legal advice, and you should not act on it as though it were advice about your specific
+    situation.
+  </p>
+
+  <h2>No guarantee of outcomes</h2>
+  <p>
+    Descriptions of ERP implementations, business intelligence work, integrations and custom
+    development explain our approach in general terms. Results depend on your data, processes,
+    systems and the scope actually agreed. Nothing on this site is a promise of a particular
+    outcome, timeline or return.
+  </p>
+
+  <h2>Accuracy</h2>
+  <p>
+    We make reasonable efforts to keep the site accurate and current, but we do not warrant that
+    every page is complete or up to date. Technology descriptions in particular change over time.
+    If something here matters to a decision you are making, confirm it with us directly.
+  </p>
+
+  <h2>External links and third-party marks</h2>
+  <p>
+    Links to third-party sites are provided for convenience only and do not imply endorsement. We
+    have no control over their content or availability. Any third-party names or logos shown remain
+    the property of their respective owners and are used to indicate a working relationship or
+    technology, not to claim ownership or endorsement.
+  </p>
+
+  <h2>Careers information</h2>
+  <p>
+    Job listings describe roles as they are open at the time of publication. Availability,
+    requirements and location may change, and a listing is not an offer of employment.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    If anything on this site appears inaccurate, tell us at
+    <a href={`mailto:${email}`}>{email}</a> or {contact.phone} and we will review it.
+  </p>
+</LegalLayout>

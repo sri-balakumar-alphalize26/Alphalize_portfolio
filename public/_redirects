@@ -1,0 +1,36 @@
+# 301s from the old hand-written .html site.
+# Losing these loses the search position the old URLs already hold.
+
+/index.html                                                      /                                          301
+
+# Core pages
+/about.html                                                      /about                                     301
+/services.html                                                   /services                                  301
+/careers.html                                                    /careers                                   301
+/contact.html                                                    /contact                                   301
+
+# Legal
+/privacy-policy.html                                             /legal/privacy-policy                      301
+/privacy.html                                                    /legal/privacy-policy                      301
+/terms-conditions.html                                           /legal/terms-conditions                    301
+/terms.html                                                      /legal/terms-conditions                    301
+/disclaimer.html                                                 /legal/disclaimer                          301
+
+# Old PHP form handlers -> the pages that now carry the forms.
+/contact_mail.php                                                /contact                                   301
+/mail_contact.php                                                /careers                                   301
+
+# Retired blog. The blog is out of scope for the rebuild, but these URLs are
+# indexed, so they must land on a real page rather than 404. The old site
+# linked posts both with and without the .html suffix.
+/blog.html                                                       /services                                  301
+/blog                                                            /services                                  301
+
+/the-power-auto-auditing-erp-streamlining-compliance-efforts.html   /services   301
+/the-power-auto-auditing-erp-streamlining-compliance-efforts        /services   301
+/social-media-business.html                                         /services   301
+/social-media-business                                              /services   301
+/transforming-businesses-erp-ai-dynamic-duo.html                    /services   301
+/transforming-businesses-erp-ai-dynamic-duo                         /services   301
+/unveiling-latest-mobile-erp-trends-empowering-businesses.html      /services   301
+/unveiling-latest-mobile-erp-trends-empowering-businesses           /services   301

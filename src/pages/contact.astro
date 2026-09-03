@@ -1,0 +1,105 @@
+---
+import ContactForm from '@/components/ContactForm.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import Reveal from '@/components/Reveal.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { contact, offices } from '@/config/site';
+
+const email = `${contact.emailUser}@${contact.emailDomain}`;
+---
+
+<BaseLayout
+  title="Contact"
+  description="Talk to Alphalize about ERP, business intelligence or custom software. Offices in Clearwater, Florida and Kollam, Kerala."
+>
+  <PageHero
+    eyebrow="Contact"
+    title="Contact Us"
+    lead="Describe your current setup and what you want to change. We will come back with a straight assessment rather than a sales deck."
+  />
+
+  <section class="container-page py-16 lg:py-20">
+    <div class="grid gap-10 lg:grid-cols-12 lg:gap-12">
+      <!-- Details -->
+      <div class="lg:col-span-5">
+        <Reveal direction="left" class="space-y-4">
+          <a
+            href={contact.phoneHref}
+            class="flex gap-4 rounded-[--radius-card] border border-brand-100 p-5 transition-colors hover:border-brand-200 hover:bg-brand-50/50"
+          >
+            <span
+              class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-600 text-white"
+            >
+              <Icon name="phone" class="size-5" />
+            </span>
+            <span>
+              <span class="block text-sm font-semibold text-ink">Call us</span>
+              <span class="mt-0.5 block text-sm text-muted">{contact.phone}</span>
+            </span>
+          </a>
+
+          <a
+            href={`mailto:${email}`}
+            class="flex gap-4 rounded-[--radius-card] border border-brand-100 p-5 transition-colors hover:border-brand-200 hover:bg-brand-50/50"
+          >
+            <span
+              class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-600 text-white"
+            >
+              <Icon name="mail" class="size-5" />
+            </span>
+            <span>
+              <span class="block text-sm font-semibold text-ink">Email us</span>
+              <span class="mt-0.5 block break-all text-sm text-muted">{email}</span>
+            </span>
+          </a>
+
+          <div class="rounded-[--radius-card] border border-brand-100 p-5">
+            <h2 class="text-sm font-semibold text-ink">Office addresses</h2>
+            <ul class="mt-4 space-y-5">
+              {
+                offices.map((o) => (
+                  <li class="flex gap-4">
+                    <span
+                      class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600"
+                    >
+                      <Icon name="pin" class="size-5" />
+                    </span>
+                    <span class="text-sm leading-relaxed text-muted">
+                      <span class="block font-semibold text-ink">{o.label}</span>
+                      {o.street}
+                      <br />
+                      {o.locality}, {o.region} {o.postalCode}
+                      <br />
+                      {o.country}
+                    </span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          <div class="cc-surface flex gap-4 rounded-[--radius-card] border border-brand-100 p-5">
+            <span
+              class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-white text-plum-600"
+            >
+              <Icon name="clock" class="size-5" />
+            </span>
+            <span class="text-sm leading-relaxed text-muted">
+              <span class="block font-semibold text-ink">Response time</span>
+              We aim to reply within one business day. Offices in two time zones mean cover across
+              both US and Indian business hours.
+            </span>
+          </div>
+        </Reveal>
+      </div>
+
+      <!-- Form -->
+      <div class="lg:col-span-7">
+        <Reveal direction="right">
+          <ContactForm />
+        </Reveal>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

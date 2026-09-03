@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import Icon from '@/components/Icon.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout
+  title="Page not found"
+  description="The page you were looking for does not exist."
+  noindex
+>
+  <section class="container-page py-24 text-center lg:py-32">
+    <p class="text-7xl font-semibold text-plum-200 lg:text-8xl">
+      404
+    </p>
+    <h1 class="mt-4 text-[length:--text-section] text-ink">This page does not exist</h1>
+    <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
+      The link may be out of date. If you followed it from somewhere on this site, let us know and
+      we will fix it.
+    </p>
+
+    <div class="mt-8 flex flex-wrap justify-center gap-3">
+      <a
+        href="/"
+        class="btn btn-primary"
+      >
+        Back to home
+      </a>
+      <a
+        href="/contact"
+        class="btn btn-outline text-brand-700"
+      >
+        Contact us
+      </a>
+    </div>
+
+    <div class="mx-auto mt-14 max-w-2xl text-left">
+      <h2 class="text-center text-sm font-semibold uppercase tracking-wider text-muted">
+        Or jump to a service
+      </h2>
+      <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+        {
+          services.map((s) => (
+            <li>
+              <a
+                href={`/services/${s.id}`}
+                class="flex items-center gap-2.5 rounded-lg border border-brand-100 px-4 py-3 text-sm text-muted transition-colors hover:border-brand-200 hover:bg-brand-50/50 hover:text-brand-700"
+              >
+                <Icon name={s.data.icon} class="size-4 shrink-0 text-brand-500" />
+                {s.data.title}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

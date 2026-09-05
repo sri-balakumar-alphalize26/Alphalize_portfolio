@@ -1,0 +1,255 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import logo from '@/assets/brand/logo.png';
+
+/**
+ * Hero visual: the app line-up orbiting the Alphalize mark. Pure CSS — the
+ * scene fades and pops in, then the ring of cards spins while every card
+ * counter-rotates at the same rate so it stays upright. All geometry is a
+ * percentage of the square, so it scales with whatever column it sits in.
+ */
+interface Props {
+  apps: CollectionEntry<'apps'>[];
+  class?: string;
+}
+
+const { apps, class: className } = Astro.props;
+
+/** left/top (% of the square) of a point at `deg` on a circle of radius `r` (% of the square). */
+const polar = (r: number, deg: number) => {
+  const a = (deg * Math.PI) / 180;
+  return { x: (50 + r * Math.cos(a)).toFixed(2), y: (50 + r * Math.sin(a)).toFixed(2) };
+};
+
+// Card centres sit at 37%: the mid ring (35.5%) runs just inside them and the
+// outer ring (38%) just outside. First app at 12 o'clock, then clockwise.
+const items = apps.map((app, i) => ({
+  app,
+  ...polar(37, -90 + (360 * i) / apps.length),
+  delay: `${(0.7 + i * 0.08).toFixed(2)}s`,
+}));
+const blueDot = polar(35.5, 0);
+const yellowDots = [0, 120, 240].map((deg) => polar(21, deg));
+---
+
+<div class:list={['scene @container relative aspect-square w-full', className]}>
+  <!-- Neutral hairline greys, sampled from the reference render (369-ecosystem-intro-orbit). -->
+  <div class="ring-outer border-[#eceef1] ring" aria-hidden="true"></div>
+  <div class="ring-mid border-[#e4e5e8] ring" aria-hidden="true"></div>
+  <div class="disc bg-[#f1f2f5]" aria-hidden="true"></div>
+  <div class="ring-inner border-[#e4e5e8] ring" aria-hidden="true"></div>
+
+  <div class="ydw absolute inset-0" aria-hidden="true">
+    {
+      yellowDots.map((p) => (
+        <span class="ydot bg-(--mk-yellow)" style={`left:${p.x}%;top:${p.y}%`} />
+      ))
+    }
+  </div>
+  <div class="dotwrap absolute inset-0" aria-hidden="true">
+    <span class="dot bg-(--mk-blue)" style={`left:${blueDot.x}%;top:${blueDot.y}%`}></span>
+  </div>
+
+  <!-- The list spins; every item counter-spins at the same rate so cards stay upright. -->
+  <ul class="orbit absolute inset-0" aria-label="Apps built by Alphalize">
+    {
+      items.map(({ app, x, y, delay }) => (
+        <li class="item" style={`left:${x}%;top:${y}%;--delay:${delay}`}>
+          <div class="card shadow-lift flex items-center justify-center rounded-[16%] bg-white">
+            <Image
+              src={app.data.image}
+              alt={app.data.title}
+              width={160}
+              densities={[1, 2]}
+              loading="eager"
+              class="h-auto max-h-[64%] w-auto max-w-[82%]"
+            />
+          </div>
+          <span class="lbl text-muted font-medium" aria-hidden="true">
+            {app.data.title}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="centre pointer-events-none absolute inset-0 grid place-items-center">
+    <Image
+      src={logo}
+      alt=""
+      width={360}
+      densities={[1, 2]}
+      loading="eager"
+      class="h-auto w-[30%]"
+    />
+  </div>
+</div>
+
+<style>
+  .scene {
+    --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* Concentric ground. Colours come from utility classes; only longhands here so
+     they are not clobbered (scoped CSS is unlayered and beats utilities). */
+  .disc,
+  .ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--size);
+    height: var(--size);
+    translate: -50% -50%;
+    border-radius: 50%;
+  }
+  .ring {
+    border-width: 1px;
+    border-style: solid;
+  }
+  .disc {
+    --size: 66%;
+  }
+  .ring-mid {
+    --size: 71%;
+  }
+  .ring-outer {
+    --size: 76%;
+  }
+  .ring-inner {
+    --size: 42%;
+  }
+
+  .dot,
+  .ydot {
+    position: absolute;
+    width: var(--size);
+    height: var(--size);
+    translate: -50% -50%;
+    border-radius: 50%;
+  }
+  .dot {
+    --size: 1.6%;
+  }
+  .ydot {
+    --size: 1.4%;
+    box-shadow: 0 0 6px color-mix(in srgb, var(--mk-yellow) 60%, transparent);
+  }
+
+  /* Each item is the card's own box, centred on its orbit point, so the
+     counter-rotation pivots on the card centre. */
+  .item {
+    position: absolute;
+    width: 13%;
+    height: 13%;
+    translate: -50% -50%;
+  }
+  .card {
+    position: absolute;
+    inset: 0;
+  }
+  .lbl {
+    position: absolute;
+    top: 105%;
+    left: 50%;
+    translate: -50% 0;
+    white-space: nowrap;
+    font-size: clamp(0.6875rem, 2.5cqw, 0.8125rem);
+    line-height: 1.25;
+  }
+
+  /* Under 28rem the labels can no longer clear their neighbours' cards. */
+  @container (width < 28rem) {
+    .item {
+      width: 15%;
+      height: 15%;
+    }
+    .lbl {
+      display: none;
+    }
+  }
+
+  /* Every animation is gated here: the global reduce-motion rule shortens
+     durations but not delays, so an ungated `both` entrance would sit at
+     opacity 0 for its whole delay. The static rules above are the end state. */
+  @media (prefers-reduced-motion: no-preference) {
+    .disc {
+      animation: ao-fade 0.8s ease 0.1s both;
+    }
+    .ring-outer,
+    .ring-mid {
+      animation: ao-fade 0.8s ease 0.5s both;
+    }
+    .ring-inner {
+      animation: ao-fade 0.8s ease 0.6s both;
+    }
+    .centre {
+      animation: ao-centre 0.9s var(--pop) 0.2s both;
+    }
+    .card {
+      animation: ao-pop 0.7s var(--pop) var(--delay) both;
+    }
+    .lbl {
+      animation: ao-label 0.5s ease calc(var(--delay) + 0.25s) both;
+    }
+    .orbit {
+      animation: ao-spin 20s linear 3.2s infinite;
+    }
+    .item {
+      animation: ao-unspin 20s linear 3.2s infinite;
+    }
+    .dotwrap {
+      animation: ao-spin 14s linear 3.2s infinite reverse;
+    }
+    .ydw {
+      animation: ao-unspin 12s linear 3.2s infinite;
+    }
+    .dot,
+    .ydot {
+      animation: ao-fade 0.6s ease 3.2s both;
+    }
+
+    /* Pause the continuous spins together — orbit and items must stay in sync. */
+    .scene:hover .orbit,
+    .scene:hover .item,
+    .scene:hover .dotwrap,
+    .scene:hover .ydw {
+      animation-play-state: paused;
+    }
+  }
+
+  /* `to` is omitted on purpose: it resolves to the static styles above. */
+  @keyframes ao-fade {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes ao-centre {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+  @keyframes ao-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+  }
+  @keyframes ao-label {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+  }
+  @keyframes ao-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes ao-unspin {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+</style>

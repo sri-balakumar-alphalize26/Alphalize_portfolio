@@ -1,18 +1,18 @@
 ---
-import { Image } from 'astro:assets';
+import { Arrow, Heading, Marker, Note } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
-import Highlight from './Highlight.astro';
+import AppOrbit from './AppOrbit.astro';
 import Icon from './Icon.astro';
 
 /**
- * Odoo-style hero: light background, one large heading with a single
- * highlighted word, a light lead paragraph, two squared buttons, and a
- * product visual on the right.
+ * Odoo-style hero: light background, one large handwriting heading with a
+ * single marker-highlighted phrase, a light lead paragraph, two squared
+ * buttons with a hand-drawn aside, and the app orbit on the right.
  *
- * Replaces the old 4-slide Embla carousel — no JavaScript at all.
+ * Replaces the old 4-slide Embla carousel — the only script is the
+ * marker's IntersectionObserver; the orbit is pure CSS.
  */
 const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
-const showcase = apps.slice(0, 6);
 ---
 
 <section class="cc-white relative isolate overflow-hidden">
@@ -26,68 +26,51 @@ const showcase = apps.slice(0, 6);
   <div class="container-page py-16 lg:py-24">
     <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
       <div class="lg:col-span-6">
-        <p class="script-accent">Odoo ERP partners</p>
+        <p class="eyebrow">Odoo ERP partners</p>
 
-        <h1 class="mt-3 text-[length:--text-hero]">
-          Run your whole business <Highlight underline>on one system</Highlight>
-        </h1>
+        <Heading as="h1" size="xl" class="mt-3">
+          Run your whole business <Marker type="highlight" color="yellow">on one system</Marker>
+        </Heading>
 
-        <p class="lead mt-6 max-w-xl text-muted">
+        <p class="lead text-muted mt-6 max-w-xl">
           Alphalize builds and implements Odoo ERP, business intelligence and the mobile, desktop
-          and IoT software around it — so your counter, your warehouse and your back office all
-          see the same numbers.
+          and IoT software around it — so your counter, your warehouse and your back office all see
+          the same numbers.
         </p>
 
-        <div class="mt-9 flex flex-wrap gap-3">
+        <div class="mt-9 flex flex-wrap items-start gap-3">
           <a href="/contact" class="btn btn-primary">
             Talk to us
             <Icon name="arrow-right" class="size-4" />
           </a>
           <a href="/services" class="btn btn-outline text-heading"> Explore services </a>
+
+          <!-- Odoo's handwritten aside beside the CTAs ("… / month for ALL apps"). -->
+          <span class="ml-1 hidden items-start sm:flex">
+            <Arrow variant="curve-down-right" color="purple" size={44} delay={700} />
+            <Note color="purple" rotate={-6} size="1.25rem" align="left" class="mt-5">
+              24/7 support included
+            </Note>
+          </span>
         </div>
 
-        <p class="mt-6 text-sm text-muted">
+        <p class="text-muted mt-6 text-sm">
           Offices in Clearwater, Florida and Kollam, Kerala &middot; 24/7 support
         </p>
       </div>
 
-      <!-- Product visual: the app line-up, which is the most concrete thing we have. -->
+      <!-- Product visual: the app line-up orbiting the brand mark. -->
       <div class="lg:col-span-6">
-        <div
-          class="rounded-[--radius-card] border border-brand-100 bg-white p-5 shadow-[--shadow-lift] sm:p-7"
-        >
-          <div class="flex items-center gap-1.5 pb-4">
-            <span class="size-2.5 rounded-full bg-brand-100"></span>
-            <span class="size-2.5 rounded-full bg-brand-100"></span>
-            <span class="size-2.5 rounded-full bg-brand-100"></span>
-            <span class="ml-2 text-xs text-muted">Your Odoo back office</span>
-          </div>
-
-          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {
-              showcase.map((app) => (
-                <li class="flex h-20 items-center justify-center rounded-[--radius-btn] border border-brand-100 bg-surface px-4">
-                  <Image
-                    src={app.data.image}
-                    alt={app.data.title}
-                    height={36}
-                    densities={[1, 2]}
-                    loading="eager"
-                    class="h-9 w-auto object-contain"
-                  />
-                </li>
-              ))
-            }
-          </ul>
-
+        <AppOrbit apps={apps} class="mx-auto max-w-[36rem]" />
+        <p class="mt-3 text-center">
           <a
             href="/services/mobile-app-development#apps"
-            class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-plum-600"
+            class="text-brand-700 hover:text-plum-600 inline-flex items-center gap-1.5 text-sm font-medium"
           >
             All {apps.length} apps
             <Icon name="arrow-right" class="size-4" />
           </a>
-        </div>
+        </p>
       </div>
     </div>
   </div>

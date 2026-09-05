@@ -10,29 +10,26 @@ const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b
 
 {
   modules.length > 0 && (
-    <section
-      id="modules"
-      class="scroll-mt-24 cc-surface border-t border-brand-100 py-16 lg:py-20"
-    >
+    <section id="modules" class="cc-surface border-brand-100 scroll-mt-24 border-t py-16 lg:py-20">
       <div class="container-page">
         <SectionHeading
           eyebrow="ERP modules"
           title="From sales to service — modules we have built"
           highlight="we have built"
-          color="teal"
+          color="blue"
           lead="Ready-made modules that drop into your Odoo deployment and cover the complete business lifecycle, from the counter to the back office."
         />
 
         <ul class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((m, i) => (
             <Reveal as="li" delay={i % 3} class="h-full">
-              <div class="flex h-full gap-4 rounded-card border border-brand-100 bg-white p-5 transition-colors hover:border-plum-300">
-                <span class="flex size-10 shrink-0 items-center justify-center rounded-btn bg-plum-50 text-plum-600">
+              <div class="rounded-card border-brand-100 hover:border-plum-300 flex h-full gap-4 border bg-white p-5 transition-colors">
+                <span class="rounded-btn bg-plum-50 text-plum-600 flex size-10 shrink-0 items-center justify-center">
                   <Icon name={m.data.icon} class="size-5" />
                 </span>
                 <div>
-                  <h3 class="text-sm font-semibold text-ink">{m.data.title}</h3>
-                  <p class="mt-1 text-sm leading-relaxed text-muted">{m.data.summary}</p>
+                  <h3 class="text-ink text-sm font-semibold">{m.data.title}</h3>
+                  <p class="text-muted mt-1 text-sm leading-relaxed">{m.data.summary}</p>
                 </div>
               </div>
             </Reveal>

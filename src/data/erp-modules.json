@@ -3,6 +3,7 @@
     "id": "pos-weighing-scale-vfd",
     "order": 1,
     "title": "POS Weighing Scale & VFD Display",
+    "shortTitle": "POS Weighing Scale & VFD",
     "summary": "The weight goes straight into the bill with no manual typing, and the customer-facing display shows what is being weighed and what it costs as it happens.",
     "icon": "scale"
   },
@@ -10,6 +11,7 @@
     "id": "tools-rental-management",
     "order": 2,
     "title": "Tools Rental Management",
+    "shortTitle": "Tools Rental",
     "summary": "Every tool that goes out and comes back, with rental periods, customer details, timesheets and automatic cost calculation.",
     "icon": "wrench"
   },

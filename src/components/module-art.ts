@@ -1,0 +1,43 @@
+/**
+ * Tile artwork for the homepage ERP modules intro. Inner markup only - the
+ * component wraps each in <svg viewBox="30 30 140 140"> and renders it twice:
+ * once in the real tile, once in the flyer that animates into it.
+ *
+ * Keyed by module id from src/data/erp-modules.json. A module with no entry
+ * here falls back to its <Icon name={icon}> glyph, so a tile is never empty.
+ *
+ * Colours are already the marker palette: #714B67 is --color-plum-600 and
+ * #F06050 is --mk-orange, so they stay as literal hex.
+ */
+export const moduleArt: Record<string, string> = {
+  'pos-weighing-scale-vfd':
+    '<path d="M48 70 L152 70 L138 92 L62 92 Z" fill="#00A09D"/> <rect x="92" y="92" width="16" height="30" fill="#714B67"/> <rect x="52" y="122" width="96" height="38" rx="8" fill="#714B67"/> <rect x="66" y="132" width="68" height="18" rx="3" fill="#F06050"/> <rect x="74" y="137" width="6" height="8" fill="#fff" opacity="0.9"/> <rect x="86" y="137" width="6" height="8" fill="#fff" opacity="0.9"/> <rect x="98" y="137" width="6" height="8" fill="#fff" opacity="0.9"/> <rect x="110" y="137" width="6" height="8" fill="#fff" opacity="0.9"/> <circle cx="100" cy="52" r="16" fill="#F5B62A" opacity="0.9"/>',
+  'tools-rental-management':
+    '<path d="M100 40 A60 60 0 1 1 46 78" fill="none" stroke="#00A09D" stroke-width="16" stroke-linecap="round"/> <path d="M36 60 L60 86 L34 92 Z" fill="#00A09D"/> <g transform="rotate(45 100 104)"> <rect x="93" y="86" width="14" height="66" rx="4" fill="#714B67"/> <path d="M82 64 a18 18 0 1 1 36 0 v22 h-36 Z" fill="#714B67"/> <rect x="94" y="46" width="12" height="20" fill="#fff"/> </g> <circle cx="104" cy="132" r="9" fill="#F06050"/>',
+  'mobile-it-repair':
+    '<rect x="56" y="38" width="66" height="124" rx="12" fill="#714B67"/> <rect x="64" y="52" width="50" height="86" rx="3" fill="#fff" opacity="0.18"/> <rect x="82" y="146" width="14" height="6" rx="3" fill="#fff" opacity="0.7"/> <g transform="rotate(45 118 118)"> <rect x="110" y="86" width="16" height="72" rx="5" fill="#F06050"/> <path d="M102 70 h32 v14 a16 16 0 0 1 -32 0 Z" fill="#F06050"/> <rect x="112" y="62" width="12" height="12" fill="#fff"/> </g> <circle cx="64" cy="140" r="14" fill="#00A09D" opacity="0.9"/>',
+  'pos-dynamic-invoice':
+    '<path d="M58 40 h84 v118 l-10 -8 l-11 8 l-10 -8 l-11 8 l-10 -8 l-11 8 l-11 -8 l-10 8 Z" fill="#714B67"/> <rect x="72" y="58" width="42" height="9" rx="4" fill="#fff" opacity="0.85"/> <rect x="72" y="78" width="56" height="7" rx="3" fill="#fff" opacity="0.5"/> <rect x="72" y="94" width="56" height="7" rx="3" fill="#fff" opacity="0.5"/> <rect x="72" y="110" width="36" height="7" rx="3" fill="#fff" opacity="0.5"/> <g transform="rotate(45 138 122)"> <rect x="130" y="72" width="16" height="80" rx="3" fill="#F06050"/> <path d="M130 152 l8 18 l8 -18 Z" fill="#F5B62A"/> <rect x="130" y="72" width="16" height="12" fill="#00A09D"/> </g>',
+  'pos-loyalty-card':
+    '<rect x="36" y="58" width="128" height="84" rx="12" fill="#714B67"/> <rect x="36" y="76" width="128" height="16" fill="#00A09D"/> <rect x="50" y="110" width="40" height="8" rx="4" fill="#fff" opacity="0.6"/> <rect x="50" y="122" width="26" height="6" rx="3" fill="#fff" opacity="0.4"/> <path d="M132 92 l8.8 17.8 l19.6 2.9 l-14.2 13.8 l3.4 19.5 l-17.6 -9.2 l-17.6 9.2 l3.4 -19.5 l-14.2 -13.8 l19.6 -2.9 Z" fill="#F5B62A"/>',
+  'kra-kpi-management':
+    '<circle cx="88" cy="112" r="50" fill="#F06050"/> <circle cx="88" cy="112" r="34" fill="#fff"/> <circle cx="88" cy="112" r="20" fill="#F06050"/> <circle cx="88" cy="112" r="7" fill="#fff"/> <path d="M88 112 L150 50" stroke="#714B67" stroke-width="10" stroke-linecap="round"/> <path d="M126 46 L156 44 L154 74 Z" fill="#00A09D"/> <rect x="132" y="120" width="12" height="40" rx="3" fill="#00A09D" opacity="0.9"/> <rect x="148" y="100" width="12" height="60" rx="3" fill="#F5B62A" opacity="0.9"/>',
+  'user-privilege-manager':
+    '<path d="M100 36 L152 54 V100 C152 132 128 152 100 164 C72 152 48 132 48 100 V54 Z" fill="#00A09D"/> <path d="M100 36 L152 54 V100 C152 132 128 152 100 164 Z" fill="#21B799" opacity="0.9"/> <rect x="80" y="94" width="40" height="34" rx="6" fill="#714B67"/> <path d="M88 94 V84 a12 12 0 0 1 24 0 V94" fill="none" stroke="#714B67" stroke-width="8"/> <circle cx="100" cy="110" r="5" fill="#F5B62A"/> <rect x="97" y="110" width="6" height="10" fill="#F5B62A"/>',
+  'attendance-suite':
+    '<circle cx="92" cy="100" r="56" fill="#714B67"/> <circle cx="92" cy="100" r="42" fill="#fff"/> <path d="M92 68 V100 L114 112" fill="none" stroke="#714B67" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/> <circle cx="140" cy="132" r="28" fill="#00A09D"/> <path d="M126 132 l10 10 l18 -20" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>',
+  'showroom-check':
+    '<rect x="38" y="66" width="124" height="86" rx="12" fill="#714B67"/> <path d="M76 66 L84 50 H116 L124 66 Z" fill="#714B67"/> <circle cx="100" cy="108" r="28" fill="#fff"/> <circle cx="100" cy="108" r="17" fill="#3D9DDE"/> <circle cx="146" cy="82" r="6" fill="#F5B62A"/> <circle cx="140" cy="140" r="24" fill="#00A09D"/> <path d="M128 140 l9 9 l16 -18" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>',
+  'signage-scan':
+    '<rect x="34" y="46" width="132" height="90" rx="10" fill="#00A09D"/> <rect x="44" y="56" width="112" height="70" rx="4" fill="#fff"/> <rect x="84" y="136" width="32" height="12" fill="#00A09D"/> <rect x="66" y="148" width="68" height="10" rx="5" fill="#714B67"/> <g fill="#714B67"> <rect x="56" y="68" width="6" height="46"/><rect x="66" y="68" width="3" height="46"/> <rect x="73" y="68" width="8" height="46"/><rect x="85" y="68" width="3" height="46"/> <rect x="92" y="68" width="5" height="46"/><rect x="101" y="68" width="9" height="46"/> <rect x="114" y="68" width="3" height="46"/><rect x="121" y="68" width="6" height="46"/> <rect x="131" y="68" width="4" height="46"/><rect x="139" y="68" width="7" height="46"/> </g> <rect x="46" y="88" width="108" height="6" fill="#F06050" opacity="0.95"/>',
+  'pharmacare-pharmacy-pos':
+    '<path d="M84 44 h32 v40 h40 v32 h-40 v40 h-32 v-40 h-40 v-32 h40 Z" fill="#00A09D"/> <path d="M100 44 h16 v40 h40 v32 h-40 v40 h-16 Z" fill="#21B799" opacity="0.9"/> <g transform="rotate(-40 132 138)"> <rect x="104" y="124" width="56" height="26" rx="13" fill="#714B67"/> <path d="M132 124 h15 a13 13 0 0 1 0 26 h-15 Z" fill="#F06050"/> </g>',
+  'credit-management':
+    '<rect x="34" y="60" width="124" height="80" rx="12" fill="#714B67"/> <rect x="34" y="76" width="124" height="16" fill="#9B6B8F"/> <rect x="48" y="110" width="44" height="8" rx="4" fill="#fff" opacity="0.6"/> <rect x="48" y="122" width="26" height="6" rx="3" fill="#fff" opacity="0.4"/> <circle cx="142" cy="130" r="28" fill="#F06050"/> <circle cx="142" cy="130" r="18" fill="#fff"/> <rect x="132" y="128" width="20" height="5" rx="2" fill="#F06050"/> <path d="M132 130 a10 10 0 0 1 20 0" fill="none" stroke="#F5B62A" stroke-width="5" stroke-linecap="round"/>',
+  'inter-company-stock-transfer':
+    '<path d="M40 74 L68 60 L96 74 V108 L68 122 L40 108 Z" fill="#714B67"/> <path d="M68 74 L96 60 L68 46 L40 60 Z" fill="#9B6B8F"/> <path d="M104 126 L132 112 L160 126 V160 L132 174 L104 160 Z" fill="#00A09D"/> <path d="M132 126 L160 112 L132 98 L104 112 Z" fill="#2DBFB8"/> <path d="M104 52 C130 40 150 52 154 78" fill="none" stroke="#F06050" stroke-width="9" stroke-linecap="round"/> <path d="M142 74 L156 90 L164 70 Z" fill="#F06050"/> <path d="M96 148 C70 160 50 148 46 122" fill="none" stroke="#F06050" stroke-width="9" stroke-linecap="round"/> <path d="M58 126 L44 110 L36 130 Z" fill="#F06050"/>',
+  'offline-sync':
+    '<path d="M62 132 a26 26 0 0 1 -4 -52 a34 34 0 0 1 66 -10 a24 24 0 0 1 20 62 Z" fill="#00A09D"/> <circle cx="100" cy="126" r="34" fill="#fff"/> <path d="M124 118 a26 26 0 0 0 -46 -6" fill="none" stroke="#714B67" stroke-width="9" stroke-linecap="round"/> <path d="M78 98 L74 118 L94 114 Z" fill="#714B67"/> <path d="M76 134 a26 26 0 0 0 46 6" fill="none" stroke="#F06050" stroke-width="9" stroke-linecap="round"/> <path d="M122 154 L126 134 L106 138 Z" fill="#F06050"/>',
+  'vehicle-tracking':
+    '<path d="M42 150 C70 120 130 120 158 150" fill="none" stroke="#714B67" stroke-width="30" stroke-linecap="round"/> <path d="M42 150 C70 120 130 120 158 150" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12"/> <path d="M100 36 C78 36 62 52 62 74 C62 102 100 132 100 132 C100 132 138 102 138 74 C138 52 122 36 100 36 Z" fill="#F06050"/> <circle cx="100" cy="74" r="16" fill="#fff"/> <circle cx="100" cy="74" r="8" fill="#00A09D"/>',
+};

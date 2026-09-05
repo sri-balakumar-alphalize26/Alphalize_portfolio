@@ -1,0 +1,219 @@
+---
+import { Image } from 'astro:assets';
+import { Heading } from '@alphalize/astro-marker';
+import ai369 from '@/assets/trusted/369ai.png';
+import danat from '@/assets/trusted/danat.png';
+import nexgenn from '@/assets/trusted/nexgenn-pos.png';
+import odoo from '@/assets/trusted/odoo.png';
+
+/**
+ * Trusted partner logos for the About page.
+ *
+ * Rises on scroll, then a slow wave lifts each mark into full colour in turn.
+ * Hovering one dims the rest and brings up a white card with the partner name.
+ *
+ * The reveal is scroll-driven CSS (`animation-timeline: view()`), the same
+ * mechanism Reveal.astro uses — no IntersectionObserver, because bundled
+ * scripts do not re-run across ClientRouter navigations and the section would
+ * stay invisible for anyone arriving from another page.
+ *
+ * `--h` is per-logo optical sizing: the source files are trimmed to their
+ * content box and their proportions differ wildly (Nex Genn POS is 5.6:1, Danat
+ * is 0.7:1), so a single max-height would leave the wordmarks enormous next to
+ * the stacked marks.
+ * `--o` staggers the rise, `--w` staggers the wave.
+ */
+const partners = [
+  { src: odoo, name: 'Odoo', h: 64 },
+  { src: ai369, name: '369ai.Biz', h: 96 },
+  { src: danat, name: 'Danat Group', h: 96 },
+  { src: nexgenn, name: 'Nex Genn POS', h: 56 },
+];
+---
+
+<section class="p-sec">
+  <p class="p-eyebrow">Trusted Partners</p>
+  <div class="p-title">
+    <Heading as="h2" size="lg" align="center">Companies we build and deliver with</Heading>
+  </div>
+
+  <div class="p-row">
+    {
+      partners.map((p, i) => (
+        <div
+          class="p-item"
+          data-name={p.name}
+          style={`--o:${i * 6}%; --w:${i * 0.25}s; --h:${p.h}px`}
+        >
+          <Image src={p.src} alt={p.name} height={96} densities={[1, 2]} loading="lazy" />
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .p-sec {
+    padding: 70px 24px 78px;
+    text-align: center;
+    background: #fff;
+    border-bottom: 1px solid var(--color-brand-100);
+  }
+
+  .p-eyebrow {
+    margin: 0 0 14px;
+    font-size: 14px;
+    letter-spacing: 3px;
+    font-weight: 600;
+    color: var(--color-plum-600);
+    text-transform: uppercase;
+  }
+  .p-title {
+    margin: 0 0 54px;
+  }
+
+  .p-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 76px;
+    flex-wrap: wrap;
+  }
+
+  .p-item {
+    position: relative;
+    padding: 22px 26px 26px;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+
+  /* white card behind the hovered logo */
+  .p-item::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow:
+      0 14px 34px rgb(16 40 70 / 0.14),
+      0 2px 8px rgb(16 40 70 / 0.06);
+    opacity: 0;
+    transform: scale(0.9);
+    z-index: 0;
+    transition: 0.38s cubic-bezier(0.34, 1.4, 0.5, 1);
+  }
+  /* partner name under it */
+  .p-item::after {
+    content: attr(data-name);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    font-size: 12.5px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--color-muted);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: 0.34s ease;
+  }
+
+  .p-item :global(img) {
+    position: relative;
+    z-index: 1;
+    display: block;
+    max-height: var(--h, 104px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: grayscale(1) opacity(0.55);
+    transition:
+      filter 0.45s ease,
+      transform 0.45s ease;
+  }
+
+  /* hover: real colours, others dim */
+  .p-row:hover .p-item :global(img) {
+    filter: grayscale(1) opacity(0.28);
+  }
+  .p-item:hover::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .p-item:hover::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .p-item:hover :global(img) {
+    filter: grayscale(0) opacity(1) !important;
+    transform: translateY(-10px) scale(1.08);
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    /* The slow colour wave. Runs unconditionally — nothing gates it. */
+    .p-item :global(img) {
+      animation: pwave 7s ease-in-out infinite;
+      animation-delay: var(--w);
+    }
+
+    /* Entrance. Purely additive: without support the content is simply there. */
+    @supports (animation-timeline: view()) {
+      .p-eyebrow,
+      .p-title,
+      .p-item {
+        animation: prise 1s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+        animation-timeline: view();
+        animation-range: entry 5% cover 28%;
+      }
+      .p-item {
+        animation-range: calc(entry 5% + var(--o)) calc(cover 30% + var(--o));
+      }
+    }
+  }
+
+  @keyframes prise {
+    from {
+      opacity: 0;
+      transform: translateY(22px) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes pwave {
+    0%,
+    74% {
+      filter: grayscale(1) opacity(0.55);
+      transform: translateY(0) scale(1);
+    }
+    82% {
+      filter: grayscale(0) opacity(1);
+      transform: translateY(-8px) scale(1.06);
+    }
+    92% {
+      filter: grayscale(0) opacity(1);
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      filter: grayscale(1) opacity(0.55);
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (max-width: 760px) {
+    .p-row {
+      gap: 44px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .p-item :global(img) {
+      animation: none;
+      filter: none;
+    }
+  }
+</style>

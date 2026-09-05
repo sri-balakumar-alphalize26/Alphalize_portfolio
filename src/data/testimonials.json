@@ -1,0 +1,44 @@
+[
+  {
+    "id": "athul-pos-speed",
+    "order": 1,
+    "name": "Athul",
+    "quote": "The POS has made our billing so much faster that queues at the counter almost never build up now. Everything from item selection to printing the bill happens in a few taps, and the staff picked it up without much training. It has been running steadily every single day since we installed it.",
+    "rating": 5
+  },
+  {
+    "id": "ajmal-weighing-scale",
+    "order": 2,
+    "name": "Ajmal",
+    "quote": "The weighing scale integration works exactly the way it should — the weight comes straight into the bill with no manual typing and no mistakes. The VFD display on the customer side is a big plus, because the customer can see what is being weighed and what it costs while it happens. It has removed a lot of arguments at the counter for us.",
+    "rating": 5
+  },
+  {
+    "id": "alshabith-restaurant",
+    "order": 3,
+    "name": "Alshabith",
+    "quote": "The restaurant application handles our dine-in, takeaway and kitchen orders in one place, which is exactly what we were missing before. Orders reach the kitchen the moment the waiter takes them, so nothing gets forgotten during the rush hours. Our table turnaround has clearly improved since we started using it.",
+    "rating": 5
+  },
+  {
+    "id": "srisaan-tools-rental",
+    "order": 4,
+    "name": "Srisaan",
+    "quote": "The tools rental management app keeps track of every item that goes out and comes back, along with the rental period and the customer details. Earlier we were maintaining all this in registers and losing track of returns, and now everything is visible in one screen. Following up on pending returns has become very simple.",
+    "rating": 5
+  },
+  {
+    "id": "rajin-kumar-notifications",
+    "order": 5,
+    "name": "Rajin Kumar",
+    "quote": "The WhatsApp and email connection is wonderful — invoices and order confirmations go out to the customer automatically the moment we finish the billing. We no longer have to save numbers, download PDFs and forward them one by one. Customers appreciate getting everything instantly on the channel they actually use.",
+    "rating": 5
+  },
+  {
+    "id": "shamnad-support",
+    "order": 6,
+    "name": "Shamnad",
+    "quote": "The support they give is easily the best part of working with them. Whenever we raise an issue, someone responds quickly and stays on it until it is completely resolved, no matter what time of day it is. That kind of reliability is rare and it is the main reason we continue with them.",
+    "rating": 5
+  }
+]

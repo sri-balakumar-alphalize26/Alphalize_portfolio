@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import { ReviewCard } from '@alphalize/astro-marker';
+import Reveal from './Reveal.astro';
+import Section from './Section.astro';
+import SectionHeading from './SectionHeading.astro';
+
+/**
+ * Client reviews as a vertical three-column wall. Cards come from the marker
+ * package's <ReviewCard>; the columns scroll on the pure CSS .marquee-col rule
+ * in global.css — the vertical counterpart to the horizontal .marquee-track the
+ * logo strips use. Zero JavaScript.
+ */
+const reviews = (await getCollection('testimonials')).sort((a, b) => a.data.order - b.data.order);
+
+// Colour is bound to the review, not its slot, so a given person keeps the same
+// mark wherever they surface in a column.
+const palette = ['blue', 'orange', 'yellow'];
+const cards = reviews.map((review, i) => ({ ...review.data, color: palette[i % palette.length] }));
+
+// Every column carries all six reviews, each starting at a different point in
+// the list — two-per-column would loop far too visibly. Speeds differ so the
+// columns never travel in lockstep, and the middle one runs the other way.
+const columns = [0, 2, 4].map((offset, i) => ({
+  items: [...cards.slice(offset), ...cards.slice(0, offset)],
+  duration: [46, 58, 52][i],
+  reverse: i === 1,
+  visibility: ['', 'hidden md:block', 'hidden lg:block'][i],
+}));
+---
+
+<Section variant="surface" space="lg">
+  <SectionHeading
+    eyebrow="Client reviews"
+    title="What our clients say"
+    highlight="clients"
+    marker="underline"
+    color="blue"
+    lead="Shops, restaurants and showrooms running our software and hardware every day."
+  />
+
+  <div
+    class="marquee-y relative mt-12 grid h-[30rem] grid-cols-1 gap-6 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_10%,black_90%,transparent)] md:grid-cols-2 lg:h-[34rem] lg:grid-cols-3"
+  >
+    {
+      columns.map((col) => (
+        <div class={col.visibility}>
+          {/* gap clears the "66" mark, which sits 18px above each card */}
+          <div
+            class="marquee-col gap-9"
+            data-reverse={col.reverse ? '' : undefined}
+            style={`--marquee-duration:${col.duration}s`}
+          >
+            {[...col.items, ...col.items].map((card, i) => {
+              const clone = i >= col.items.length;
+              return (
+                <div data-clone={clone ? '' : undefined} aria-hidden={clone ? 'true' : undefined}>
+                  <ReviewCard name={card.name} rating={card.rating} color={card.color}>
+                    {card.quote}
+                  </ReviewCard>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <Reveal class="text-muted mt-10 text-center text-sm">
+    Worked with us?
+    <a href="/contact" class="text-plum-600 font-semibold hover:underline">Tell us how it went</a>.
+  </Reveal>
+</Section>

@@ -377,6 +377,47 @@
   }
 }
 
+/* Vertical review wall — three columns, each drifting at its own pace. */
+@keyframes marquee-scroll-y {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -50%, 0);
+  }
+}
+
+.marquee-col {
+  display: flex;
+  flex-direction: column;
+  animation: marquee-scroll-y var(--marquee-duration, 48s) linear infinite;
+}
+
+.marquee-col[data-reverse] {
+  animation-direction: reverse;
+}
+
+.marquee-y:hover .marquee-col,
+.marquee-y:focus-within .marquee-col {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-y {
+    height: auto;
+    mask-image: none;
+  }
+
+  .marquee-col {
+    animation: none;
+  }
+
+  /* Otherwise the static fallback would list every quote twice. */
+  .marquee-col > [data-clone] {
+    display: none;
+  }
+}
+
 /* Astro view-transition tuning: cross-fade, no sliding. */
 @media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(root) {

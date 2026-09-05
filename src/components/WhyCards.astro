@@ -7,7 +7,7 @@ import SectionHeading from './SectionHeading.astro';
 /**
  * "Why Alphalize" — the three value cards, with the hover treatment from the
  * why-cards reference: a gradient rail down the left edge, the icon tile
- * springing up and turning teal, and a light sweeping across the card.
+ * springing up and turning brand blue, and a light sweeping across the card.
  *
  * The entrance stays on the site's own scroll-driven `Reveal` (zero JS) rather
  * than the reference's IntersectionObserver engine. Two consequences worth
@@ -43,7 +43,7 @@ const values = [
     title="A partner, not just a vendor"
     highlight="partner"
     marker="circle"
-    color="teal"
+    color="blue"
   />
 
   <div class="mt-12 grid gap-6 md:grid-cols-3">
@@ -85,7 +85,7 @@ const values = [
     position: absolute;
     inset: 0 auto 0 0;
     width: 3px;
-    background: linear-gradient(180deg, var(--mk-teal), var(--color-plum-600));
+    background: linear-gradient(180deg, var(--color-brand-500), var(--color-plum-600));
     transform: scaleY(0);
     transform-origin: top;
     transition: transform 0.5s var(--ease-out-soft);
@@ -135,27 +135,27 @@ const values = [
     background: linear-gradient(
       105deg,
       transparent 0%,
-      color-mix(in srgb, var(--mk-teal) 10%, transparent) 45%,
+      color-mix(in srgb, var(--color-brand-500) 10%, transparent) 45%,
       rgb(255 255 255 / 0.35) 50%,
-      color-mix(in srgb, var(--mk-teal) 10%, transparent) 55%,
+      color-mix(in srgb, var(--color-brand-500) 10%, transparent) 55%,
       transparent 100%
     );
   }
 
   .wc-card:hover {
     transform: translateY(-8px);
-    border-color: color-mix(in srgb, var(--mk-teal) 30%, #fff);
+    border-color: color-mix(in srgb, var(--color-brand-500) 30%, #fff);
     box-shadow:
       var(--shadow-lift),
-      0 0 0 1px color-mix(in srgb, var(--mk-teal) 25%, transparent);
+      0 0 0 1px color-mix(in srgb, var(--color-brand-500) 25%, transparent);
   }
   .wc-card:hover::before {
     transform: scaleY(1);
   }
   .wc-card:hover .wc-tile {
     transform: translateY(-3px) rotate(-6deg);
-    background: var(--mk-teal);
-    box-shadow: 0 10px 20px color-mix(in srgb, var(--mk-teal) 35%, transparent);
+    background: var(--color-brand-500);
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--color-brand-500) 35%, transparent);
   }
   .wc-card:hover .wc-tile :global(svg) {
     transform: scale(1.15) rotate(6deg);

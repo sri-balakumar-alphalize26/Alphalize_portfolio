@@ -2,9 +2,9 @@
 import CtaBand from '@/components/CtaBand.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
-import PartnerMarquee from '@/components/PartnerMarquee.astro';
 import Reveal from '@/components/Reveal.astro';
 import SectionHeading from '@/components/SectionHeading.astro';
+import TrustedPartners from '@/components/TrustedPartners.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { offices } from '@/config/site';
 
@@ -103,7 +103,7 @@ const reasons = [
         title="What you get from working with Alphalize"
         highlight="Alphalize"
         marker="circle"
-        color="teal"
+        color="blue"
       />
       <div class="mt-12 grid gap-6 md:grid-cols-3">
         {
@@ -123,7 +123,7 @@ const reasons = [
     </div>
   </section>
 
-  <PartnerMarquee />
+  <TrustedPartners />
 
   <CtaBand />
 </BaseLayout>

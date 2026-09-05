@@ -81,10 +81,24 @@ const modules = defineCollection({
   loader: file('./src/data/erp-modules.json'),
   schema: z.object({
     title: z.string(),
+    /** Grid label where the full title is too long. Falls back to title. */
+    shortTitle: z.string().optional(),
     summary: z.string(),
     icon: iconName,
     order: z.number().int(),
   }),
 });
 
-export const collections = { services, jobs, apps, modules };
+/** Client reviews on the homepage. One JSON file, one entry per review. */
+const testimonials = defineCollection({
+  loader: file('./src/data/testimonials.json'),
+  schema: z.object({
+    name: z.string(),
+    quote: z.string(),
+    /** Stars shown on the card, 0-5. */
+    rating: z.number().int().min(0).max(5).default(5),
+    order: z.number().int(),
+  }),
+});
+
+export const collections = { services, jobs, apps, modules, testimonials };

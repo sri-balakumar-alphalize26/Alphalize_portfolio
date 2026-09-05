@@ -46,9 +46,9 @@ const reasons = [
             At Alphalize, we understand the power of automation in streamlining business processes
             and unlocking operational efficiency. We are passionate about helping our clients bring
             their ideas to life and transforming manual tasks into automated workflows. Whether you
-            have a specific automation concept in mind or need guidance in identifying
-            opportunities for automation, our team of experts is here to guide you through the
-            implementation process.
+            have a specific automation concept in mind or need guidance in identifying opportunities
+            for automation, our team of experts is here to guide you through the implementation
+            process.
           </p>
           <h2>It starts with your vision</h2>
           <p>
@@ -67,17 +67,17 @@ const reasons = [
       </Reveal>
 
       <Reveal direction="right" class="lg:col-span-5">
-        <div class="cc-surface rounded-[--radius-card] border border-brand-100 p-7">
-          <h2 class="text-base font-semibold text-ink">Where we work</h2>
+        <div class="cc-surface rounded-card border-brand-100 border p-7">
+          <h2 class="text-ink text-base font-semibold">Where we work</h2>
           <ul class="mt-4 space-y-5">
             {
               offices.map((o) => (
                 <li class="flex gap-3">
-                  <span class="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[--radius-btn] bg-white text-plum-600">
+                  <span class="rounded-btn text-plum-600 mt-0.5 flex size-9 shrink-0 items-center justify-center bg-white">
                     <Icon name="pin" class="size-4" />
                   </span>
-                  <span class="text-sm leading-relaxed text-muted">
-                    <span class="block font-semibold text-ink">{o.label}</span>
+                  <span class="text-muted text-sm leading-relaxed">
+                    <span class="text-ink block font-semibold">{o.label}</span>
                     {o.street}
                     <br />
                     {o.locality}, {o.region} {o.postalCode}
@@ -86,7 +86,7 @@ const reasons = [
               ))
             }
           </ul>
-          <p class="mt-6 border-t border-brand-200/60 pt-5 text-sm leading-relaxed text-muted">
+          <p class="border-brand-200/60 text-muted mt-6 border-t pt-5 text-sm leading-relaxed">
             Two offices across two time zones means implementation support that overlaps with both
             US and Indian business hours.
           </p>
@@ -96,22 +96,25 @@ const reasons = [
   </section>
 
   <!-- Why choose us -->
-  <section class="cc-surface border-t border-brand-100 py-18 lg:py-24">
+  <section class="cc-surface border-brand-100 border-t py-18 lg:py-24">
     <div class="container-page">
       <SectionHeading
         eyebrow="Why choose us"
         title="What you get from working with Alphalize"
+        highlight="Alphalize"
+        marker="circle"
+        color="teal"
       />
       <div class="mt-12 grid gap-6 md:grid-cols-3">
         {
           reasons.map((r, i) => (
             <Reveal as="article" delay={i}>
-              <div class="h-full rounded-[--radius-card] border border-brand-100 bg-white p-7 shadow-[--shadow-card]">
-                <span class="flex size-12 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600">
+              <div class="rounded-card border-brand-100 shadow-card h-full border bg-white p-7">
+                <span class="rounded-btn bg-plum-50 text-plum-600 flex size-12 items-center justify-center">
                   <Icon name={r.icon} class="size-6" />
                 </span>
-                <h3 class="mt-5 text-lg font-semibold text-ink">{r.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-muted">{r.body}</p>
+                <h3 class="text-ink mt-5 text-lg font-semibold">{r.title}</h3>
+                <p class="text-muted mt-2 text-sm leading-relaxed">{r.body}</p>
               </div>
             </Reveal>
           ))

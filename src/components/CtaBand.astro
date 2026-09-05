@@ -1,4 +1,5 @@
 ---
+import { Heading, Sparkle } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
 import { contact } from '@/config/site';
@@ -17,7 +18,7 @@ const {
 <section class="container-page py-16 lg:py-20">
   <Reveal
     direction="scale"
-    class="cc-plum relative isolate overflow-hidden rounded-[--radius-card] px-6 py-14 text-center sm:px-12 lg:py-18"
+    class="cc-plum relative isolate overflow-hidden rounded-card px-6 pt-8 pb-14 text-center sm:px-12 lg:pt-12 lg:pb-18"
   >
     <div
       aria-hidden="true"
@@ -25,23 +26,18 @@ const {
     >
     </div>
 
-    <h2 class="mx-auto max-w-2xl text-[length:--text-section] leading-[1.15] text-white">
-      {title}
-    </h2>
+    <!-- Odoo's "Unleash your growth potential" treatment: burst lines around the heading. -->
+    <Sparkle color="yellow" hearts={false} class="mx-auto max-w-2xl">
+      <Heading as="h2" size="lg" align="center" class="text-white">{title}</Heading>
+    </Sparkle>
     <p class="lead mx-auto mt-4 max-w-2xl text-plum-100">{body}</p>
 
     <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-      <a
-        href="/contact"
-        class="btn btn-light"
-      >
+      <a href="/contact" class="btn btn-light">
         Start a conversation
         <Icon name="arrow-right" class="size-4" />
       </a>
-      <a
-        href={contact.phoneHref}
-        class="btn btn-outline text-white"
-      >
+      <a href={contact.phoneHref} class="btn btn-outline text-white">
         <Icon name="phone" class="size-4" />
         {contact.phone}
       </a>

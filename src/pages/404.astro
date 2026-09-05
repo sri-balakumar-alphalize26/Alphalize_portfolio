@@ -1,4 +1,5 @@
 ---
+import { Heading } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import Icon from '@/components/Icon.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
@@ -12,28 +13,16 @@ const services = (await getCollection('services')).sort((a, b) => a.data.order -
   noindex
 >
   <section class="container-page py-24 text-center lg:py-32">
-    <p class="text-7xl font-semibold text-plum-200 lg:text-8xl">
-      404
-    </p>
-    <h1 class="mt-4 text-[length:--text-section] text-ink">This page does not exist</h1>
+    <p class="text-7xl font-semibold text-plum-200 lg:text-8xl">404</p>
+    <Heading as="h1" size="lg" align="center" class="mt-4">This page does not exist</Heading>
     <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
       The link may be out of date. If you followed it from somewhere on this site, let us know and
       we will fix it.
     </p>
 
     <div class="mt-8 flex flex-wrap justify-center gap-3">
-      <a
-        href="/"
-        class="btn btn-primary"
-      >
-        Back to home
-      </a>
-      <a
-        href="/contact"
-        class="btn btn-outline text-brand-700"
-      >
-        Contact us
-      </a>
+      <a href="/" class="btn btn-primary"> Back to home </a>
+      <a href="/contact" class="btn btn-outline text-brand-700"> Contact us </a>
     </div>
 
     <div class="mx-auto mt-14 max-w-2xl text-left">

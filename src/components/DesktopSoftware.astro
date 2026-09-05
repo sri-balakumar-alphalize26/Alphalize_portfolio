@@ -1,4 +1,5 @@
 ---
+import { Heading, Marker } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
 
@@ -17,7 +18,7 @@ const points = [
   <div class="container-page">
     <Reveal
       direction="scale"
-      class="cc-blue relative isolate grid gap-10 overflow-hidden rounded-[--radius-card] px-6 py-12 sm:px-12 lg:grid-cols-2 lg:items-center lg:py-16"
+      class="cc-blue relative isolate grid gap-10 overflow-hidden rounded-card px-6 py-12 sm:px-12 lg:grid-cols-2 lg:items-center lg:py-16"
     >
       <div
         aria-hidden="true"
@@ -26,16 +27,15 @@ const points = [
       </div>
 
       <div>
-        <p class="script-accent">Windows · Offline-first</p>
-        <h2 class="mt-2 text-[length:--text-section] leading-[1.15]">Desktop software</h2>
+        <p class="eyebrow">Windows · Offline-first</p>
+        <Heading as="h2" size="md" class="mt-2">
+          Desktop <Marker type="underline" color="sky">software</Marker>
+        </Heading>
         <p class="lead mt-4 max-w-lg text-brand-100">
           Installable Windows .exe applications for billing counters and back-office machines,
           built for speed on local hardware.
         </p>
-        <a
-          href="/contact"
-          class="btn btn-light mt-7"
-        >
+        <a href="/contact" class="btn btn-light mt-7">
           Ask about desktop billing
           <Icon name="arrow-right" class="size-4" />
         </a>
@@ -44,7 +44,7 @@ const points = [
       <ul class="space-y-4">
         {
           points.map((p) => (
-            <li class="flex gap-3 rounded-[--radius-btn] border border-white/10 bg-white/5 p-4">
+            <li class="flex gap-3 rounded-btn border border-white/10 bg-white/5 p-4">
               <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
                 <Icon name="monitor" class="size-4" />
               </span>

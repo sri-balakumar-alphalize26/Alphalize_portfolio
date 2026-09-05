@@ -44,6 +44,9 @@ const tiles: { icon: IconName; title: string; body: string; href: string; cta: s
     <SectionHeading
       eyebrow="Software we build"
       title="Every app you run. Every tool you use. One core."
+      highlight="One core."
+      marker="squiggle"
+      color="yellow"
       lead="Mobile, desktop and connected devices — all landing in a single Odoo back office, with nothing re-typed in between."
     />
 
@@ -53,9 +56,9 @@ const tiles: { icon: IconName; title: string; body: string; href: string; cta: s
           <Reveal as="article" delay={i} class="group h-full">
             <a
               href={t.href}
-              class="flex h-full flex-col rounded-[--radius-card] border border-brand-100 bg-white p-6 transition-[border-color,box-shadow] duration-300 ease-[--ease-out-soft] hover:border-plum-300 hover:shadow-[--shadow-lift]"
+              class="flex h-full flex-col rounded-card border border-brand-100 bg-white p-6 transition-[border-color,box-shadow] duration-300 ease-out-soft hover:border-plum-300 hover:shadow-lift"
             >
-              <span class="flex size-12 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600 transition-colors duration-300 group-hover:bg-plum-600 group-hover:text-white">
+              <span class="flex size-12 items-center justify-center rounded-btn bg-plum-50 text-plum-600 transition-colors duration-300 group-hover:bg-plum-600 group-hover:text-white">
                 <Icon name={t.icon} class="size-6" />
               </span>
               <h3 class="mt-5 text-lg font-semibold text-ink">{t.title}</h3>
@@ -86,7 +89,7 @@ const tiles: { icon: IconName; title: string; body: string; href: string; cta: s
                   href="/services/mobile-app-development#apps"
                   tabindex={decorative ? -1 : undefined}
                   aria-hidden={decorative ? 'true' : undefined}
-                  class="flex h-20 items-center rounded-[--radius-card] border border-brand-100 bg-white px-6 transition-colors duration-300 hover:border-plum-300"
+                  class="flex h-20 items-center rounded-card border border-brand-100 bg-white px-6 transition-colors duration-300 hover:border-plum-300"
                 >
                   <Image
                     src={app.data.image}

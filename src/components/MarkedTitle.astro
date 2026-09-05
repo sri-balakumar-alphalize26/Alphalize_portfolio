@@ -1,0 +1,25 @@
+---
+import { Marker } from '@alphalize/astro-marker';
+import type { MarkerType } from './marks';
+
+/**
+ * A plain-string title with one phrase wrapped in a hand-drawn marker stroke.
+ * Used inside <Heading> by SectionHeading and FeatureRow, whose titles arrive
+ * as strings from props rather than as markup.
+ */
+interface Props {
+  title: string;
+  /** Substring of `title` to mark; the title renders plain when absent. */
+  highlight?: string;
+  marker?: MarkerType;
+  color?: string;
+}
+
+const { title, highlight = '', marker = 'underline', color = 'blue' } = Astro.props;
+
+const at = highlight ? title.indexOf(highlight) : -1;
+const hit = at >= 0 ? highlight : '';
+---
+
+{/* Kept on one line: whitespace here would render as a stray space before punctuation. */}
+{hit ? <>{title.slice(0, at)}<Marker type={marker} color={color}>{hit}</Marker>{title.slice(at + hit.length)}</> : title}

@@ -26,10 +26,10 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         <Reveal direction="left" class="space-y-4">
           <a
             href={contact.phoneHref}
-            class="flex gap-4 rounded-[--radius-card] border border-brand-100 p-5 transition-colors hover:border-brand-200 hover:bg-brand-50/50"
+            class="flex gap-4 rounded-card border border-brand-100 p-5 transition-colors hover:border-brand-200 hover:bg-brand-50/50"
           >
             <span
-              class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-600 text-white"
+              class="flex size-11 shrink-0 items-center justify-center rounded-btn bg-plum-600 text-white"
             >
               <Icon name="phone" class="size-5" />
             </span>
@@ -41,10 +41,10 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
           <a
             href={`mailto:${email}`}
-            class="flex gap-4 rounded-[--radius-card] border border-brand-100 p-5 transition-colors hover:border-brand-200 hover:bg-brand-50/50"
+            class="flex gap-4 rounded-card border border-brand-100 p-5 transition-colors hover:border-brand-200 hover:bg-brand-50/50"
           >
             <span
-              class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-600 text-white"
+              class="flex size-11 shrink-0 items-center justify-center rounded-btn bg-plum-600 text-white"
             >
               <Icon name="mail" class="size-5" />
             </span>
@@ -54,14 +54,14 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
             </span>
           </a>
 
-          <div class="rounded-[--radius-card] border border-brand-100 p-5">
+          <div class="rounded-card border border-brand-100 p-5">
             <h2 class="text-sm font-semibold text-ink">Office addresses</h2>
             <ul class="mt-4 space-y-5">
               {
                 offices.map((o) => (
                   <li class="flex gap-4">
                     <span
-                      class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600"
+                      class="flex size-11 shrink-0 items-center justify-center rounded-btn bg-plum-50 text-plum-600"
                     >
                       <Icon name="pin" class="size-5" />
                     </span>
@@ -79,9 +79,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
             </ul>
           </div>
 
-          <div class="cc-surface flex gap-4 rounded-[--radius-card] border border-brand-100 p-5">
+          <div class="cc-surface flex gap-4 rounded-card border border-brand-100 p-5">
             <span
-              class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-white text-plum-600"
+              class="flex size-11 shrink-0 items-center justify-center rounded-btn bg-white text-plum-600"
             >
               <Icon name="clock" class="size-5" />
             </span>

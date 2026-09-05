@@ -1,5 +1,5 @@
 ---
-import Highlight from './Highlight.astro';
+import { Heading, Marker } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 
 const { eyebrow, title, lead, crumbs = [] } = Astro.props;
 
-// Odoo highlights the last word of a heading; do the same when the title has
+// Odoo underlines the last word of a heading; do the same when the title has
 // more than one word, so interior pages carry the same signature as the home hero.
 const words = title.trim().split(/\s+/);
 const head = words.length > 1 ? words.slice(0, -1).join(' ') : title;
@@ -47,11 +47,11 @@ const tail = words.length > 1 ? words[words.length - 1] : '';
       </ol>
     </nav>
 
-    {eyebrow && <p class="script-accent mt-7">{eyebrow}</p>}
+    {eyebrow && <p class="eyebrow mt-7">{eyebrow}</p>}
 
-    <h1 class="mt-2 max-w-3xl text-[length:--text-hero]">
-      {tail ? <>{head} <Highlight>{tail}</Highlight></> : title}
-    </h1>
+    <Heading as="h1" size="lg" class="mt-2 max-w-3xl">
+      {tail ? <>{head} <Marker type="underline" color="blue">{tail}</Marker></> : title}
+    </Heading>
 
     {lead && <p class="lead mt-5 max-w-2xl text-muted">{lead}</p>}
   </div>

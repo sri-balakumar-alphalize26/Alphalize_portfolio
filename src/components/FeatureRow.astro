@@ -1,6 +1,9 @@
 ---
+import { Heading } from '@alphalize/astro-marker';
 import { Image } from 'astro:assets';
 import Icon from './Icon.astro';
+import MarkedTitle from './MarkedTitle.astro';
+import type { MarkerType } from './marks';
 import Reveal from './Reveal.astro';
 
 /**
@@ -10,6 +13,10 @@ import Reveal from './Reveal.astro';
 interface Props {
   eyebrow?: string;
   title: string;
+  /** Phrase inside `title` to wrap in a marker stroke. */
+  highlight?: string;
+  marker?: MarkerType;
+  color?: string;
   body: string;
   points?: string[];
   href?: string;
@@ -25,6 +32,9 @@ interface Props {
 const {
   eyebrow,
   title,
+  highlight,
+  marker,
+  color,
   body,
   points = [],
   href,
@@ -38,8 +48,10 @@ const {
 
 <div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
   <Reveal direction={flip ? 'right' : 'left'} class={flip ? 'lg:order-2' : undefined}>
-    {eyebrow && <p class="script-accent">{eyebrow}</p>}
-    <h3 class="mt-2 text-[length:--text-section]">{title}</h3>
+    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <Heading as="h3" size="md" class="mt-2">
+      <MarkedTitle title={title} highlight={highlight} marker={marker} color={color} />
+    </Heading>
     <p class="mt-4 leading-relaxed text-muted">{body}</p>
 
     {
@@ -71,7 +83,7 @@ const {
   <Reveal direction={flip ? 'left' : 'right'} class={flip ? 'lg:order-1' : undefined}>
     <div
       class:list={[
-        'overflow-hidden rounded-[--radius-card] border border-brand-100',
+        'overflow-hidden rounded-card border border-brand-100',
         fit === 'contain' ? 'flex h-64 items-center justify-center bg-surface p-10' : '',
       ]}
     >

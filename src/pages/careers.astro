@@ -70,13 +70,13 @@ const jsonLd = jobs.map((job) => ({
         rendered.map(({ job, Content }, i) => (
           <Reveal as="article" delay={i}>
             <details
-              class="group rounded-[--radius-card] border border-brand-100 bg-white transition-colors open:border-plum-300"
+              class="group rounded-card border border-brand-100 bg-white transition-colors open:border-plum-300"
             >
               <summary
                 class="flex cursor-pointer list-none items-start gap-4 p-6 [&::-webkit-details-marker]:hidden"
               >
                 <span
-                  class="flex size-11 shrink-0 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600"
+                  class="flex size-11 shrink-0 items-center justify-center rounded-btn bg-plum-50 text-plum-600"
                 >
                   <Icon name="briefcase" class="size-5" />
                 </span>

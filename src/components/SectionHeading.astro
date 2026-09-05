@@ -1,9 +1,16 @@
 ---
+import { Heading } from '@alphalize/astro-marker';
+import MarkedTitle from './MarkedTitle.astro';
+import type { MarkerType } from './marks';
 import Reveal from './Reveal.astro';
 
 interface Props {
   eyebrow?: string;
   title: string;
+  /** Phrase inside `title` to wrap in a marker stroke. */
+  highlight?: string;
+  marker?: MarkerType;
+  color?: string;
   lead?: string;
   align?: 'left' | 'center';
   /** Use on dark backgrounds. */
@@ -11,33 +18,24 @@ interface Props {
   class?: string;
 }
 
-const { eyebrow, title, lead, align = 'center', invert = false, class: className } = Astro.props;
+const {
+  eyebrow,
+  title,
+  highlight,
+  marker,
+  color,
+  lead,
+  align = 'center',
+  invert = false,
+  class: className,
+} = Astro.props;
 ---
 
-<Reveal
-  class:list={[
-    'max-w-3xl',
-    align === 'center' && 'mx-auto text-center',
-    className,
-  ]}
->
-  {
-    eyebrow && (
-      <p
-        class="script-accent"
-      >
-        {eyebrow}
-      </p>
-    )
-  }
-  <h2
-    class:list={[
-      'mt-2 text-[length:--text-section] leading-[1.15]',
-      invert ? 'text-white' : 'text-ink',
-    ]}
-  >
-    {title}
-  </h2>
+<Reveal class:list={['max-w-3xl', align === 'center' && 'mx-auto text-center', className]}>
+  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+  <Heading as="h2" size="lg" align={align} class:list={['mt-2', invert && 'text-white']}>
+    <MarkedTitle title={title} highlight={highlight} marker={marker} color={color} />
+  </Heading>
   {
     lead && (
       <p class:list={['mt-4 text-base leading-relaxed', invert ? 'text-brand-200' : 'text-muted']}>

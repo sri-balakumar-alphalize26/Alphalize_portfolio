@@ -3,35 +3,242 @@ import type { CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
 
+/**
+ * A service tile, shared by the homepage highlight grid and /services.
+ *
+ * The entrance rides the site's scroll-driven `Reveal` (zero JS). Two notes on
+ * the animation, both consequences of `Reveal` filling `transform` on the
+ * element it wraps — a filled animation outranks `:hover`:
+ *   - the card that lifts is the inner <a>, not the reveal element;
+ *   - the card's tilt and the tile's pop animate the `rotate`/`scale`
+ *     properties, which compose with the `transform` their hover states set.
+ */
 interface Props {
   service: CollectionEntry<'services'>;
   delay?: number;
+  /**
+   * Marks the card as one of the highlighted services: plum rim, tile already
+   * filled, and a lift as it scrolls in. Opt-in rather than read from
+   * `service.data.featured`, because on the homepage every card in the grid is
+   * a featured one and flagging all four would single out nothing.
+   */
+  featured?: boolean;
 }
 
-const { service, delay = 0 } = Astro.props;
+const { service, delay = 0, featured = false } = Astro.props;
 const { title, summary, icon } = service.data;
 ---
 
-<Reveal as="article" delay={delay} class="group h-full">
-  <a
-    href={`/services/${service.id}`}
-    class="flex h-full flex-col rounded-card border border-brand-100 bg-white p-6 transition-[border-color,box-shadow] duration-300 ease-out-soft hover:border-plum-300 hover:shadow-lift"
-  >
-    <span
-      class="flex size-12 items-center justify-center rounded-btn bg-plum-50 text-plum-600 transition-colors duration-300 group-hover:bg-plum-600 group-hover:text-white"
-    >
+<Reveal as="article" delay={delay} class="h-full [perspective:1200px]">
+  <a href={`/services/${service.id}`} class:list={['sc-card', featured && 'is-featured']}>
+    <span class="sc-tile">
       <Icon name={icon} class="size-6" />
     </span>
 
-    <h3 class="mt-5 text-lg font-semibold text-ink">{title}</h3>
-    <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{summary}</p>
+    <h3>{title}</h3>
+    <p>{summary}</p>
 
-    <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 group-hover:text-plum-600">
+    <span class="sc-more">
       Learn more
-      <Icon
-        name="arrow-right"
-        class="size-4 transition-transform duration-300 group-hover:translate-x-1"
-      />
+      <Icon name="arrow-right" class="size-4" />
     </span>
   </a>
 </Reveal>
+
+<style>
+  .sc-card {
+    --sc-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    padding: 1.5rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    color: inherit;
+    text-decoration: none;
+    transform-origin: center bottom;
+    transition:
+      transform 0.45s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      border-color 0.35s ease,
+      box-shadow 0.45s ease;
+  }
+
+  /* Rail along the bottom edge, wiped in from the left on hover. */
+  .sc-card::after {
+    content: '';
+    position: absolute;
+    right: 1.5rem;
+    bottom: 0;
+    left: 1.5rem;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-plum-600), var(--color-brand-500));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s var(--ease-out-soft);
+  }
+
+  .sc-tile {
+    position: relative;
+    display: grid;
+    isolation: isolate;
+    overflow: hidden;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-btn);
+    background: var(--color-plum-50);
+    color: var(--color-plum-600);
+    transition:
+      transform 0.5s var(--sc-spring),
+      color 0.35s ease,
+      box-shadow 0.4s ease;
+  }
+  /* The plum flood, grown from nothing behind the icon rather than cross-fading. */
+  .sc-tile::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--color-plum-600);
+    transform: scale(0);
+    transition: transform 0.45s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .sc-tile :global(svg) {
+    transition: transform 0.5s var(--sc-spring);
+  }
+
+  .sc-card h3 {
+    margin-top: 1.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+    transition: color 0.3s ease;
+  }
+  .sc-card p {
+    flex: 1;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    color: var(--color-muted);
+  }
+
+  .sc-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--color-brand-700);
+    transition: color 0.3s ease;
+  }
+  .sc-more :global(svg) {
+    transition: transform 0.35s var(--sc-spring);
+  }
+
+  /* Highlighted service: reads as already-activated, so hovering it swaps the
+     tile flood to blue rather than repeating the plum it is wearing. */
+  .is-featured {
+    border-color: var(--color-plum-300);
+  }
+  .is-featured .sc-tile {
+    color: #fff;
+  }
+  .is-featured .sc-tile::before {
+    transform: scale(1);
+  }
+  .is-featured .sc-more {
+    color: var(--color-plum-600);
+  }
+  .is-featured:hover .sc-tile::before,
+  .is-featured:focus-visible .sc-tile::before {
+    background: var(--color-brand-500);
+  }
+
+  .sc-card:hover,
+  .sc-card:focus-visible {
+    transform: translateY(-8px);
+    border-color: var(--color-plum-300);
+    box-shadow: var(--shadow-lift);
+  }
+  .sc-card:hover::after,
+  .sc-card:focus-visible::after {
+    transform: scaleX(1);
+  }
+  .sc-card:hover .sc-tile,
+  .sc-card:focus-visible .sc-tile {
+    transform: rotate(-6deg);
+    color: #fff;
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--color-plum-600) 35%, transparent);
+  }
+  .sc-card:hover .sc-tile::before,
+  .sc-card:focus-visible .sc-tile::before {
+    transform: scale(1);
+  }
+  .sc-card:hover .sc-tile :global(svg),
+  .sc-card:focus-visible .sc-tile :global(svg) {
+    transform: scale(1.15) rotate(6deg);
+  }
+  .sc-card:hover h3,
+  .sc-card:focus-visible h3 {
+    color: var(--color-plum-600);
+  }
+  .sc-card:hover .sc-more,
+  .sc-card:focus-visible .sc-more {
+    color: var(--color-plum-600);
+  }
+  .sc-card:hover .sc-more :global(svg),
+  .sc-card:focus-visible .sc-more :global(svg) {
+    transform: translateX(5px);
+  }
+
+  /* Entrance, on the same scroll timeline Reveal uses. `rotate`/`scale` rather
+     than `transform`, so the filled end state leaves the hover transform free. */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .sc-card {
+        animation: sc-card-in linear both;
+        animation-timeline: view();
+        animation-range: entry 8% cover 22%;
+      }
+      .sc-tile {
+        animation: sc-tile-in linear both;
+        animation-timeline: view();
+        animation-range: entry 22% cover 26%;
+      }
+      /* The highlighted card lifts and settles once it has landed. `translate`,
+         so the hover `transform` still applies on top. */
+      .is-featured {
+        animation:
+          sc-card-in linear both,
+          sc-featured-lift linear both;
+        animation-timeline: view(), view();
+        animation-range:
+          entry 8% cover 22%,
+          cover 24% cover 44%;
+      }
+    }
+  }
+
+  /* `to` is omitted on purpose: it resolves to the static styles above. */
+  @keyframes sc-card-in {
+    from {
+      rotate: x -14deg;
+    }
+  }
+  @keyframes sc-tile-in {
+    from {
+      opacity: 0;
+      scale: 0.4;
+    }
+  }
+  @keyframes sc-featured-lift {
+    50% {
+      translate: 0 -8px;
+    }
+  }
+</style>

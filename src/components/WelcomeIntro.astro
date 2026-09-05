@@ -1,0 +1,202 @@
+---
+import { Heading, Marker } from '@alphalize/astro-marker';
+import { getCollection } from 'astro:content';
+import Icon from './Icon.astro';
+import Reveal from './Reveal.astro';
+import Section from './Section.astro';
+
+/**
+ * "Welcome to Alphalize" — the company introduction, with the service line-up
+ * as chips beside it.
+ *
+ * The eyebrow tightens its tracking and the headline rises out of a mask as the
+ * block arrives; each chip answers a hover with a plum-to-blue bar down its
+ * leading edge, and the button sweeps a shine.
+ */
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const chips = services.slice(0, 6);
+---
+
+<Section variant="white" space="lg">
+  <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+    <Reveal direction="left">
+      <p class="wi-eyebrow eyebrow">Welcome to Alphalize</p>
+
+      <span class="wi-mask">
+        <Heading as="h2" size="lg" class="wi-line mt-2">
+          We take your business to the <Marker type="highlight" color="yellow">next level</Marker>
+        </Heading>
+      </span>
+
+      <p class="text-muted mt-5 leading-relaxed">
+        Alphalize is a software company specialising in innovative and comprehensive ERP (Enterprise
+        Resource Planning) and business solutions for a wide range of clients. With our expertise
+        and current technology, we help businesses streamline their operations, improve efficiency
+        and drive growth.
+      </p>
+      <p class="text-muted mt-4 leading-relaxed">
+        Years of experience across ERP, business intelligence and IT solutions, working with clients
+        around the world — and a commitment to software that fits the organisation it serves.
+      </p>
+
+      <a href="/about" class="btn btn-primary wi-cta mt-8">
+        Discover more
+        <Icon name="arrow-right" class="size-4" />
+      </a>
+    </Reveal>
+
+    <Reveal direction="right">
+      <ul class="grid gap-4 sm:grid-cols-2">
+        {
+          chips.map((s) => (
+            <li>
+              <a href={`/services/${s.id}`} class="wi-chip">
+                <span class="wi-bar" aria-hidden="true" />
+                <span class="wi-ico">
+                  <Icon name={s.data.icon} class="size-5" />
+                </span>
+                <span class="wi-name">{s.data.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </Reveal>
+  </div>
+</Section>
+
+<style>
+  /* Mask for the headline's rise. The padding gives the marker stroke room, so
+     the highlight is not shaved off by the same overflow. */
+  .wi-mask {
+    display: block;
+    padding: 0.08em 0;
+    overflow: hidden;
+  }
+
+  .wi-chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    overflow: hidden;
+    height: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-heading);
+    text-decoration: none;
+    transition:
+      transform 0.4s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      border-color 0.35s ease,
+      box-shadow 0.4s ease;
+  }
+  /* Leading edge, drawn top-down on hover. */
+  .wi-bar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--color-plum-600), var(--color-brand-500));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .wi-ico {
+    display: grid;
+    flex: none;
+    place-items: center;
+    color: var(--color-plum-600);
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .wi-name {
+    transition:
+      transform 0.35s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      color 0.3s ease;
+  }
+
+  .wi-chip:hover,
+  .wi-chip:focus-visible {
+    transform: translateY(-4px);
+    border-color: var(--color-plum-300);
+    box-shadow: var(--shadow-lift);
+  }
+  .wi-chip:hover .wi-bar,
+  .wi-chip:focus-visible .wi-bar {
+    transform: scaleY(1);
+  }
+  .wi-chip:hover .wi-ico,
+  .wi-chip:focus-visible .wi-ico {
+    transform: scale(1.15) rotate(-8deg);
+  }
+  .wi-chip:hover .wi-name,
+  .wi-chip:focus-visible .wi-name {
+    transform: translateX(3px);
+    color: var(--color-plum-600);
+  }
+
+  .wi-cta {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .wi-cta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 38%;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent, rgb(255 255 255 / 0.32), transparent);
+    transform: skewX(-18deg);
+  }
+  .wi-cta :global(svg) {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .wi-cta:hover :global(svg),
+  .wi-cta:focus-visible :global(svg) {
+    transform: translateX(6px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wi-cta:hover::after,
+    .wi-cta:focus-visible::after {
+      animation: wi-shine 0.9s ease-out;
+    }
+    @supports (animation-timeline: view()) {
+      .wi-eyebrow {
+        animation: wi-track 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 26%;
+      }
+      /* :global, because <Heading> renders the h2 and so never carries this
+         component's scope attribute. */
+      .wi-mask :global(.wi-line) {
+        animation: wi-rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 28%;
+      }
+    }
+  }
+
+  @keyframes wi-shine {
+    to {
+      left: 130%;
+    }
+  }
+  /* `to` is omitted on purpose: it resolves to the resting styles above. */
+  @keyframes wi-track {
+    from {
+      letter-spacing: 0.34em;
+    }
+  }
+  @keyframes wi-rise {
+    from {
+      translate: 0 108%;
+    }
+  }
+</style>

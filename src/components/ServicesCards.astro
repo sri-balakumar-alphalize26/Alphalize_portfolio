@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import ArrowButton from './ArrowButton.astro';
+import Reveal from './Reveal.astro';
+import Section from './Section.astro';
+import SectionHeading from './SectionHeading.astro';
+import ServiceCard from './ServiceCard.astro';
+
+/**
+ * "Services we offer" — the homepage highlight grid.
+ *
+ * The cards carry their own entrance and hover treatment (see ServiceCard),
+ * and the closing button is the shared ArrowButton, so all that lives here is
+ * the section frame and which services go in the grid.
+ */
+const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const featured = services.filter((s) => s.data.featured);
+---
+
+<Section variant="white" space="lg">
+  <SectionHeading
+    eyebrow="Services we offer"
+    title="Built around how your business actually runs"
+    highlight="actually runs"
+    lead="From full ERP rollouts to the integrations and dashboards that make them useful, we cover the software side of running a modern operation."
+  />
+
+  <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    {featured.map((service, i) => <ServiceCard service={service} delay={i} />)}
+  </div>
+
+  <Reveal class="mt-10 text-center">
+    <ArrowButton href="/services">All {services.length} services</ArrowButton>
+  </Reveal>
+</Section>

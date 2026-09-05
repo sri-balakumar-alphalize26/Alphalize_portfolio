@@ -1,0 +1,200 @@
+---
+import Icon from './Icon.astro';
+import Reveal from './Reveal.astro';
+import Section from './Section.astro';
+import SectionHeading from './SectionHeading.astro';
+
+/**
+ * "Why Alphalize" — the three value cards, with the hover treatment from the
+ * why-cards reference: a gradient rail down the left edge, the icon tile
+ * springing up and turning teal, and a light sweeping across the card.
+ *
+ * The entrance stays on the site's own scroll-driven `Reveal` (zero JS) rather
+ * than the reference's IntersectionObserver engine. Two consequences worth
+ * knowing:
+ *   - `Reveal` fills `transform` at the end of its timeline, and a filled
+ *     animation outranks a `:hover` rule, so the card that lifts has to be a
+ *     child of the reveal element rather than the element itself.
+ *   - The tile's pop-in animates the `scale`/`rotate` properties, which compose
+ *     with the `transform` its hover state sets, so neither cancels the other.
+ */
+const values = [
+  {
+    icon: 'award' as const,
+    title: 'Expertise & Experience',
+    body: 'A team of highly skilled professionals with extensive expertise in ERP software development, business intelligence and IT solutions.',
+  },
+  {
+    icon: 'users' as const,
+    title: 'Customer-Centric Approach',
+    body: 'We strive to build strong, long-lasting relationships based on trust, transparency and exceptional service — through implementation and well beyond it.',
+  },
+  {
+    icon: 'sparkles' as const,
+    title: 'Innovation & Improvement',
+    body: 'The business landscape keeps moving. Staying ahead means embracing the latest technologies, trends and practices rather than settling into a stack.',
+  },
+];
+---
+
+<Section variant="surface" space="lg">
+  <SectionHeading
+    eyebrow="Why Alphalize"
+    title="A partner, not just a vendor"
+    highlight="partner"
+    marker="circle"
+    color="teal"
+  />
+
+  <div class="mt-12 grid gap-6 md:grid-cols-3">
+    {
+      values.map((v, i) => (
+        <Reveal as="article" delay={i}>
+          <div class="wc-card" style={`--o:${i * 7}%`}>
+            <span class="wc-tile">
+              <Icon name={v.icon} class="size-6" />
+            </span>
+            <h3>{v.title}</h3>
+            <p>{v.body}</p>
+            <span class="wc-shine" aria-hidden="true" />
+          </div>
+        </Reveal>
+      ))
+    }
+  </div>
+</Section>
+
+<style>
+  .wc-card {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    padding: 1.75rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    transition:
+      transform 0.45s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      border-color 0.45s ease,
+      box-shadow 0.45s ease;
+  }
+
+  /* The rail down the left edge, wiped in from the top on hover. */
+  .wc-card::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--mk-teal), var(--color-plum-600));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.5s var(--ease-out-soft);
+  }
+
+  .wc-tile {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-btn);
+    background: var(--color-plum-600);
+    color: #fff;
+    transition:
+      transform 0.5s var(--wc-spring),
+      background 0.4s ease,
+      box-shadow 0.4s ease;
+  }
+  .wc-tile :global(svg) {
+    transition: transform 0.5s var(--wc-spring);
+  }
+
+  .wc-card h3 {
+    margin-top: 1.25rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+    transition: color 0.3s ease;
+  }
+  .wc-card p {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    color: var(--color-muted);
+  }
+
+  /* Light sweep. Parked off the left edge until the hover animation runs it across. */
+  .wc-shine {
+    position: absolute;
+    top: 0;
+    left: -70%;
+    width: 45%;
+    height: 100%;
+    transform: skewX(-18deg);
+    pointer-events: none;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      color-mix(in srgb, var(--mk-teal) 10%, transparent) 45%,
+      rgb(255 255 255 / 0.35) 50%,
+      color-mix(in srgb, var(--mk-teal) 10%, transparent) 55%,
+      transparent 100%
+    );
+  }
+
+  .wc-card:hover {
+    transform: translateY(-8px);
+    border-color: color-mix(in srgb, var(--mk-teal) 30%, #fff);
+    box-shadow:
+      var(--shadow-lift),
+      0 0 0 1px color-mix(in srgb, var(--mk-teal) 25%, transparent);
+  }
+  .wc-card:hover::before {
+    transform: scaleY(1);
+  }
+  .wc-card:hover .wc-tile {
+    transform: translateY(-3px) rotate(-6deg);
+    background: var(--mk-teal);
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--mk-teal) 35%, transparent);
+  }
+  .wc-card:hover .wc-tile :global(svg) {
+    transform: scale(1.15) rotate(6deg);
+  }
+  .wc-card:hover h3 {
+    color: var(--color-plum-600);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wc-card {
+      --wc-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .wc-card:hover .wc-shine {
+      animation: wc-shine 0.9s ease-out;
+    }
+
+    /* Tile pop-in, on the same scroll timeline Reveal uses, staggered per card
+       through --o. `scale`/`rotate` rather than `transform`, so the filled end
+       state leaves the hover transform free to apply on top. */
+    @supports (animation-timeline: view()) {
+      .wc-tile {
+        animation: wc-tile-in linear both;
+        animation-timeline: view();
+        animation-range: calc(entry 20% + var(--o)) calc(cover 24% + var(--o));
+      }
+    }
+  }
+
+  /* `to` is omitted on purpose: it resolves to the static styles above. */
+  @keyframes wc-tile-in {
+    from {
+      opacity: 0;
+      scale: 0.4;
+      rotate: -20deg;
+    }
+  }
+  @keyframes wc-shine {
+    to {
+      left: 130%;
+    }
+  }
+</style>

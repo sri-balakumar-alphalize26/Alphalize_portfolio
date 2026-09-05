@@ -1,0 +1,493 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import ArrowButton from './ArrowButton.astro';
+import Icon from './Icon.astro';
+import Section from './Section.astro';
+import SectionHeading from './SectionHeading.astro';
+import { moduleArt } from './module-art';
+import a0 from '@/assets/brand/letters/0-a.png';
+import l1 from '@/assets/brand/letters/1-l.png';
+import p2 from '@/assets/brand/letters/2-p.png';
+import h3 from '@/assets/brand/letters/3-h.png';
+import a4 from '@/assets/brand/letters/4-a.png';
+import l5 from '@/assets/brand/letters/5-l.png';
+import i6 from '@/assets/brand/letters/6-i.png';
+import z7 from '@/assets/brand/letters/7-z.png';
+import e8 from '@/assets/brand/letters/8-e.png';
+
+/**
+ * The ERP module wall, introduced by the alphalize wordmark collapsing into its
+ * middle "a", bursting, and reforming as the module tiles.
+ *
+ * The landed grid is the DEFAULT state — the script opts *into* the animation by
+ * adding `.is-armed`. Without JS, on an old browser, or under reduced motion the
+ * section is simply a correct static grid, never a blank box.
+ *
+ * Tiles come from the same `modules` collection that ModulesGrid renders on
+ * /services/erp-solutions, so the list lives in exactly one place.
+ */
+
+/** Kept off the homepage wall only; /services/erp-solutions still lists them. */
+const HIDDEN = new Set(['vehicle-tracking']);
+const modules = (await getCollection('modules'))
+  .filter((m) => !HIDDEN.has(m.id))
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Letter geometry from the original 908x208 wordmark, kept exact so the glyphs
+// reassemble into a real "alphalize" rather than an approximation.
+const LOGO_W = 908;
+const LOGO_H = 208;
+const letters = [
+  { src: a0, glyph: 'a', left: 0, w: 127 },
+  { src: l1, glyph: 'l', left: 127, w: 52 },
+  { src: p2, glyph: 'p', left: 184, w: 129 },
+  { src: h3, glyph: 'h', left: 313, w: 125 },
+  { src: a4, glyph: 'a', left: 438, w: 122 },
+  { src: l5, glyph: 'l', left: 562, w: 55 },
+  { src: i6, glyph: 'i', left: 617, w: 57 },
+  { src: z7, glyph: 'z', left: 674, w: 108 },
+  { src: e8, glyph: 'e', left: 782, w: 126 },
+];
+/** The letter every other one collapses into, and which then bursts. */
+const SURVIVOR = 4;
+
+const HREF = '/services/erp-solutions#modules';
+---
+
+<Section variant="white" space="lg">
+  <SectionHeading
+    eyebrow="ERP modules"
+    title="Ready-made modules that ship with the platform"
+    highlight="Ready-made modules"
+    marker="underline"
+    color="teal"
+    lead="From the weighing scale at the counter to offline sync in the back office — built once, and already running in production."
+  />
+
+  <div class="mi-stage rounded-card bg-surface mt-12" data-modules-intro data-survivor={SURVIVOR}>
+    <div class="mi-logo" aria-hidden="true" style={`--lw:${LOGO_W}px; --lh:${LOGO_H}px`}>
+      {
+        letters.map((l, i) => (
+          <Image
+            class="mi-ltr"
+            data-i={i}
+            data-cx={l.left + l.w / 2}
+            src={l.src}
+            alt=""
+            width={l.w}
+            height={LOGO_H}
+            densities={[1, 2]}
+            loading="lazy"
+            style={`left:${l.left}px; width:${l.w}px`}
+          />
+        ))
+      }
+    </div>
+
+    <ul class="mi-grid">
+      {
+        modules.map((m) => (
+          <li>
+            <span class="mi-app">
+              <span class="mi-tile">
+                {moduleArt[m.id] ? (
+                  <svg viewBox="30 30 140 140" aria-hidden="true" set:html={moduleArt[m.id]} />
+                ) : (
+                  <Icon name={m.data.icon} class="mi-fallback" />
+                )}
+              </span>
+              <span class="mi-name">{m.data.shortTitle ?? m.data.title}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+
+    {/* Flyers: decorative copies of the tile artwork that fly to the real tiles. */}
+    <div class="mi-flies" aria-hidden="true">
+      {
+        modules.map((m) => (
+          <div class="mi-fly" data-art={moduleArt[m.id] ? '' : undefined}>
+            <span class="mi-tile">
+              {moduleArt[m.id] && <svg viewBox="30 30 140 140" set:html={moduleArt[m.id]} />}
+            </span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <p class="mt-10 text-center">
+    <ArrowButton href={HREF}>See what each module does</ArrowButton>
+  </p>
+</Section>
+
+<style>
+  .mi-stage {
+    /* Positioned, so it is the containing block for the absolute flyers — every
+       coordinate in the script is measured against this box, never the page. */
+    position: relative;
+    overflow: hidden;
+    --ls: 0.3;
+  }
+  @media (min-width: 640px) {
+    .mi-stage {
+      --ls: 0.45;
+    }
+  }
+  @media (min-width: 1024px) {
+    .mi-stage {
+      --ls: 0.55;
+    }
+  }
+
+  /* --- the wordmark. Hidden until the script arms the sequence. --- */
+  .mi-logo {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--lw);
+    height: var(--lh);
+    transform: translate(-50%, -50%) scale(var(--ls));
+    transform-origin: center;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .mi-stage.is-armed .mi-logo {
+    display: block;
+  }
+  .mi-ltr {
+    position: absolute;
+    top: 0;
+    height: var(--lh);
+    max-width: none;
+    will-change: transform, opacity;
+  }
+
+  /* --- the grid. Visible by default; this is the no-JS resting state. --- */
+  .mi-grid {
+    list-style: none;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 44px 18px;
+    justify-items: center;
+    padding: 56px 24px;
+  }
+  /* Not a link: the tiles are a picture of the line-up, and the button below is
+     the single way through to the detail. */
+  .mi-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    color: inherit;
+  }
+  .mi-tile {
+    width: 104px;
+    height: 104px;
+    border-radius: var(--radius-card);
+    background: #fff;
+    display: grid;
+    place-items: center;
+    box-shadow: var(--shadow-card);
+    transition:
+      transform 0.28s var(--ease-out-soft),
+      box-shadow 0.28s ease;
+  }
+  .mi-tile :global(svg) {
+    width: 64px;
+    height: 64px;
+    display: block;
+    transition: transform 0.32s var(--ease-out-soft);
+  }
+  .mi-tile :global(.mi-fallback) {
+    width: 44px;
+    height: 44px;
+    color: var(--color-plum-600);
+  }
+  .mi-name {
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.25;
+    color: var(--color-heading);
+    transition:
+      opacity 0.5s ease,
+      color 0.2s ease;
+  }
+
+  .mi-app:hover .mi-tile {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lift);
+  }
+  .mi-app:hover .mi-tile :global(svg) {
+    transform: scale(1.12);
+  }
+  .mi-app:hover .mi-name {
+    color: var(--color-brand-600);
+  }
+
+  /* --- armed state: the grid steps aside while the flyers do the work. --- */
+  .mi-stage.is-armed .mi-name {
+    opacity: 0;
+  }
+  /* Kept in flow so the FLIP can still measure the tiles it is flying towards. */
+  .mi-stage.is-armed:not(.is-landed) .mi-grid .mi-tile {
+    visibility: hidden;
+  }
+  .mi-stage.is-armed.is-landed .mi-name {
+    opacity: 1;
+  }
+
+  .mi-flies {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .mi-fly {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 104px;
+    height: 104px;
+    opacity: 0;
+    will-change: transform, filter;
+  }
+  /* Only paint flyers once the sequence owns the stage. */
+  .mi-stage:not(.is-armed) .mi-flies {
+    display: none;
+  }
+
+  @media (max-width: 639px) {
+    .mi-grid {
+      gap: 32px 12px;
+      padding: 40px 12px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mi-tile,
+    .mi-tile :global(svg),
+    .mi-name {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  type Cleanup = () => void;
+  let teardown: Cleanup | null = null;
+
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  function mount(): Cleanup | null {
+    const stage = document.querySelector<HTMLElement>('[data-modules-intro]');
+    if (!stage) return null;
+
+    // Reduced motion never arms. This check is load-bearing: the global
+    // animation-duration override in global.css applies to CSS animations only
+    // and does not shorten WAAPI durations, so nothing else here honours it.
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+
+    const logo = stage.querySelector<HTMLElement>('.mi-logo');
+    const ltrs = [...stage.querySelectorAll<HTMLElement>('.mi-ltr')];
+    const flies = [...stage.querySelectorAll<HTMLElement>('.mi-fly')];
+    const tiles = [...stage.querySelectorAll<HTMLElement>('.mi-grid .mi-tile')];
+    if (!logo || !ltrs.length || !flies.length) return null;
+
+    const survivor = Number(stage.dataset.survivor ?? 4);
+    const running = new Set<Animation>();
+    let busy = false;
+
+    const track = (a: Animation) => {
+      running.add(a);
+      return a;
+    };
+
+    /** Cancel everything and snap to the finished grid, the safe resting state. */
+    const settle = () => {
+      running.forEach((a) => a.cancel());
+      running.clear();
+      logo.style.display = 'none';
+      flies.forEach((f) => (f.style.opacity = '0'));
+      stage.classList.add('is-armed', 'is-landed');
+      busy = false;
+    };
+
+    // Frame-local coordinates. Origin and target are read from the same layout
+    // snapshot, so the delta is scroll-invariant and the page may scroll
+    // mid-sequence without moving anything. Hence no scrollX/scrollY here.
+    const rel = (el: Element) => {
+      const o = stage.getBoundingClientRect();
+      const r = el.getBoundingClientRect();
+      return {
+        x: r.left - o.left,
+        y: r.top - o.top,
+        cx: r.left - o.left + r.width / 2,
+        cy: r.top - o.top + r.height / 2,
+      };
+    };
+
+    const run = async (signal: AbortSignal) => {
+      busy = true;
+      stage.classList.add('is-armed');
+      await sleep(500);
+      if (signal.aborted) return;
+
+      // 1. every letter slides onto the survivor. Distances are plain arithmetic
+      //    in the 908x208 design box: the letters are children of a scaled
+      //    parent, so a translateX is already expressed pre-scale. Measuring and
+      //    dividing by --ls also works, but breaks the moment --ls stops being a
+      //    bare number.
+      const survivorCx = Number(ltrs[survivor].dataset.cx ?? 0);
+      await Promise.all(
+        ltrs.map((l, i) => {
+          const dx = survivorCx - Number(l.dataset.cx ?? 0);
+          l.style.zIndex = i === survivor ? '10' : '1';
+          return track(
+            l.animate(
+              [
+                { transform: 'translateX(0)', opacity: 1 },
+                { transform: `translateX(${dx}px)`, opacity: i === survivor ? 1 : 0.15 },
+              ],
+              {
+                duration: 700,
+                delay: Math.abs(i - survivor) * 40,
+                easing: 'cubic-bezier(.7,0,.2,1)',
+                fill: 'forwards',
+              }
+            )
+          ).finished;
+        })
+      );
+      if (signal.aborted) return;
+      ltrs.forEach((l, i) => {
+        if (i !== survivor) l.style.opacity = '0';
+      });
+
+      // 2. the survivor pulses
+      const a = ltrs[survivor];
+      await track(
+        a.animate(
+          [{ transform: 'scale(1)' }, { transform: 'scale(1.25)' }, { transform: 'scale(.6)' }],
+          { duration: 420, easing: 'cubic-bezier(.6,0,.4,1)', fill: 'forwards', composite: 'add' }
+        )
+      ).finished;
+      if (signal.aborted) return;
+
+      // 3. it bursts into a spinning ring. The radius comes off the stage box,
+      //    not the viewport, so the ring stays inside the section at any width.
+      const c = rel(a);
+      const R = Math.min(stage.clientWidth, stage.clientHeight) * 0.28;
+      const N = flies.length;
+      track(a.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250, fill: 'forwards' }));
+
+      await Promise.all(
+        flies.map((f, i) => {
+          const ang = (i / N) * Math.PI * 2;
+          const ang2 = ang + Math.PI * 1.2;
+          const at = (t: number, s: number) =>
+            `translate(${c.cx - 52 + Math.cos(t) * s}px,${c.cy - 52 + Math.sin(t) * s}px) ` +
+            `rotate(${(t * 180) / Math.PI - (ang * 180) / Math.PI}deg) scale(${s ? 0.55 : 0.1})`;
+          f.style.opacity = '1';
+          return track(
+            f.animate(
+              [
+                {
+                  transform: `translate(${c.cx - 52}px,${c.cy - 52}px) scale(.1)`,
+                  filter: 'blur(0px)',
+                  opacity: 0,
+                },
+                { transform: at(ang, R * 0.35), filter: 'blur(1px)', opacity: 1, offset: 0.25 },
+                { transform: at(ang + Math.PI * 0.6, R), filter: 'blur(3px)', offset: 0.6 },
+                { transform: at(ang2, R * 1.05), filter: 'blur(6px)', opacity: 0.9 },
+              ],
+              { duration: 1100, easing: 'cubic-bezier(.3,0,.5,1)', fill: 'forwards' }
+            )
+          ).finished;
+        })
+      );
+      if (signal.aborted) return;
+
+      // 4. FLIP each flyer onto its real tile. Targets are measured here rather
+      //    than at the start, so any reflow during beats 1-3 is accounted for.
+      logo.style.display = 'none';
+      const targets = tiles.map((t) => rel(t));
+
+      await Promise.all(
+        flies.map((f, i) => {
+          const target = targets[i];
+          if (!target) return Promise.resolve();
+          return track(
+            f.animate(
+              [
+                { transform: getComputedStyle(f).transform, filter: 'blur(6px)' },
+                {
+                  transform: `translate(${target.x}px,${target.y}px) rotate(0deg) scale(1)`,
+                  filter: 'blur(0px)',
+                },
+              ],
+              { duration: 900, delay: i * 35, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' }
+            )
+          ).finished;
+        })
+      );
+      if (signal.aborted) return;
+
+      flies.forEach((f) => (f.style.opacity = '0'));
+      stage.classList.add('is-landed');
+      busy = false;
+    };
+
+    const ac = new AbortController();
+
+    // rootMargin rather than a ratio threshold: the stage is often taller than a
+    // phone viewport, where a ratio like 0.35 can be unreachable and the
+    // sequence would simply never fire. This triggers when the stage overlaps
+    // the middle band of the screen, at any stage height.
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        run(ac.signal).catch(settle);
+      },
+      { threshold: 0, rootMargin: '-25% 0px -25% 0px' }
+    );
+    io.observe(stage);
+
+    // A resize invalidates every cached coordinate mid-flight, and tiles landing
+    // in the wrong places looks broken. Snap to the finished grid instead.
+    const ro = new ResizeObserver(() => {
+      if (busy) {
+        ac.abort();
+        settle();
+      }
+    });
+    ro.observe(stage);
+
+    return () => {
+      io.disconnect();
+      ro.disconnect();
+      ac.abort();
+      running.forEach((x) => x.cancel());
+      running.clear();
+    };
+  }
+
+  function boot() {
+    teardown?.();
+    teardown = mount();
+  }
+
+  // Fires on the first load and after every ClientRouter navigation, so arriving
+  // from another page re-arms instead of leaving a dead section.
+  document.addEventListener('astro:page-load', boot);
+  document.addEventListener('astro:before-swap', () => {
+    teardown?.();
+    teardown = null;
+  });
+</script>

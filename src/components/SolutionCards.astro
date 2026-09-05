@@ -1,9 +1,16 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import ArrowButton from './ArrowButton.astro';
 import Reveal from './Reveal.astro';
 import SectionHeading from './SectionHeading.astro';
 
+/**
+ * The connected-device line-up on /services/iot-and-automation.
+ *
+ * The hardware itself is 369ai.Biz's, so every heading here is a way through to
+ * that site rather than to a page of ours.
+ */
 type Solution = NonNullable<CollectionEntry<'services'>['data']['solutions']>[number];
 
 interface Props {
@@ -11,26 +18,30 @@ interface Props {
 }
 
 const { solutions } = Astro.props;
+
+const AI369 = 'https://369ai.biz/';
 ---
 
-<section
-  id="solutions"
-  class="scroll-mt-24 cc-surface border-t border-brand-100 py-16 lg:py-20"
->
+<section id="solutions" class="cc-surface border-brand-100 scroll-mt-24 border-t py-16 lg:py-20">
   <div class="container-page">
     <SectionHeading
       eyebrow="Connected devices"
       title="Automation, access control and unmanned retail"
       highlight="unmanned retail"
       color="pink"
-      lead="Hardware we install, running software we wrote — each one wired into the same ERP core as the rest of your operation."
+      lead="Hardware we install, running software we wrote — each one wired into the same ERP core as the rest of your operation. The devices themselves come from 369ai.Biz."
     />
 
     <div class="mt-12 grid gap-6 lg:grid-cols-3">
       {
         solutions.map((s, i) => (
           <Reveal as="article" delay={i} class="h-full">
-            <div class="flex h-full flex-col overflow-hidden rounded-card border border-brand-100 bg-white">
+            <a
+              href={AI369}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="sol-card rounded-card border-brand-100 flex h-full flex-col overflow-hidden border bg-white"
+            >
               <Image
                 src={s.image}
                 alt={s.title}
@@ -40,16 +51,47 @@ const { solutions } = Astro.props;
                 loading="lazy"
               />
               <div class="flex flex-1 flex-col p-6">
-                <p class="eyebrow">
-                  {s.tagline}
-                </p>
-                <h3 class="mt-1.5 text-lg font-semibold text-ink">{s.title}</h3>
-                <p class="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
+                <p class="eyebrow">{s.tagline}</p>
+                <h3 class="sol-title text-ink mt-1.5 text-lg font-semibold">{s.title}</h3>
+                <p class="text-muted mt-2 text-sm leading-relaxed">{s.body}</p>
               </div>
-            </div>
+            </a>
           </Reveal>
         ))
       }
     </div>
+
+    <Reveal class="mt-10 text-center">
+      <ArrowButton href={AI369} external>See the range on 369ai.Biz</ArrowButton>
+    </Reveal>
   </div>
 </section>
+
+<style>
+  .sol-card {
+    text-decoration: none;
+    transition:
+      transform 0.4s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      border-color 0.35s ease,
+      box-shadow 0.4s ease;
+  }
+  .sol-card :global(img) {
+    transition: transform 0.5s var(--ease-out-soft);
+  }
+  .sol-title {
+    transition: color 0.3s ease;
+  }
+  .sol-card:hover,
+  .sol-card:focus-visible {
+    transform: translateY(-5px);
+    border-color: var(--color-plum-300);
+    box-shadow: var(--shadow-lift);
+  }
+  .sol-card:hover :global(img) {
+    transform: scale(1.04);
+  }
+  .sol-card:hover .sol-title,
+  .sol-card:focus-visible .sol-title {
+    color: var(--color-plum-600);
+  }
+</style>

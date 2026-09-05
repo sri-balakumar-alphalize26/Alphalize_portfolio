@@ -37,17 +37,7 @@ export type Office = {
 };
 
 export const offices: Office[] = [
-  // Addresses as published on the current alphalize.com contact page.
-  {
-    id: 'clearwater',
-    label: 'United States',
-    street: '15500 George Blvd',
-    locality: 'Clearwater',
-    region: 'FL',
-    postalCode: '33760',
-    country: 'United States',
-    countryCode: 'US',
-  },
+  // Address as published on the current alphalize.com contact page.
   {
     id: 'kollam',
     label: 'India',

@@ -1,0 +1,272 @@
+---
+import { Heading } from '@alphalize/astro-marker';
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import MarkedTitle from './MarkedTitle.astro';
+import type { MarkerType } from './marks';
+import Section from './Section.astro';
+import SectionHeading from './SectionHeading.astro';
+import appAlphalize from '@/assets/apps/369ai-alphalize.png';
+import smartLocks from '@/assets/solutions/smart-locks.jpg';
+
+/**
+ * "What we do" as a pile of cards rather than a run of rows.
+ *
+ * Each card pins with `position: sticky`, and as the next one rides up over it
+ * the covered card pivots slightly off-axis and dims. A rAF-throttled scroll
+ * pass writes one number per card — `--p`, how far the next card has covered
+ * it, 0 to 1 — and every bit of the motion is CSS reading that.
+ *
+ * The cards are deliberately not wrapped in <Reveal>: a transform on an
+ * ancestor makes it the containing block for a sticky child, which would pin
+ * the cards to the wrapper instead of the viewport.
+ */
+interface Row {
+  kicker: string;
+  title: string;
+  highlight: string;
+  marker?: MarkerType;
+  color?: string;
+  body: string;
+  points: string[];
+  href: string;
+  cta: string;
+  external?: boolean;
+  image: ImageMetadata;
+  imageAlt: string;
+  fit: 'cover' | 'contain';
+}
+
+/** Alternating tilt: one direction throughout reads as mechanical. */
+const FAN = ['-2.4deg', '2deg'];
+
+const rows: Row[] = [
+  {
+    kicker: 'Odoo ERP',
+    title: 'The back office, unified',
+    highlight: 'unified',
+    body: 'Customised ERP that integrates finance, HR, supply chain and inventory into one source of truth, with approval workflows that run without someone chasing a spreadsheet.',
+    points: [
+      'Fifteen ready-made modules, from POS weighing scales to offline sync',
+      'Role-based dashboards with the numbers each team needs',
+      'Integrates with the accounting and payment systems you already run',
+    ],
+    href: '/services/erp-solutions',
+    cta: 'Explore ERP solutions',
+    image: appAlphalize,
+    imageAlt: '369aiAlphalize — the Odoo back office in one app',
+    fit: 'contain',
+  },
+  {
+    kicker: 'Connected devices',
+    title: 'Hardware that reports to your ERP',
+    highlight: 'reports to your ERP',
+    color: 'teal',
+    body: 'The 369ai.Biz device range, wired into the same core as everything else — smart locks, unmanned retail and robotics, each one writing back to the ERP as it runs rather than at the end of the day.',
+    points: [
+      'Smart locks — centralised access control, live monitoring and digital authorisation per user and per location',
+      'Smart vending machines — remote stock and performance monitoring, with touchless, card and QR payment',
+      'Robotics — dispensing, warehousing and smart manufacturing, coordinated in real time',
+    ],
+    href: 'https://369ai.biz/',
+    cta: 'See the range on 369ai.Biz',
+    external: true,
+    image: smartLocks,
+    imageAlt: 'Smart locker bank with centralised access control',
+    fit: 'cover',
+  },
+];
+---
+
+<Section variant="white" space="lg">
+  <SectionHeading
+    eyebrow="What we do"
+    title="One platform. Every department."
+    highlight="One platform."
+    marker="highlight"
+    color="yellow"
+    lead="Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers."
+  />
+
+  <div class="wwd-stack" data-wwd>
+    {
+      rows.map((row, i) => (
+        <article class="wwd-card" data-card style={`--i:${i};--rot:${FAN[i % FAN.length]}`}>
+          <div class="wwd-grid">
+            <div>
+              <p class="eyebrow">{row.kicker}</p>
+              <Heading as="h3" size="md" class="mt-2">
+                <MarkedTitle
+                  title={row.title}
+                  highlight={row.highlight}
+                  marker={row.marker}
+                  color={row.color}
+                />
+              </Heading>
+              <p class="text-muted mt-4 leading-relaxed">{row.body}</p>
+
+              <ul class="mt-5 space-y-2.5">
+                {row.points.map((p) => (
+                  <li class="text-muted flex gap-2.5 text-sm leading-relaxed">
+                    <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <a
+                href={row.href}
+                target={row.external ? '_blank' : undefined}
+                rel={row.external ? 'noopener noreferrer' : undefined}
+                class="wwd-link text-brand-700 hover:text-plum-600 mt-7 inline-flex items-center gap-1.5 text-sm font-semibold"
+              >
+                {row.cta}
+                <Icon name="arrow-right" class="size-4" />
+              </a>
+            </div>
+
+            <div
+              class:list={[
+                'rounded-card border-brand-100 overflow-hidden border',
+                row.fit === 'contain'
+                  ? 'bg-surface flex h-64 items-center justify-center p-10'
+                  : '',
+              ]}
+            >
+              <Image
+                src={row.image}
+                alt={row.imageAlt}
+                widths={[560, 1120]}
+                sizes="(min-width: 1024px) 520px, 92vw"
+                loading="lazy"
+                class={
+                  row.fit === 'cover'
+                    ? 'aspect-[4/3] w-full object-cover'
+                    : 'max-h-full w-auto object-contain'
+                }
+              />
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</Section>
+
+<style>
+  .wwd-stack {
+    /* Clearance for the sticky header, and the lip of each card left showing
+       under the one above it. */
+    --pin-top: 6rem;
+    --pin-step: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+    /* Room for the last card to reach its pin point and settle. */
+    padding-bottom: 30vh;
+  }
+
+  .wwd-card {
+    position: sticky;
+    top: calc(var(--pin-top) + var(--i) * var(--pin-step));
+    padding: 2rem;
+    /* Opaque on purpose: a translucent card lets the pile show through. */
+    background: #fff;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-lift);
+    transform-origin: center bottom;
+    will-change: transform;
+  }
+  @media (width >= 64rem) {
+    .wwd-card {
+      padding: 2.75rem;
+    }
+  }
+
+  /* Dimming the covered card is what sells the depth — the tilt on its own
+     reads as a glitch rather than as a pile. */
+  .wwd-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--color-heading);
+    opacity: calc(0.18 * var(--p, 0));
+    transition: opacity 0.1s linear;
+  }
+
+  .wwd-grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  @media (width >= 64rem) {
+    .wwd-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .wwd-link :global(svg) {
+    transition: transform 0.3s var(--ease-out-soft);
+  }
+  .wwd-link:hover :global(svg) {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .wwd-card {
+      transform: rotate(calc(var(--rot, -2deg) * var(--p, 0))) scale(calc(1 - 0.035 * var(--p, 0)));
+    }
+    /* A narrow card rotating reads as broken rather than as a fan. */
+    @media (width < 48rem) {
+      .wwd-card {
+        transform: scale(calc(1 - 0.03 * var(--p, 0)));
+      }
+    }
+  }
+</style>
+
+<script>
+  function mountWhatWeDo() {
+    document.querySelectorAll<HTMLElement>('[data-wwd]').forEach((stack) => {
+      const cards = [...stack.querySelectorAll<HTMLElement>('[data-card]')];
+      if (!cards.length) return;
+
+      let queued = false;
+
+      // One pass per frame: for each card, how far the next one has covered it.
+      const measure = () => {
+        queued = false;
+        cards.forEach((card, i) => {
+          const next = cards[i + 1];
+          if (!next) {
+            card.style.setProperty('--p', '0');
+            return;
+          }
+          const a = card.getBoundingClientRect();
+          const b = next.getBoundingClientRect();
+          // 0 while the next card's top sits at this card's bottom, 1 once it
+          // has travelled the whole height of this one.
+          const p = (a.bottom - b.top) / Math.max(a.height, 1);
+          card.style.setProperty('--p', Math.min(1, Math.max(0, p)).toFixed(3));
+        });
+      };
+
+      const onScroll = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(measure);
+      };
+
+      addEventListener('scroll', onScroll, { passive: true });
+      addEventListener('resize', onScroll);
+      measure();
+    });
+  }
+
+  document.addEventListener('astro:page-load', mountWhatWeDo);
+</script>

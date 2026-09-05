@@ -1,44 +1,17 @@
 ---
-import { getCollection } from 'astro:content';
-import { Heading, Marker } from '@alphalize/astro-marker';
-import smartLocks from '@/assets/solutions/smart-locks.jpg';
-import vending from '@/assets/solutions/vending.webp';
-import appAlphalize from '@/assets/apps/369ai-alphalize.png';
-import Counter from '@/components/Counter.astro';
 import CtaBand from '@/components/CtaBand.astro';
-import FeatureRow from '@/components/FeatureRow.astro';
 import Hero from '@/components/Hero.astro';
-import Icon from '@/components/Icon.astro';
 import ModulesIntro from '@/components/ModulesIntro.astro';
 import PartnerMosaic from '@/components/PartnerMosaic.astro';
-import Reveal from '@/components/Reveal.astro';
-import Section from '@/components/Section.astro';
-import SectionHeading from '@/components/SectionHeading.astro';
-import ServiceCard from '@/components/ServiceCard.astro';
+import ServicesCards from '@/components/ServicesCards.astro';
 import SoftwareStrip from '@/components/SoftwareStrip.astro';
+import StatBand from '@/components/StatBand.astro';
+import Testimonials from '@/components/Testimonials.astro';
+import WelcomeIntro from '@/components/WelcomeIntro.astro';
+import WhatWeDo from '@/components/WhatWeDo.astro';
+import WhyCards from '@/components/WhyCards.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/config/site';
-
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
-const featured = services.filter((s) => s.data.featured);
-
-const values = [
-  {
-    icon: 'award' as const,
-    title: 'Expertise & Experience',
-    body: 'A team of highly skilled professionals with extensive expertise in ERP software development, business intelligence and IT solutions.',
-  },
-  {
-    icon: 'users' as const,
-    title: 'Customer-Centric Approach',
-    body: 'We strive to build strong, long-lasting relationships based on trust, transparency and exceptional service — through implementation and well beyond it.',
-  },
-  {
-    icon: 'sparkles' as const,
-    title: 'Innovation & Improvement',
-    body: 'The business landscape keeps moving. Staying ahead means embracing the latest technologies, trends and practices rather than settling into a stack.',
-  },
-];
 ---
 
 <BaseLayout
@@ -47,121 +20,13 @@ const values = [
 >
   <Hero />
 
-  <PartnerMosaic />
-
-  <!-- Odoo's signature alternating feature rows. -->
-  <Section variant="white" space="lg">
-    <SectionHeading
-      eyebrow="What we do"
-      title="One platform. Every department."
-      highlight="One platform."
-      marker="highlight"
-      color="yellow"
-      lead="Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers."
-    />
-
-    <div class="mt-14 space-y-16 lg:space-y-24">
-      <FeatureRow
-        eyebrow="Odoo ERP"
-        title="The back office, unified"
-        highlight="unified"
-        body="Customised ERP that integrates finance, HR, supply chain and inventory into one source of truth, with approval workflows that run without someone chasing a spreadsheet."
-        points={[
-          'Fifteen ready-made modules, from POS weighing scales to offline sync',
-          'Role-based dashboards with the numbers each team needs',
-          'Integrates with the accounting and payment systems you already run',
-        ]}
-        href="/services/erp-solutions"
-        cta="Explore ERP solutions"
-        image={appAlphalize}
-        imageAlt="369aiAlphalize — the Odoo back office in one app"
-        fit="contain"
-      />
-
-      <FeatureRow
-        flip
-        eyebrow="Connected devices"
-        title="Security that reports to your ERP"
-        highlight="reports to your ERP"
-        color="teal"
-        body="IoT smart locks with centralised access control, live monitoring and digital authorisation for users and locations — so every access is secure, recorded and controlled in real time."
-        points={[
-          'Warehouses, offices and vending systems',
-          'Digital authorisation per user and per location',
-          'Every access recorded against the same core',
-        ]}
-        href="/services/iot-and-automation"
-        cta="See IoT & automation"
-        image={smartLocks}
-        imageAlt="Smart locker system"
-      />
-
-      <FeatureRow
-        eyebrow="Unmanned retail"
-        title="Selling around the clock"
-        highlight="around the clock"
-        marker="highlight"
-        color="yellow"
-        body="Smart vending powered by AI, IoT and ERP integration. Manage products, track stock and monitor performance remotely, while customers buy through touchless, card or QR payments."
-        points={[
-          'Remote stock and performance monitoring',
-          'Touchless, card and QR payment',
-          'Built for 24/7 operation',
-        ]}
-        href="/services/iot-and-automation#solutions"
-        cta="See vending solutions"
-        image={vending}
-        imageAlt="Smart vending machine with touch screen"
-      />
-    </div>
-  </Section>
+  <WhatWeDo />
 
   <!-- Value blocks -->
-  <Section variant="surface" space="lg">
-    <SectionHeading
-      eyebrow="Why Alphalize"
-      title="A partner, not just a vendor"
-      highlight="partner"
-      marker="circle"
-      color="teal"
-    />
-    <div class="mt-12 grid gap-6 md:grid-cols-3">
-      {
-        values.map((v, i) => (
-          <Reveal as="article" delay={i}>
-            <div class="rounded-card border-brand-100 h-full border bg-white p-7">
-              <span class="rounded-btn bg-plum-600 flex size-12 items-center justify-center text-white">
-                <Icon name={v.icon} class="size-6" />
-              </span>
-              <h3 class="text-ink mt-5 text-lg font-semibold">{v.title}</h3>
-              <p class="text-muted mt-2 text-sm leading-relaxed">{v.body}</p>
-            </div>
-          </Reveal>
-        ))
-      }
-    </div>
-  </Section>
+  <WhyCards />
 
   <!-- Services -->
-  <Section variant="white" space="lg">
-    <SectionHeading
-      eyebrow="Services we offer"
-      title="Built around how your business actually runs"
-      highlight="actually runs"
-      lead="From full ERP rollouts to the integrations and dashboards that make them useful, we cover the software side of running a modern operation."
-    />
-
-    <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      {featured.map((service, i) => <ServiceCard service={service} delay={i} />)}
-    </div>
-
-    <Reveal class="mt-10 text-center">
-      <a href="/services" class="btn btn-outline text-brand-700">
-        All {services.length} services
-        <Icon name="arrow-right" class="size-4" />
-      </a>
-    </Reveal>
-  </Section>
+  <ServicesCards />
 
   <SoftwareStrip />
 
@@ -169,61 +34,16 @@ const values = [
   <ModulesIntro />
 
   <!-- Stats band -->
-  <Section variant="blue" space="md">
-    <Reveal class="grid grid-cols-2 gap-8 lg:grid-cols-4">
-      <Counter value={7} suffix="+" label="Service lines" />
-      <Counter value={2} label="Global offices" />
-      <Counter value={100} suffix="%" label="Tailored builds" />
-      <Counter value={24} suffix="/7" label="Support cover" />
-    </Reveal>
-  </Section>
+  <StatBand />
 
   <!-- About -->
-  <Section variant="white" space="lg">
-    <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-      <Reveal direction="left">
-        <p class="eyebrow">Welcome to Alphalize</p>
-        <Heading as="h2" size="lg" class="mt-2">
-          We take your business to the <Marker type="highlight" color="yellow">next level</Marker>
-        </Heading>
-        <p class="text-muted mt-5 leading-relaxed">
-          Alphalize is a software company specialising in innovative and comprehensive ERP
-          (Enterprise Resource Planning) and business solutions for a wide range of clients. With
-          our expertise and current technology, we help businesses streamline their operations,
-          improve efficiency and drive growth.
-        </p>
-        <p class="text-muted mt-4 leading-relaxed">
-          Years of experience across ERP, business intelligence and IT solutions, working with
-          clients around the world — and a commitment to software that fits the organisation it
-          serves.
-        </p>
-        <a href="/about" class="btn btn-primary mt-8">
-          Discover more
-          <Icon name="arrow-right" class="size-4" />
-        </a>
-      </Reveal>
+  <WelcomeIntro />
 
-      <Reveal direction="right">
-        <ul class="grid gap-4 sm:grid-cols-2">
-          {
-            services.slice(0, 6).map((s) => (
-              <li>
-                <a
-                  href={`/services/${s.id}`}
-                  class="rounded-card border-brand-100 text-heading hover:border-plum-300 hover:text-plum-600 flex h-full items-center gap-3 border p-4 text-sm font-medium transition-colors"
-                >
-                  <Icon name={s.data.icon} class="text-plum-600 size-5 shrink-0" />
-                  {s.data.title}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </Reveal>
-    </div>
-  </Section>
+  <!-- Who we build with -->
+  <PartnerMosaic />
 
   <!-- Client reviews -->
+  <Testimonials />
 
   <CtaBand />
 </BaseLayout>

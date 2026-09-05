@@ -1,0 +1,542 @@
+---
+import { Image } from 'astro:assets';
+import { Arrow, Heading, Note } from '@alphalize/astro-marker';
+import ai369 from '@/assets/trusted/369ai.png';
+import danat from '@/assets/trusted/danat.png';
+import nexgenn from '@/assets/trusted/nexgenn-pos.png';
+import odoo from '@/assets/trusted/odoo.png';
+
+/**
+ * "Our Partners" mosaic for the homepage — a conversion of the 369 partners
+ * intro scene. Pure CSS: a field of pastel tiles drifts row by row while colour
+ * accents pop in and out; four logo cards hop between six spots each (jump
+ * while invisible, pop in, wobble, pop out); a centred card carries the
+ * heading. The scene is authored in 1700×690 reference pixels and scales with
+ * a single unit, `--px`, so every length below is reference px × var(--px).
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+// Tile field, transcribed from the reference: 6 rows × 14 tiles on a 126px pitch.
+// token = <bg><radius>[/<accent><radius><group>]
+//   bg      E #edf2f7 · F #e7eef6 · S #f2f6fa · W white with a hairline inset
+//   radius  s 8px · r 24px · o circle · b blob · tl/tr/br one round corner
+//   accent  B brand-500 · L brand-400 · N brand-700 · O plum-600 · Y marker yellow
+//           (the reference's 369 blues/oranges, mapped onto the site palette)
+//   group   0/1/2 → animation-delay −10.5s / −17.5s / −24.5s (group 2 is lit at t=0)
+const ROWS = [
+  'Eo/Bbr2 Fbr Wb/Or1 Wtl Ws/Bb0 Wtr Stl Ftl Er Sbr/Otr2 Etr Wtr Ftr/Btl1 Wtr/Or0',
+  'Ebr/Otl1 Sb/Ls1 Wbr/Bo1 Ss/Os0 Wr/Lb2 Wo Ftl/Br2 Etr So Eb Fb/Ltr0 Fo/Bbr0 Sbr/Os2 Wbr',
+  'Ss/Ns2 Ftr/Ytl1 Ws So/Ns0 Etr Eo Fb Fr Wr Er Wo Wtl/Ytr2 Etr/Ns1 Wbr',
+  'Ws/Bb2 Sb Fs/Otl1 Wbr/Bbr0 Ftr Fr Sr Sr Ebr Sbr Eo Fb/Br1 Fb Wb/Otl2',
+  'Sbr/Ltl0 Wb/Lo2 Fs/Yr1 So/Lr1 Ftr Eb Er Wtl Etl Wo Wb Sr/Ytl2 Fs/Ltl1 Wtl/Ltr2',
+  'Wo/Ntr0 Wbr/Ytr2 Wo Fo Ebr Sbr/Ybr0 Fr Ftl/Nbr2 Str/Ys1 Wo Ws/Ntr1 Sr Fbr Es',
+];
+const BG: Record<string, string> = {
+  E: 'bg-[#edf2f7]',
+  F: 'bg-[#e7eef6]',
+  S: 'bg-[#f2f6fa]',
+  W: 'bg-white shadow-[inset_0_0_0_1px_#e4eaf1]',
+};
+const ACCENT: Record<string, string> = {
+  B: 'bg-brand-500',
+  L: 'bg-brand-400',
+  N: 'bg-brand-700',
+  O: 'bg-plum-600',
+  Y: 'bg-(--mk-yellow)',
+};
+const TOKEN = /^([EFSW])(tl|tr|br|[srob])(?:\/([BLNOY])(tl|tr|br|[srob])([012]))?$/;
+
+const rows = ROWS.map((row) =>
+  row.split(' ').map((token) => {
+    const m = TOKEN.exec(token);
+    if (!m) throw new Error(`PartnerMosaic: bad tile token "${token}"`);
+    const [, bg, radius, accent, accentRadius, group] = m;
+    return {
+      bg: BG[bg],
+      radius,
+      accent: accent ? { cls: ACCENT[accent], radius: accentRadius, group } : null,
+    };
+  })
+);
+if (rows.some((r) => r.length !== 14)) throw new Error('PartnerMosaic: every row needs 14 tiles');
+
+// Logo cards. Six stops each, from the reference hops: [x, y, w, h, radius] in
+// reference px. The boxes were drawn around these exact logos, so 20px of
+// padding leaves every mark at its natural proportions.
+type Stop = readonly [number, number, number, number, string];
+const partners: { src: ImageMetadata; name: string; wobble: number; stops: Stop[] }[] = [
+  {
+    src: ai369,
+    name: '369ai.Biz',
+    wobble: 1,
+    stops: [
+      [105, 351, 232, 221, '60 26 26 26'],
+      [1283, 274, 252, 240, '26 60 26 60'],
+      [140, 60, 252, 240, '26 26 26 60'],
+      [1296, 286, 252, 240, '16'],
+      [161, 344, 244, 232, '26'],
+      [1321, 423, 241, 230, '26 60 26 60'],
+    ],
+  },
+  {
+    src: odoo,
+    name: 'Odoo',
+    wobble: -1,
+    stops: [
+      [51, 89, 352, 140, '16'],
+      [1275, 54, 345, 138, '26 26 26 60'],
+      [764, 518, 338, 136, '26 60 26 60'],
+      [453, 530, 371, 146, '26 26 26 60'],
+      [1334, 84, 348, 139, '40'],
+      [915, 21, 337, 135, '16'],
+    ],
+  },
+  {
+    src: danat,
+    name: 'Danat Group',
+    wobble: 0.7,
+    stops: [
+      [1346, 290, 186, 240, '26 60 26 60'],
+      [18, 179, 186, 240, '40'],
+      [1274, 233, 186, 240, '26'],
+      [197, 85, 186, 240, '26 26 26 60'],
+      [1280, 270, 186, 240, '40'],
+      [192, 77, 183, 236, '40'],
+    ],
+  },
+  {
+    src: nexgenn,
+    name: 'Nex Genn POS',
+    wobble: -1.2,
+    stops: [
+      [361, 521, 440, 111, '26 60 26 60'],
+      [291, 49, 440, 111, '60 26 26 26'],
+      [588, 17, 440, 111, '60 26 26 26'],
+      [1121, 22, 440, 111, '26 60 26 60'],
+      [1101, 554, 440, 111, '40'],
+      [326, 549, 440, 111, '40'],
+    ],
+  },
+];
+
+const PAD = 20;
+const px = (n: number) => `calc(${n} * var(--px))`;
+const radius = (r: string) =>
+  r
+    .split(' ')
+    .map((n) => px(Number(n)))
+    .join(' ');
+
+// Each card keeps the size of its first stop (the animation only moves and
+// fades, it never resizes); later stops are re-centred inside the box the
+// reference card would have occupied there.
+const cards = partners.map((p) => {
+  const [, , w, h] = p.stops[0];
+  const vars = p.stops
+    .map(
+      ([x, y, sw, sh, r], k) =>
+        `--x${k}:${x + (sw - w) / 2};--y${k}:${y + (sh - h) / 2};--r${k}:${radius(r)}`
+    )
+    .join(';');
+  return { ...p, inner: w - 2 * PAD, style: `--w:${w};--h:${h};--wob:${p.wobble};${vars}` };
+});
+---
+
+<section
+  class:list={['pm cc-white border-brand-100 @container relative border-y', className]}
+  aria-labelledby="pm-title"
+>
+  <div class="pm-stage">
+    <div class="pm-scene">
+      <div class="pm-grid" aria-hidden="true">
+        {
+          rows.map((row) => (
+            <div class="pm-row">
+              {row.map((t) => (
+                <div class:list={['pm-tile', t.bg, `pm-r-${t.radius}`]}>
+                  {t.accent && (
+                    <span
+                      class:list={[
+                        'pm-acc',
+                        t.accent.cls,
+                        `pm-r-${t.accent.radius}`,
+                        `pm-g${t.accent.group}`,
+                      ]}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+
+      <ul class="pm-logos" role="list" aria-label="Partner logos">
+        {
+          cards.map((c) => (
+            <li class="pm-lg shadow-lift bg-white" style={c.style}>
+              <Image src={c.src} alt={c.name} width={c.inner} densities={[1, 2]} loading="lazy" />
+            </li>
+          ))
+        }
+      </ul>
+
+      <div class="pm-card bg-white">
+        <div id="pm-title">
+          <Heading as="h2" align="center">
+            Our <span class="text-plum-600">Partners</span>
+          </Heading>
+        </div>
+        <p class="pm-lead text-muted">Powering the 369 AI ecosystem</p>
+        <span class="pm-tag">
+          <Note color="yellow" rotate={-6} size="max(calc(40 * var(--px)), 1.25rem)">trusted</Note>
+        </span>
+        <span class="pm-arw" aria-hidden="true">
+          <Arrow variant="curve-down-left" color="yellow" size={70} stroke={3.5} animate={false} />
+        </span>
+      </div>
+    </div>
+    <div class="pm-edge" aria-hidden="true"></div>
+  </div>
+
+  <!-- WCAG 2.2.2 pause control, no JS. Hidden statically; shown only when motion is on. -->
+  <div class="pm-ctl">
+    <input type="checkbox" id="pm-pause" class="sr-only" />
+    <label for="pm-pause" class="text-muted cursor-pointer text-xs font-medium">
+      <span class="pm-on">Pause animation</span><span class="pm-off">Play animation</span>
+    </label>
+  </div>
+</section>
+
+<style>
+  /* One reference pixel: the 1700px scene fills the container up to 0.6× (so
+     tiles land at the hero orbit's card size and the heading inside the site's
+     heading range) and never drops below 0.35×, keeping the centre card legible
+     on phones (the scene then overflows symmetrically behind it). */
+  .pm-stage {
+    --px: clamp(0.35px, 100cqw / 1700, 0.6px);
+    position: relative;
+    height: calc(690 * var(--px));
+    overflow: hidden;
+    content-visibility: auto;
+  }
+  .pm-scene {
+    position: absolute;
+    top: 0;
+    left: calc((100% - 1700 * var(--px)) / 2);
+    width: calc(1700 * var(--px));
+    height: 100%;
+  }
+
+  /* Tile field: 14 × 6 on a 126 pitch (104 tile + 22 gap), origin −46/−38. */
+  .pm-grid {
+    position: absolute;
+    left: calc(-46 * var(--px));
+    top: calc(-38 * var(--px));
+    z-index: 1;
+    display: grid;
+    row-gap: calc(22 * var(--px));
+  }
+  .pm-row {
+    display: flex;
+    column-gap: calc(22 * var(--px));
+  }
+  .pm-row:nth-child(odd) {
+    --dir: 1;
+  }
+  .pm-row:nth-child(even) {
+    --dir: -1;
+  }
+  .pm-tile {
+    position: relative;
+    flex: none;
+    width: calc(104 * var(--px));
+    aspect-ratio: 1;
+  }
+  .pm-acc {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .pm-g0 {
+    --d: -10.5s;
+  }
+  .pm-g1 {
+    --d: -17.5s;
+  }
+  .pm-g2 {
+    --d: -24.5s;
+    opacity: 1;
+  }
+  .pm-r-s {
+    border-radius: 7.7%;
+  }
+  .pm-r-r {
+    border-radius: 23%;
+  }
+  .pm-r-o {
+    border-radius: 50%;
+  }
+  .pm-r-b {
+    border-radius: 60% 40% 55% 45% / 50% 55% 45% 50%;
+  }
+  .pm-r-tl {
+    border-radius: 50% 23% 23% 23%;
+  }
+  .pm-r-tr {
+    border-radius: 23% 50% 23% 23%;
+  }
+  .pm-r-br {
+    border-radius: 23% 23% 50% 23%;
+  }
+
+  /* White fade at the edges; --gx widens it across the gutters once the
+     viewport is wider than the 1× scene. */
+  .pm-edge {
+    --gx: max(0px, (100cqw - 1700 * var(--px)) / 2);
+    --fx: calc(190 * var(--px) + var(--gx));
+    --fy: calc(120 * var(--px));
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to right,
+        #fff,
+        rgb(255 255 255 / 0) var(--fx),
+        rgb(255 255 255 / 0) calc(100% - var(--fx)),
+        #fff
+      ),
+      linear-gradient(
+        to bottom,
+        #fff,
+        rgb(255 255 255 / 0) var(--fy),
+        rgb(255 255 255 / 0) calc(100% - var(--fy)),
+        #fff
+      );
+  }
+
+  /* Logo cards: parked at their first stop (the reduced-motion state). */
+  .pm-logos {
+    position: absolute;
+    inset: 0;
+  }
+  .pm-lg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(var(--w) * var(--px));
+    height: calc(var(--h) * var(--px));
+    padding: calc(20 * var(--px));
+    translate: calc(var(--x0) * var(--px)) calc(var(--y0) * var(--px));
+    rotate: calc(2deg * var(--wob));
+    border-radius: var(--r0);
+  }
+  .pm-lg :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Centre card: 780×290 at 1×, rem floors on phones, never wider than the viewport. */
+  .pm-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: clamp(min(20rem, 100cqw - 2rem), 780 * var(--px), 100cqw - 2rem);
+    min-height: calc(290 * var(--px));
+    padding: max(calc(28 * var(--px)), 1rem) max(calc(40 * var(--px)), 1.25rem);
+    translate: -50% -50%;
+    border-radius: max(calc(34 * var(--px)), 1rem);
+    box-shadow:
+      0 1.5rem 3.5rem rgb(16 40 70 / 0.16),
+      0 0.25rem 0.9rem rgb(16 40 70 / 0.08);
+    text-align: center;
+  }
+  /* Unlayered scoped rule, so it wins over .mk-hand--lg in @layer base. */
+  .pm-card :global(.mk-hand) {
+    font-size: max(calc(86 * var(--px)), 2rem);
+    line-height: 1;
+  }
+  .pm-lead {
+    margin-top: max(calc(16 * var(--px)), 0.5rem);
+    font-size: max(calc(25 * var(--px)), 1rem);
+  }
+  .pm-tag {
+    position: absolute;
+    right: calc(70 * var(--px));
+    top: calc(28 * var(--px));
+  }
+  .pm-arw {
+    position: absolute;
+    right: calc(122 * var(--px));
+    top: calc(68 * var(--px));
+    width: calc(70 * var(--px));
+    aspect-ratio: 7 / 6;
+  }
+  .pm-arw :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+  @container (width < 40rem) {
+    .pm-arw {
+      display: none;
+    }
+    /* Sticker on the card's top edge. */
+    .pm-tag {
+      top: -0.55em;
+      right: 1.25rem;
+    }
+  }
+
+  .pm-ctl {
+    display: none;
+    position: absolute;
+    right: 1rem;
+    bottom: 0.75rem;
+    z-index: 7;
+  }
+  .pm-off {
+    display: none;
+  }
+  .pm:has(#pm-pause:checked) .pm-on {
+    display: none;
+  }
+  .pm:has(#pm-pause:checked) .pm-off {
+    display: inline;
+  }
+  .pm:has(#pm-pause:focus-visible) label {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Every animation is gated here (the global reduce-motion rule shortens
+     durations but not delays). The static rules above are the end state. */
+  @media (prefers-reduced-motion: no-preference) {
+    .pm-ctl {
+      display: block;
+    }
+    .pm-row {
+      animation: pm-drift 42s linear infinite;
+    }
+    .pm-acc {
+      animation: pm-face 21s ease-in-out var(--d) infinite;
+    }
+    .pm-lg {
+      animation:
+        pm-hop-pos 42s step-end infinite,
+        pm-hop-pop 7s cubic-bezier(0.3, 1.3, 0.5, 1) infinite;
+      will-change: transform, opacity;
+    }
+    .pm-lg:hover,
+    .pm:has(#pm-pause:checked) .pm-row,
+    .pm:has(#pm-pause:checked) .pm-acc,
+    .pm:has(#pm-pause:checked) .pm-lg {
+      animation-play-state: paused;
+    }
+  }
+
+  /* from/to omitted on purpose: they resolve to the static styles above. */
+  @keyframes pm-drift {
+    50% {
+      translate: calc(26 * var(--dir) * var(--px)) 0;
+    }
+  }
+
+  @keyframes pm-face {
+    0% {
+      opacity: 0;
+      rotate: -0.5deg;
+      scale: 0.45;
+    }
+    3% {
+      opacity: 1;
+      rotate: -1.8deg;
+      scale: 1;
+    }
+    30% {
+      opacity: 1;
+      rotate: -5.1deg;
+      scale: 1;
+    }
+    33% {
+      opacity: 0;
+      rotate: 5.1deg;
+      scale: 0.45;
+    }
+    100% {
+      opacity: 0;
+      rotate: -6.9deg;
+      scale: 0.45;
+    }
+  }
+
+  /* Position and radius jump discretely (step-end) at each 7s beat… */
+  @keyframes pm-hop-pos {
+    0% {
+      translate: calc(var(--x0) * var(--px)) calc(var(--y0) * var(--px));
+      border-radius: var(--r0);
+    }
+    16.667% {
+      translate: calc(var(--x1) * var(--px)) calc(var(--y1) * var(--px));
+      border-radius: var(--r1);
+    }
+    33.333% {
+      translate: calc(var(--x2) * var(--px)) calc(var(--y2) * var(--px));
+      border-radius: var(--r2);
+    }
+    50% {
+      translate: calc(var(--x3) * var(--px)) calc(var(--y3) * var(--px));
+      border-radius: var(--r3);
+    }
+    66.667% {
+      translate: calc(var(--x4) * var(--px)) calc(var(--y4) * var(--px));
+      border-radius: var(--r4);
+    }
+    83.333% {
+      translate: calc(var(--x5) * var(--px)) calc(var(--y5) * var(--px));
+      border-radius: var(--r5);
+    }
+  }
+  /* …while the card is invisible: the reference's 0.05/1.60/14.97/16.57% of 42s
+     are 0.3/9.6/89.8/99.4% of each 7s beat. */
+  @keyframes pm-hop-pop {
+    0%,
+    0.3% {
+      opacity: 0;
+      scale: 0.45;
+      rotate: 0deg;
+    }
+    9.6% {
+      opacity: 1;
+      scale: 1;
+      rotate: calc(5.6deg * var(--wob));
+    }
+    89.8% {
+      opacity: 1;
+      scale: 1;
+      rotate: calc(-5.9deg * var(--wob));
+    }
+    99.4%,
+    100% {
+      opacity: 0;
+      scale: 0.45;
+      rotate: calc(0.8deg * var(--wob));
+    }
+  }
+</style>

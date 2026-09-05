@@ -4,6 +4,8 @@ import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import { contact, offices, site } from '@/config/site';
+import inter400 from '@alphalize/astro-marker/fonts/inter-latin-400-normal.woff2?url';
+import caveat700 from '@alphalize/astro-marker/fonts/caveat-latin-700-normal.woff2?url';
 import '@/styles/global.css';
 
 interface Props {
@@ -47,12 +49,9 @@ const organization = {
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#004b80" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Caveat:wght@400..700&display=swap"
-    />
+    <!-- Fonts are self-hosted (packages/astro-marker); preload the two above-the-fold faces. -->
+    <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={caveat700} as="font" type="font/woff2" crossorigin />
 
     <Seo
       title={title}

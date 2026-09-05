@@ -1,0 +1,56 @@
+---
+/**
+ * <Arrow> — hand-drawn arrow, draws itself when scrolled into view.
+ *
+ *   <Arrow variant="curve-down-right" color="purple" size={64} />
+ *   <Arrow variant="up" color="teal" size={28} />
+ *
+ * variant  curve-down-right | curve-down-left | up | down | right | left | loop-right
+ * color    named marker colour or any CSS colour
+ * size     width in px (default 56)
+ * flip     mirror horizontally
+ * rotate   extra rotation in degrees
+ * stroke   line width in SVG units (default 3.2)
+ */
+export interface Props {
+  variant?: 'curve-down-right' | 'curve-down-left' | 'up' | 'down' | 'right' | 'left' | 'loop-right';
+  color?: string;
+  size?: number;
+  flip?: boolean;
+  rotate?: number;
+  stroke?: number;
+  animate?: boolean;
+  delay?: number;
+  class?: string;
+}
+const NAMED = ['yellow', 'pink', 'teal', 'blue', 'sky', 'orange', 'purple', 'green'];
+const { variant = 'curve-down-right', color = 'purple', size = 56, flip = false, rotate = 0, stroke = 3.2, animate = true, delay = 0, class: className = '' } = Astro.props;
+const col = NAMED.includes(color) ? `var(--mk-${color})` : color;
+
+// shaft + head, box 0 0 60 60
+const V: Record<string, { shaft: string; head: string; vb?: string }> = {
+  'curve-down-right': { shaft: 'M6 6 C 20 8, 44 18, 50 48', head: 'M41 40 L 50 50 L 57 38' },
+  'curve-down-left':  { shaft: 'M54 6 C 40 8, 16 18, 10 48', head: 'M19 40 L 10 50 L 3 38' },
+  'up':               { shaft: 'M30 56 C 29 40, 31 24, 30 6', head: 'M20 16 L 30 5 L 40 16' },
+  'down':             { shaft: 'M30 4 C 31 20, 29 36, 30 54', head: 'M20 44 L 30 55 L 40 44' },
+  'right':            { shaft: 'M4 30 C 20 28, 36 32, 56 30', head: 'M46 20 L 57 30 L 46 40' },
+  'left':             { shaft: 'M56 30 C 40 28, 24 32, 4 30', head: 'M14 20 L 3 30 L 14 40' },
+  'loop-right':       { shaft: 'M6 40 C 10 10, 40 4, 38 24 C 36 40, 14 34, 22 22 C 28 12, 48 14, 56 30', head: 'M48 22 L 57 31 L 46 36' },
+};
+const a = V[variant];
+const tf = `${flip ? 'scaleX(-1) ' : ''}rotate(${rotate}deg)`;
+---
+<svg class:list={['mk-arrow', className, { 'mk-animate': animate }]} data-mk-mark viewBox="0 0 60 60" width={size} height={size}
+     style={`--mk-stroke:${col};--mk-delay:${delay}ms;transform:${tf}`} aria-hidden="true" focusable="false">
+  <path class="mk-arrow__shaft" d={a.shaft} pathLength="1" stroke-width={stroke} />
+  <path class="mk-arrow__head"  d={a.head}  pathLength="1" stroke-width={stroke} />
+</svg>
+
+<style>
+  .mk-arrow { display: inline-block; overflow: visible; vertical-align: middle; }
+  .mk-arrow path { fill: none; stroke: var(--mk-stroke); stroke-linecap: round; stroke-linejoin: round; }
+  .mk-animate path { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset var(--mk-draw-duration) var(--mk-draw-ease); }
+  .mk-animate .mk-arrow__shaft { transition-delay: var(--mk-delay); }
+  .mk-animate .mk-arrow__head  { transition-delay: calc(var(--mk-delay) + var(--mk-draw-duration) * .8); transition-duration: calc(var(--mk-draw-duration) * .4); }
+  .mk-animate.is-in path { stroke-dashoffset: 0; }
+</style>

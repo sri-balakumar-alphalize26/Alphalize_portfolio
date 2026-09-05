@@ -1,0 +1,22 @@
+---
+/**
+ * <Quote> — bold outlined “66” quote mark (coloured fill + ink outline, slightly offset).
+ *   <Quote color="yellow" size={56} />
+ * color  named marker colour or CSS colour · size px · outline show ink outline (default true)
+ */
+export interface Props { color?: string; size?: number; outline?: boolean; class?: string }
+const NAMED = ['yellow', 'pink', 'teal', 'blue', 'sky', 'orange', 'purple', 'green'];
+const { color = 'yellow', size = 56, outline = true, class: className = '' } = Astro.props;
+const col = NAMED.includes(color) ? `var(--mk-${color})` : color;
+// one rounded “6”-style comma, box 0 0 44 44; drawn twice
+const d = 'M30 4 C 16 4, 6 14, 6 28 C 6 37, 12 42, 20 42 C 27 42, 32 37, 32 30 C 32 23, 27 18, 20 18 C 18 18, 16 18.5, 15 19 C 16 12, 22 8, 30 8 Z';
+---
+<svg class:list={['mk-quote', className]} viewBox="0 0 88 44" width={size * 2} height={size} style={`--c:${col}`} aria-hidden="true" focusable="false">
+  {outline && <g class="mk-quote__ink"><path d={d} /><path d={d} transform="translate(40 0)" /></g>}
+  <g class="mk-quote__fill"><path d={d} /><path d={d} transform="translate(40 0)" /></g>
+</svg><style>
+  .mk-quote { display: block; overflow: visible; }
+  .mk-quote__ink { transform: translate(-1.5px, 1.5px); }
+  .mk-quote__ink path { fill: none; stroke: var(--mk-ink); stroke-width: 3.5; stroke-linejoin: round; }
+  .mk-quote__fill path { fill: var(--c); }
+</style>

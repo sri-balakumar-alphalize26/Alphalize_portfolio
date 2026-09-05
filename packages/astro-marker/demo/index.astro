@@ -1,0 +1,93 @@
+---
+// Copy this file into src/pages/marker-demo.astro to see every component.
+import { Heading, Marker, Arrow, Sparkle, Note, Button, Fonts, Quote, ReviewCard } from '@alphalize/astro-marker';
+import '@alphalize/astro-marker/tokens.css';
+import '@alphalize/astro-marker/fonts.css';   // bundled Caveat + Inter (or use <Fonts /> for Google Fonts)
+---
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>astro-marker demo</title>
+  <style>
+    body { margin: 0; background: #F6F7F9; font-family: var(--mk-font-sans); color: var(--mk-ink); }
+    section { padding: 72px 24px; text-align: center; }
+    section + section { border-top: 1px solid #E5E7EB; }
+    .cta { display: flex; gap: 16px; justify-content: center; margin-top: 40px; position: relative; }
+    .price { position: absolute; left: calc(50% + 200px); top: -18px; display: grid; justify-items: center; }
+    .sub { color: var(--mk-ink-muted); font-size: 14px; line-height: 1.6; margin: 8px 0 0; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. hero: highlight + underline + arrow + price note -->
+  <section>
+    <Heading as="h1" size="xl" align="center">
+      All your business on <Marker type="highlight" color="yellow">one platform</Marker>.
+    </Heading>
+    <Heading as="p" size="lg" align="center" style="margin-top:.2em">
+      Simple, efficient, yet <Marker type="underline" color="blue" delay={500}>affordable</Marker>!
+    </Heading>
+    <div class="cta">
+      <Button href="#">Start now - It's free</Button>
+      <Button href="#" variant="secondary">Meet an advisor</Button>
+      <div class="price">
+        <Arrow variant="curve-down-right" color="purple" size={54} delay={900} />
+        <Note color="purple" rotate={-10}>580.00 Rs / month<br />for ALL apps</Note>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. pink strike-highlight + teal underline -->
+  <section>
+    <Heading size="lg" align="center">
+      <Marker type="strike" color="pink">Level up</Marker> your quality of <Marker type="underline" color="teal" delay={400}>work</Marker>
+    </Heading>
+  </section>
+
+  <!-- 3. squiggle underline -->
+  <section>
+    <Heading size="lg" align="center">Optimized for <Marker type="squiggle" color="yellow">productivity</Marker></Heading>
+  </section>
+
+  <!-- 4. thick pink underline -->
+  <section>
+    <Heading size="lg" align="center"><Marker type="underline" color="pink">Native AI</Marker> across all your business</Heading>
+  </section>
+
+  <!-- 5. circle + sky underline, two lines -->
+  <section>
+    <Heading size="lg" align="center">
+      Enterprise <Marker type="circle" color="teal">software</Marker><br />
+      done <Marker type="underline" color="sky" delay={500}>right</Marker><span class="mk-ink-blue">.</span>
+    </Heading>
+  </section>
+
+  <!-- 6. sparkle hero with coloured words + up arrow -->
+  <section>
+    <Sparkle color="yellow">
+      <Heading as="h1" size="xl" align="center">Unleash<br />your <span class="mk-ink-teal">growth potential</span></Heading>
+    </Sparkle>
+    <div style="margin-top:28px"><Button href="#" size="lg">Start now - It's free</Button></div>
+    <div style="margin-top:10px"><Arrow variant="up" color="teal" size={30} stroke={4} delay={300} /></div>
+    <p class="sub">No credit card required<br />Instant access</p>
+  </section>
+
+  <!-- 7. review cards with coloured quote marks (auto-cycle blue → orange → yellow) -->
+  <section style="text-align:left; max-width:1140px; margin:0 auto">
+    <Heading size="md" align="center">What our <Marker type="underline" color="orange">customers</Marker> say</Heading>
+    <div class="mk-reviews" style="margin-top:36px">
+      <ReviewCard name="Ajmal" rating={5}>The weighing scale integration works exactly the way it should — the weight comes straight into the bill with no manual typing and no mistakes. The VFD display on the customer side is a big plus.</ReviewCard>
+      <ReviewCard name="Alshabith" rating={5}>The restaurant application handles our dine-in, takeaway and kitchen orders in one place. Orders reach the kitchen the moment the waiter takes them, so nothing gets forgotten during the rush hours.</ReviewCard>
+      <ReviewCard name="Srisaan" rating={4}>The tools rental management app keeps track of every item that goes out and comes back, along with the rental period and the customer details. Following up on pending returns has become very easy.</ReviewCard>
+      <ReviewCard name="Amalesh" rating={4}>The website they built for us looks clean and professional, and it loads quickly on both mobile and desktop. Customers are able to find what they need without calling us for every small detail.</ReviewCard>
+      <ReviewCard name="Nisha" rating={4}>The software keeps getting better with every update they release, and we can see that our feedback actually gets implemented. It feels like a product that is being looked after.</ReviewCard>
+      <ReviewCard name="Shamnad" rating={4} color="teal">The support they give is easily the best part of working with them. Whenever there is an issue, someone responds quickly and stays on it until it is completely resolved.</ReviewCard>
+    </div>
+    <div style="display:flex; gap:32px; justify-content:center; margin-top:48px; align-items:center">
+      <Quote color="blue" /><Quote color="orange" /><Quote color="yellow" /><Quote color="teal" outline={false} />
+    </div>
+  </section>
+
+</body>
+</html>

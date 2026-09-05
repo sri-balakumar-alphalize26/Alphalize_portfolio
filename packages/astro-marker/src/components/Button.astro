@@ -1,0 +1,22 @@
+---
+/**
+ * <Button> — the two CTA styles (solid purple / soft grey).
+ *   <Button href="/signup">Start now - It's free</Button>
+ *   <Button href="/contact" variant="secondary">Meet an advisor</Button>
+ */
+export interface Props { href?: string; variant?: 'primary' | 'secondary'; size?: 'md' | 'lg'; class?: string; [key: string]: any }
+const { href, variant = 'primary', size = 'md', class: className = '', ...rest } = Astro.props;
+const Tag = href ? 'a' : 'button';
+---
+<Tag href={href} class:list={['mk-btn', `mk-btn--${variant}`, `mk-btn--${size}`, className]} {...rest}><slot /></Tag>
+<style>
+  .mk-btn { display: inline-flex; align-items: center; justify-content: center; gap: .5em; font-family: var(--mk-font-sans); font-weight: 600; font-size: 1rem; line-height: 1;
+    padding: 1em 1.5em; border-radius: var(--mk-btn-radius); border: 0; cursor: pointer; text-decoration: none; transition: transform .15s, box-shadow .15s, background .15s; }
+  .mk-btn--lg { font-size: 1.125rem; padding: 1.15em 2.2em; }
+  .mk-btn--primary { background: var(--mk-btn-primary-bg); color: var(--mk-btn-primary-fg); }
+  .mk-btn--primary:hover { background: color-mix(in srgb, var(--mk-btn-primary-bg) 88%, black); }
+  .mk-btn--secondary { background: var(--mk-btn-secondary-bg); color: var(--mk-btn-secondary-fg); }
+  .mk-btn--secondary:hover { background: color-mix(in srgb, var(--mk-btn-secondary-bg) 90%, black); }
+  .mk-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(20,24,40,.12); }
+  .mk-btn:active { transform: translateY(0); box-shadow: none; }
+</style>

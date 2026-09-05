@@ -1,0 +1,88 @@
+---
+/**
+ * <Marker> — hand-drawn marker effect around inline text.
+ *
+ *   <Marker type="highlight" color="yellow">one platform</Marker>
+ *   <Marker type="underline" color="blue">affordable</Marker>
+ *   <Marker type="strike"    color="pink">Level up</Marker>
+ *   <Marker type="circle"    color="teal">software</Marker>
+ *   <Marker type="squiggle"  color="orange">productivity</Marker>
+ *   <Marker type="box"       color="purple">right</Marker>
+ *
+ * Props
+ *   type    highlight | underline | strike | circle | squiggle | box   (default underline)
+ *   color   yellow | pink | teal | blue | sky | orange | purple | green | any CSS colour
+ *   animate draw the stroke when scrolled into view (default true)
+ *   delay   ms before drawing (default 0)
+ *   tilt    degrees of rotation for the stroke (default per type)
+ */
+export interface Props {
+  type?: 'highlight' | 'underline' | 'strike' | 'circle' | 'squiggle' | 'box';
+  color?: string;
+  animate?: boolean;
+  delay?: number;
+  tilt?: number;
+  class?: string;
+}
+const NAMED = ['yellow', 'pink', 'teal', 'blue', 'sky', 'orange', 'purple', 'green'];
+const {
+  type = 'underline',
+  color = 'yellow',
+  animate = true,
+  delay = 0,
+  tilt,
+  class: className = '',
+} = Astro.props;
+
+const stroke = NAMED.includes(color) ? `var(--mk-${color})` : color;
+const defaultTilt: Record<string, number> = { highlight: -1.5, strike: -1, underline: 0, circle: -4, squiggle: 0, box: 0 };
+const rot = tilt ?? defaultTilt[type];
+
+// Hand-drawn paths, all in a 0 0 100 N box, stretched with preserveAspectRatio="none"
+const PATHS: Record<string, { vb: string; d: string[]; w: number[] }> = {
+  highlight: { vb: '0 0 100 24', d: ['M11 13 C 28 8, 56 16, 90 11'], w: [20] },
+  strike:    { vb: '0 0 100 24', d: ['M11 13 C 28 8, 56 16, 90 11', 'M2 12 C 30 10, 70 15, 98 12'], w: [20, 2.2] },
+  underline: { vb: '0 0 100 14', d: ['M2 8 C 28 4, 62 12, 98 6'], w: [5.5] },
+  squiggle:  { vb: '0 0 100 16', d: ['M2 8 C 8 2, 14 14, 20 8 S 32 2, 38 8 S 50 14, 56 8 S 68 2, 74 8 S 86 14, 92 8 L 98 6'], w: [4.5] },
+  circle:    { vb: '0 0 100 40', d: ['M58 4 C 84 2, 100 10, 97 22 C 93 36, 40 40, 12 32 C -4 26, 6 8, 40 5 C 56 3, 74 4, 84 8'], w: [4] },
+  box:       { vb: '0 0 100 40', d: ['M4 5 C 30 3, 70 4, 96 4 L 97 35 C 70 37, 30 36, 3 36 L 4 5'], w: [4] },
+};
+const p = PATHS[type];
+---
+<span class:list={['mk-mark', `mk-mark--${type}`, className, { 'mk-animate': animate }]} data-mk-mark style={`--mk-stroke:${stroke};--mk-delay:${delay}ms;--mk-rot:${rot}deg`}><slot /><svg class="mk-mark__svg" viewBox={p.vb} preserveAspectRatio="none" aria-hidden="true" focusable="false">{p.d.map((d, i) => <path d={d} pathLength="1" stroke-width={p.w[i]} style={`--i:${i}`} />)}</svg></span><style>
+  .mk-mark { position: relative; display: inline; white-space: nowrap; }
+  .mk-mark__svg {
+    position: absolute; overflow: visible; pointer-events: none;
+    transform: rotate(var(--mk-rot, 0deg)); transform-origin: center;
+  }
+  .mk-mark__svg path {
+    fill: none; stroke: var(--mk-stroke); stroke-linecap: round; stroke-linejoin: round;
+  }
+  /* placement per type */
+  .mk-mark--highlight, .mk-mark--strike { z-index: 0; }
+  .mk-mark--highlight .mk-mark__svg, .mk-mark--strike .mk-mark__svg {
+    left: -0.12em; top: 0.04em; height: 1em; width: calc(100% + 0.24em); z-index: -1; opacity: .95;
+  }
+  .mk-mark--strike .mk-mark__svg path:nth-child(2) { stroke: var(--mk-ink); opacity: .85; }
+  .mk-mark--underline .mk-mark__svg, .mk-mark--squiggle .mk-mark__svg {
+    left: -0.05em; width: calc(100% + 0.1em); height: 0.32em; bottom: -0.22em;
+  }
+  .mk-mark--circle .mk-mark__svg, .mk-mark--box .mk-mark__svg {
+    left: -0.3em; width: calc(100% + 0.6em); top: -0.18em; height: 1.35em;
+  }
+
+  /* draw-on */
+  .mk-animate .mk-mark__svg path {
+    stroke-dasharray: 1; stroke-dashoffset: 1;
+    transition: stroke-dashoffset var(--mk-draw-duration) var(--mk-draw-ease);
+    transition-delay: calc(var(--mk-delay) + var(--i) * 250ms);
+  }
+  .mk-animate.is-in .mk-mark__svg path { stroke-dashoffset: 0; }
+</style><script>
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+  }, { threshold: 0.6 });
+  const seed = () => document.querySelectorAll('[data-mk-mark].mk-animate:not(.is-in)').forEach((el) => io.observe(el));
+  seed();
+  document.addEventListener('astro:page-load', seed);   // works with <ClientRouter />
+</script>

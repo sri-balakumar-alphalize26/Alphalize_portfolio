@@ -12,6 +12,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@alphalize/astro-marker": "file:./packages/astro-marker",
     "@astrojs/cloudflare": "^14.3.0",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.3.1",

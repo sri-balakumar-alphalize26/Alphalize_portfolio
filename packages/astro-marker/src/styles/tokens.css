@@ -1,0 +1,63 @@
+/* @alphalize/astro-marker — design tokens
+   Override any of these in your own global.css AFTER importing this file. */
+:root {
+  /* Fonts — swap --mk-font-hand for your own handwriting face */
+  --mk-font-hand: "Caveat", "Kalam", "Segoe Print", "Bradley Hand", cursive;
+  --mk-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Ink */
+  --mk-ink: #111827;
+  --mk-ink-muted: #4B5563;
+
+  /* Marker colours (name → used by color="…") */
+  --mk-yellow: #F9B84A;
+  --mk-pink:   #FF8B8B;
+  --mk-teal:   #1FD1B4;
+  --mk-blue:   #2BA8F5;
+  --mk-sky:    #8FC4F5;
+  --mk-orange: #F06050;
+  --mk-purple: #714B67;
+  --mk-green:  #21B799;
+
+  /* Buttons */
+  --mk-btn-primary-bg: #714B67;
+  --mk-btn-primary-fg: #ffffff;
+  --mk-btn-secondary-bg: #F1F2F4;
+  --mk-btn-secondary-fg: #1F2937;
+  --mk-btn-radius: 6px;
+
+  /* Motion */
+  --mk-draw-duration: 700ms;
+  --mk-draw-ease: cubic-bezier(.65, 0, .35, 1);
+}
+
+/* Handwriting heading */
+.mk-hand {
+  font-family: var(--mk-font-hand);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.005em;
+  color: var(--mk-ink);
+  margin: 0;
+}
+.mk-hand--xl { font-size: clamp(2.6rem, 6.5vw, 5rem); }
+.mk-hand--lg { font-size: clamp(2.1rem, 5vw, 3.8rem); }
+.mk-hand--md { font-size: clamp(1.7rem, 3.6vw, 2.6rem); }
+.mk-hand--sm { font-size: clamp(1.3rem, 2.6vw, 1.8rem); }
+.mk-hand--center { text-align: center; }
+
+/* Coloured words inside a heading: <span class="mk-ink-teal"> */
+.mk-ink-teal   { color: var(--mk-teal); }
+.mk-ink-blue   { color: var(--mk-blue); }
+.mk-ink-pink   { color: var(--mk-pink); }
+.mk-ink-yellow { color: var(--mk-yellow); }
+.mk-ink-orange { color: var(--mk-orange); }
+.mk-ink-purple { color: var(--mk-purple); }
+.mk-ink-green  { color: var(--mk-green); }
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --mk-draw-duration: 0ms; }
+}
+
+/* Review grid: <div class="mk-reviews"> … <ReviewCard/> … </div> — cards cycle blue/orange/yellow */
+.mk-reviews { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 32px 24px; padding-top: 20px; }

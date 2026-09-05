@@ -1,0 +1,17 @@
+{
+  "name": "@alphalize/astro-marker",
+  "version": "0.1.0",
+  "description": "Handwriting headings, marker highlights, hand-drawn arrows and CTA buttons for Astro",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./src/styles/tokens.css",
+    "./fonts.css": "./src/styles/fonts.css",
+    "./components/*": "./src/components/*",
+    "./fonts/*": "./src/fonts/*"
+  },
+  "files": ["src", "README.md"],
+  "peerDependencies": { "astro": ">=4.0.0" },
+  "keywords": ["astro", "astro-component", "marker", "highlight", "handwriting"],
+  "license": "MIT"
+}

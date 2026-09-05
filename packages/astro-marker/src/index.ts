@@ -1,0 +1,9 @@
+export { default as Heading } from './components/Heading.astro';
+export { default as Marker } from './components/Marker.astro';
+export { default as Arrow } from './components/Arrow.astro';
+export { default as Sparkle } from './components/Sparkle.astro';
+export { default as Note } from './components/Note.astro';
+export { default as Button } from './components/Button.astro';
+export { default as Fonts } from './components/Fonts.astro';
+export { default as Quote } from './components/Quote.astro';
+export { default as ReviewCard } from './components/ReviewCard.astro';

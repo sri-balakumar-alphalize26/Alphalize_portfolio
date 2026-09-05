@@ -1,0 +1,13 @@
+---
+/**
+ * <Note> — small handwritten annotation ("580.00 Rs / month for ALL apps").
+ *   <Note color="purple" rotate={-8}>580.00 Rs / month<br/>for ALL apps</Note>
+ */
+export interface Props { color?: string; rotate?: number; size?: string; align?: 'left' | 'center' | 'right'; class?: string }
+const NAMED = ['yellow', 'pink', 'teal', 'blue', 'sky', 'orange', 'purple', 'green'];
+const { color = 'purple', rotate = -8, size = '1.35rem', align = 'center', class: className = '' } = Astro.props;
+const col = NAMED.includes(color) ? `var(--mk-${color})` : color;
+---
+<span class:list={['mk-note', className]} style={`--c:${col};--r:${rotate}deg;--s:${size};text-align:${align}`}><slot /></span><style>
+  .mk-note { display: inline-block; font-family: var(--mk-font-hand); font-weight: 700; font-size: var(--s); line-height: 1.15; color: var(--c); transform: rotate(var(--r)); }
+</style>

@@ -1,0 +1,58 @@
+---
+import Highlight from './Highlight.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+  /** Breadcrumb trail, excluding Home and the current page. */
+  crumbs?: { label: string; href: string }[];
+}
+
+const { eyebrow, title, lead, crumbs = [] } = Astro.props;
+
+// Odoo highlights the last word of a heading; do the same when the title has
+// more than one word, so interior pages carry the same signature as the home hero.
+const words = title.trim().split(/\s+/);
+const head = words.length > 1 ? words.slice(0, -1).join(' ') : title;
+const tail = words.length > 1 ? words[words.length - 1] : '';
+---
+
+<section class="cc-white relative isolate overflow-hidden border-b border-brand-100">
+  <div
+    aria-hidden="true"
+    class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_55%_70%_at_12%_0%,var(--color-brand-50),transparent_60%),radial-gradient(ellipse_45%_60%_at_92%_10%,var(--color-plum-50),transparent_55%)]"
+  >
+  </div>
+
+  <div class="container-page py-12 lg:py-16">
+    <nav aria-label="Breadcrumb">
+      <ol class="flex flex-wrap items-center gap-1.5 text-xs text-muted">
+        <li><a href="/" class="hover:text-plum-600">Home</a></li>
+        {
+          crumbs.map((c) => (
+            <>
+              <li aria-hidden="true"><Icon name="chevron-right" class="size-3" /></li>
+              <li>
+                <a href={c.href} class="hover:text-plum-600">
+                  {c.label}
+                </a>
+              </li>
+            </>
+          ))
+        }
+        <li aria-hidden="true"><Icon name="chevron-right" class="size-3" /></li>
+        <li aria-current="page" class="text-heading">{title}</li>
+      </ol>
+    </nav>
+
+    {eyebrow && <p class="script-accent mt-7">{eyebrow}</p>}
+
+    <h1 class="mt-2 max-w-3xl text-[length:--text-hero]">
+      {tail ? <>{head} <Highlight>{tail}</Highlight></> : title}
+    </h1>
+
+    {lead && <p class="lead mt-5 max-w-2xl text-muted">{lead}</p>}
+  </div>
+</section>

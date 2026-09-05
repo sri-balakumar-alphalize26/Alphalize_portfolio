@@ -1,0 +1,107 @@
+[
+  {
+    "id": "pos-weighing-scale-vfd",
+    "order": 1,
+    "title": "POS Weighing Scale & VFD Display",
+    "summary": "The weight goes straight into the bill with no manual typing, and the customer-facing display shows what is being weighed and what it costs as it happens.",
+    "icon": "scale"
+  },
+  {
+    "id": "tools-rental-management",
+    "order": 2,
+    "title": "Tools Rental Management",
+    "summary": "Every tool that goes out and comes back, with rental periods, customer details, timesheets and automatic cost calculation.",
+    "icon": "wrench"
+  },
+  {
+    "id": "mobile-it-repair",
+    "order": 3,
+    "title": "Mobile & IT Repair",
+    "summary": "Job intake through to delivery: device and fault details, spare parts, technician assignment, repair status and invoicing.",
+    "icon": "smartphone"
+  },
+  {
+    "id": "pos-dynamic-invoice",
+    "order": 4,
+    "title": "POS Dynamic Invoice",
+    "summary": "Branded, editable POS invoices — logo, company details, tax lines and footer — configured from the back office rather than in code.",
+    "icon": "receipt"
+  },
+  {
+    "id": "pos-loyalty-card",
+    "order": 5,
+    "title": "POS Loyalty Card",
+    "summary": "Points earned and redeemed at the counter, with the customer's balance and available rewards in front of the cashier during checkout.",
+    "icon": "credit-card"
+  },
+  {
+    "id": "kra-kpi-management",
+    "order": 6,
+    "title": "KRA/KPI Management",
+    "summary": "Set role objectives and score them on a purpose-built board, with results rolling up from the individual to the department.",
+    "icon": "chart"
+  },
+  {
+    "id": "user-privilege-manager",
+    "order": 7,
+    "title": "User Privilege Manager",
+    "summary": "Control what each user sees and does, field by field — hide menus, lock fields, and grant create, read, write and delete per person rather than per group.",
+    "icon": "user-check"
+  },
+  {
+    "id": "attendance-suite",
+    "order": 8,
+    "title": "Attendance Suite",
+    "summary": "Late tracking with automatic deductions, leave and work-from-home requests, device management and reports, in one place.",
+    "icon": "calendar"
+  },
+  {
+    "id": "showroom-check",
+    "order": 9,
+    "title": "Showroom Check",
+    "summary": "Scheduled photo checks that a showroom still matches its agreed layout, with the evidence stored against every visit.",
+    "icon": "camera"
+  },
+  {
+    "id": "signage-scan",
+    "order": 10,
+    "title": "Signage Scan",
+    "summary": "Full-screen promotional signage on in-store displays, doubling as a barcode price checker customers can use themselves.",
+    "icon": "tag"
+  },
+  {
+    "id": "pharmacare-pharmacy-pos",
+    "order": 11,
+    "title": "PharmaCare Pharmacy POS",
+    "summary": "A pharmacy counter with batch and expiry tracking, so short-dated stock is caught before it reaches a customer.",
+    "icon": "pill"
+  },
+  {
+    "id": "credit-management",
+    "order": 12,
+    "title": "Credit Management",
+    "summary": "Customer credit limits with an approval step, so an order beyond the limit stops and waits for a decision instead of shipping.",
+    "icon": "shield"
+  },
+  {
+    "id": "inter-company-stock-transfer",
+    "order": 13,
+    "title": "Inter-Company Stock Transfer",
+    "summary": "Move stock and its value between companies with a request and approval flow, keeping both sets of books straight.",
+    "icon": "building"
+  },
+  {
+    "id": "offline-sync",
+    "order": 14,
+    "title": "Offline Sync",
+    "summary": "Keep billing when the connection drops — the counter switches to local data and syncs back afterwards, with a cross-check so nothing is duplicated or lost.",
+    "icon": "refresh"
+  },
+  {
+    "id": "vehicle-tracking",
+    "order": 15,
+    "title": "Vehicle Tracking",
+    "summary": "Trips, driver logs and vehicle movement in one place, with automatic checks that flag journeys which do not add up.",
+    "icon": "truck"
+  }
+]

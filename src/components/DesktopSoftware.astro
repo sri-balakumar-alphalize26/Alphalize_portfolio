@@ -1,0 +1,58 @@
+---
+import Icon from './Icon.astro';
+import Reveal from './Reveal.astro';
+
+/**
+ * Windows desktop software band. Rendered on /services/erp-solutions via
+ * `showcase: erp`; the homepage software strip deep-links to `#desktop`.
+ */
+const points = [
+  'Runs natively on the counter PC — fast even on modest hardware.',
+  'Keeps working through a dropped connection and syncs back to the ERP once you are online again.',
+  'Installed and updated by our team, with 24/7 support behind it.',
+];
+---
+
+<section id="desktop" class="scroll-mt-24 py-16 lg:py-20">
+  <div class="container-page">
+    <Reveal
+      direction="scale"
+      class="cc-blue relative isolate grid gap-10 overflow-hidden rounded-[--radius-card] px-6 py-12 sm:px-12 lg:grid-cols-2 lg:items-center lg:py-16"
+    >
+      <div
+        aria-hidden="true"
+        class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_80%_at_0%_0%,rgba(96,179,255,0.35),transparent_60%)]"
+      >
+      </div>
+
+      <div>
+        <p class="script-accent">Windows · Offline-first</p>
+        <h2 class="mt-2 text-[length:--text-section] leading-[1.15]">Desktop software</h2>
+        <p class="lead mt-4 max-w-lg text-brand-100">
+          Installable Windows .exe applications for billing counters and back-office machines,
+          built for speed on local hardware.
+        </p>
+        <a
+          href="/contact"
+          class="btn btn-light mt-7"
+        >
+          Ask about desktop billing
+          <Icon name="arrow-right" class="size-4" />
+        </a>
+      </div>
+
+      <ul class="space-y-4">
+        {
+          points.map((p) => (
+            <li class="flex gap-3 rounded-[--radius-btn] border border-white/10 bg-white/5 p-4">
+              <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
+                <Icon name="monitor" class="size-4" />
+              </span>
+              <span class="text-sm leading-relaxed text-brand-100">{p}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Reveal>
+  </div>
+</section>

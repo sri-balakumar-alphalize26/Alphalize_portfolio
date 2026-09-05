@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+import Reveal from './Reveal.astro';
+
+interface Props {
+  app: CollectionEntry<'apps'>;
+  delay?: number;
+}
+
+const { app, delay = 0 } = Astro.props;
+const { title, tagline, image, features, platform } = app.data;
+---
+
+<Reveal as="article" delay={delay} class="h-full">
+  <div
+    class="flex h-full flex-col overflow-hidden rounded-[--radius-card] border border-brand-100 bg-white transition-[border-color,box-shadow] duration-300 ease-[--ease-out-soft] hover:border-plum-300 hover:shadow-[--shadow-lift]"
+  >
+    <!-- Artwork is a transparent wordmark logo: show it contained at a fixed, modest height. -->
+    <div class="flex h-28 items-center justify-center bg-surface px-8">
+      <Image
+        src={image}
+        alt={`${title} logo`}
+        height={64}
+        densities={[1, 2]}
+        class="h-16 w-auto max-w-full object-contain"
+        loading="lazy"
+      />
+    </div>
+
+    <div class="flex flex-1 flex-col p-6">
+      <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum-600">
+        {platform === 'tablet' ? 'Android · tablet' : 'Android'}
+      </span>
+      <h3 class="mt-1.5 text-lg font-semibold text-ink">{title}</h3>
+      <p class="mt-1 text-sm leading-relaxed text-muted">{tagline}</p>
+
+      <ul class="mt-4 space-y-2">
+        {
+          features.map((f) => (
+            <li class="flex gap-2.5 text-sm leading-relaxed text-muted">
+              <Icon name="check" class="mt-0.5 size-4 shrink-0 text-plum-600" />
+              <span>{f}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</Reveal>

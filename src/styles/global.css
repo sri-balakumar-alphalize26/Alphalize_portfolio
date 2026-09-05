@@ -1,0 +1,366 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Design tokens. Palette is derived from the existing brand blue (#004b80)
+   so the rebuild stays recognisably Alphalize while the layout modernises.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-brand-50: #eff8ff;
+  --color-brand-100: #dbeefe;
+  --color-brand-200: #bfe2ff;
+  --color-brand-300: #93cfff;
+  --color-brand-400: #60b3ff;
+  --color-brand-500: #3b93f7;
+  --color-brand-600: #0074ac;
+  --color-brand-700: #004b80;
+  --color-brand-800: #043d72;
+  --color-brand-900: #062f56;
+  --color-brand-950: #041e39;
+
+  /* Odoo purple (#714b67 is Odoo's --o-color-1). Used for highlighted heading
+     words, script eyebrows and secondary accents — blue stays primary. */
+  --color-plum-50: #f8f4f7;
+  --color-plum-100: #f1e7ef;
+  --color-plum-200: #e2cedd;
+  --color-plum-300: #c9a9c1;
+  --color-plum-400: #a87d9d;
+  --color-plum-500: #8a5c7e;
+  --color-plum-600: #714b67;
+  --color-plum-700: #604058;
+  --color-plum-800: #4a2f44;
+  --color-plum-900: #382434;
+  --color-plum-950: #241722;
+
+  /* Odoo's --o-color-2, used sparingly for a third accent. */
+  --color-teal-600: #017e84;
+  --color-teal-500: #00a09d;
+
+  /* Odoo's o-cc2 section background. */
+  --color-surface: #f9f9f9;
+
+  /* Odoo sets headings to #111827 near-black; we use dark brand blue instead,
+     which is the "blue with purple" pairing asked for. */
+  --color-heading: #062f56;
+  --color-ink: #1a1a1a;
+  --color-muted: #454545;
+  --color-accent: #e94d65;
+
+  --font-sans:
+    'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  /* Odoo uses one family throughout — no separate display face. */
+  --font-display:
+    'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  /* Odoo's handwriting accent. */
+  --font-script: 'Caveat', ui-rounded, 'Segoe Script', cursive;
+
+  /* Odoo: h1 = 3.5rem, section headings ~2.5rem. */
+  --text-hero: clamp(2.5rem, 1.5rem + 3.2vw, 3.5rem);
+  --text-section: clamp(1.75rem, 1.15rem + 1.9vw, 2.5rem);
+
+  /* Odoo buttons use a 0.25rem radius; cards are squarer than ours were. */
+  --radius-btn: 0.25rem;
+  --radius-card: 0.5rem;
+  --shadow-card: 0 1px 2px rgb(4 30 57 / 0.04);
+  --shadow-lift: 0 2px 6px rgb(4 30 57 / 0.07), 0 12px 28px -14px rgb(4 30 57 / 0.2);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Offset anchor targets so the sticky header never covers a heading. */
+  :target {
+    scroll-margin-top: 6rem;
+  }
+
+  body {
+    background-color: white;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Odoo: Inter 600, line-height 1.2, no letter-spacing tweak. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--color-heading);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, brand-coloured focus ring for keyboard users only. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 80rem;
+    padding-inline: 1.25rem;
+  }
+
+  @media (width >= 48rem) {
+    .container-page {
+      padding-inline: 2rem;
+    }
+  }
+
+  .prose-content :where(h2) {
+    font-size: 1.5rem;
+    margin-block: 2rem 0.75rem;
+  }
+  .prose-content :where(h3) {
+    font-size: 1.25rem;
+    margin-block: 1.5rem 0.5rem;
+  }
+  .prose-content :where(p) {
+    margin-block: 1rem;
+    line-height: 1.75;
+    color: var(--color-muted);
+  }
+  .prose-content :where(ul) {
+    margin-block: 1rem;
+    padding-inline-start: 1.25rem;
+    list-style: disc;
+  }
+  .prose-content :where(li) {
+    margin-block: 0.375rem;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+  .prose-content :where(a) {
+    color: var(--color-brand-700);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose-content :where(strong) {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  /* Odoo's lead paragraph: 1.5rem at weight 300. */
+  .lead {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+  @media (width >= 48rem) {
+    .lead {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Odoo's Caveat script eyebrow, always in purple. */
+  .script-accent {
+    font-family: var(--font-script);
+    font-weight: 700;
+    font-size: 1.5rem;
+    line-height: 1.1;
+    color: var(--color-plum-600);
+  }
+
+  /* --- Buttons. Odoo shape (0.25rem radius); blue stays primary. --- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--radius-btn);
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.25;
+    border: 1px solid transparent;
+    transition:
+      background-color 0.2s var(--ease-out-soft),
+      border-color 0.2s var(--ease-out-soft),
+      color 0.2s var(--ease-out-soft);
+  }
+  .btn-primary {
+    background-color: var(--color-brand-700);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background-color: var(--color-brand-800);
+  }
+  .btn-plum {
+    background-color: var(--color-plum-600);
+    color: #fff;
+  }
+  .btn-plum:hover {
+    background-color: var(--color-plum-700);
+  }
+  .btn-outline {
+    border-color: color-mix(in srgb, currentColor 35%, transparent);
+    color: inherit;
+  }
+  .btn-outline:hover {
+    background-color: color-mix(in srgb, currentColor 8%, transparent);
+  }
+  .btn-light {
+    background-color: #fff;
+    color: var(--color-brand-800);
+  }
+  .btn-light:hover {
+    background-color: var(--color-brand-50);
+  }
+
+  /* --- Odoo colour combos (o-cc1..5): bg + heading + text set together. --- */
+  .cc-white {
+    background-color: #fff;
+    color: var(--color-muted);
+  }
+  .cc-surface {
+    background-color: var(--color-surface);
+    color: var(--color-muted);
+  }
+  .cc-blue {
+    background-color: var(--color-brand-900);
+    color: var(--color-brand-100);
+  }
+  .cc-plum {
+    background-color: var(--color-plum-600);
+    color: var(--color-plum-100);
+  }
+  .cc-ink {
+    background-color: var(--color-brand-950);
+    color: var(--color-brand-100);
+  }
+  .cc-blue :is(h1, h2, h3, h4),
+  .cc-plum :is(h1, h2, h3, h4),
+  .cc-ink :is(h1, h2, h3, h4) {
+    color: #fff;
+  }
+  .cc-blue .script-accent,
+  .cc-ink .script-accent {
+    color: var(--color-brand-300);
+  }
+  .cc-plum .script-accent {
+    color: var(--color-plum-200);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll-driven reveal. Uses native CSS scroll timelines where supported
+   (zero JS); elsewhere the @supports guard leaves content plainly visible.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    [data-reveal] {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 26%;
+    }
+    [data-reveal='up'] {
+      --reveal-y: 1.75rem;
+    }
+    [data-reveal='left'] {
+      --reveal-x: -1.75rem;
+    }
+    [data-reveal='right'] {
+      --reveal-x: 1.75rem;
+    }
+    [data-reveal='fade'] {
+      --reveal-y: 0rem;
+    }
+    [data-reveal='scale'] {
+      --reveal-scale: 0.96;
+    }
+  }
+}
+
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--reveal-x, 0), var(--reveal-y, 1.75rem), 0)
+      scale(var(--reveal-scale, 1));
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Partner logo marquee — pure CSS, replaces the Owl Carousel instance. */
+@keyframes marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 38s linear infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Astro view-transition tuning: cross-fade, no sliding. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: vt-fade-out 0.18s var(--ease-out-soft) both;
+  }
+  ::view-transition-new(root) {
+    animation: vt-fade-in 0.26s var(--ease-out-soft) both;
+  }
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}

@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Reveal from './Reveal.astro';
+import SectionHeading from './SectionHeading.astro';
+
+type Solution = NonNullable<CollectionEntry<'services'>['data']['solutions']>[number];
+
+interface Props {
+  solutions: Solution[];
+}
+
+const { solutions } = Astro.props;
+---
+
+<section
+  id="solutions"
+  class="scroll-mt-24 cc-surface border-t border-brand-100 py-16 lg:py-20"
+>
+  <div class="container-page">
+    <SectionHeading
+      eyebrow="Connected devices"
+      title="Automation, access control and unmanned retail"
+      lead="Hardware we install, running software we wrote — each one wired into the same ERP core as the rest of your operation."
+    />
+
+    <div class="mt-12 grid gap-6 lg:grid-cols-3">
+      {
+        solutions.map((s, i) => (
+          <Reveal as="article" delay={i} class="h-full">
+            <div class="flex h-full flex-col overflow-hidden rounded-[--radius-card] border border-brand-100 bg-white">
+              <Image
+                src={s.image}
+                alt={s.title}
+                widths={[480, 960]}
+                sizes="(min-width: 1024px) 400px, 90vw"
+                class="aspect-[4/3] w-full object-cover"
+                loading="lazy"
+              />
+              <div class="flex flex-1 flex-col p-6">
+                <p class="script-accent text-lg">
+                  {s.tagline}
+                </p>
+                <h3 class="mt-1.5 text-lg font-semibold text-ink">{s.title}</h3>
+                <p class="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
+              </div>
+            </div>
+          </Reveal>
+        ))
+      }
+    </div>
+  </div>
+</section>

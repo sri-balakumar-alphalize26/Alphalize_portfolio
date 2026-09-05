@@ -1,0 +1,88 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import Reveal from './Reveal.astro';
+
+/**
+ * Odoo's signature alternating row: copy on one side, visual on the other,
+ * mirrored on every second row.
+ */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  body: string;
+  points?: string[];
+  href?: string;
+  cta?: string;
+  image: ImageMetadata;
+  imageAlt: string;
+  /** `true` puts the image on the left. */
+  flip?: boolean;
+  /** Logo-style artwork sits contained on a tint; photos fill the frame. */
+  fit?: 'cover' | 'contain';
+}
+
+const {
+  eyebrow,
+  title,
+  body,
+  points = [],
+  href,
+  cta = 'Learn more',
+  image,
+  imageAlt,
+  flip = false,
+  fit = 'cover',
+} = Astro.props;
+---
+
+<div class="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+  <Reveal direction={flip ? 'right' : 'left'} class={flip ? 'lg:order-2' : undefined}>
+    {eyebrow && <p class="script-accent">{eyebrow}</p>}
+    <h3 class="mt-2 text-[length:--text-section]">{title}</h3>
+    <p class="mt-4 leading-relaxed text-muted">{body}</p>
+
+    {
+      points.length > 0 && (
+        <ul class="mt-5 space-y-2.5">
+          {points.map((p) => (
+            <li class="flex gap-2.5 text-sm leading-relaxed text-muted">
+              <Icon name="check" class="mt-0.5 size-4 shrink-0 text-plum-600" />
+              <span>{p}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      href && (
+        <a
+          href={href}
+          class="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-plum-600"
+        >
+          {cta}
+          <Icon name="arrow-right" class="size-4" />
+        </a>
+      )
+    }
+  </Reveal>
+
+  <Reveal direction={flip ? 'left' : 'right'} class={flip ? 'lg:order-1' : undefined}>
+    <div
+      class:list={[
+        'overflow-hidden rounded-[--radius-card] border border-brand-100',
+        fit === 'contain' ? 'flex h-64 items-center justify-center bg-surface p-10' : '',
+      ]}
+    >
+      <Image
+        src={image}
+        alt={imageAlt}
+        widths={[560, 1120]}
+        sizes="(min-width: 1024px) 560px, 92vw"
+        loading="lazy"
+        class={fit === 'cover' ? 'aspect-[4/3] w-full object-cover' : 'max-h-full w-auto object-contain'}
+      />
+    </div>
+  </Reveal>
+</div>

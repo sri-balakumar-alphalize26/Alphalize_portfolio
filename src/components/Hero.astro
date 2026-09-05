@@ -1,0 +1,94 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Highlight from './Highlight.astro';
+import Icon from './Icon.astro';
+
+/**
+ * Odoo-style hero: light background, one large heading with a single
+ * highlighted word, a light lead paragraph, two squared buttons, and a
+ * product visual on the right.
+ *
+ * Replaces the old 4-slide Embla carousel — no JavaScript at all.
+ */
+const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
+const showcase = apps.slice(0, 6);
+---
+
+<section class="cc-white relative isolate overflow-hidden">
+  <!-- Soft tinted wash, Odoo keeps heroes light rather than dark. -->
+  <div
+    aria-hidden="true"
+    class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_70%_at_15%_0%,var(--color-brand-50),transparent_60%),radial-gradient(ellipse_50%_60%_at_95%_20%,var(--color-plum-50),transparent_55%)]"
+  >
+  </div>
+
+  <div class="container-page py-16 lg:py-24">
+    <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
+      <div class="lg:col-span-6">
+        <p class="script-accent">Odoo ERP partners</p>
+
+        <h1 class="mt-3 text-[length:--text-hero]">
+          Run your whole business <Highlight underline>on one system</Highlight>
+        </h1>
+
+        <p class="lead mt-6 max-w-xl text-muted">
+          Alphalize builds and implements Odoo ERP, business intelligence and the mobile, desktop
+          and IoT software around it — so your counter, your warehouse and your back office all
+          see the same numbers.
+        </p>
+
+        <div class="mt-9 flex flex-wrap gap-3">
+          <a href="/contact" class="btn btn-primary">
+            Talk to us
+            <Icon name="arrow-right" class="size-4" />
+          </a>
+          <a href="/services" class="btn btn-outline text-heading"> Explore services </a>
+        </div>
+
+        <p class="mt-6 text-sm text-muted">
+          Offices in Clearwater, Florida and Kollam, Kerala &middot; 24/7 support
+        </p>
+      </div>
+
+      <!-- Product visual: the app line-up, which is the most concrete thing we have. -->
+      <div class="lg:col-span-6">
+        <div
+          class="rounded-[--radius-card] border border-brand-100 bg-white p-5 shadow-[--shadow-lift] sm:p-7"
+        >
+          <div class="flex items-center gap-1.5 pb-4">
+            <span class="size-2.5 rounded-full bg-brand-100"></span>
+            <span class="size-2.5 rounded-full bg-brand-100"></span>
+            <span class="size-2.5 rounded-full bg-brand-100"></span>
+            <span class="ml-2 text-xs text-muted">Your Odoo back office</span>
+          </div>
+
+          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {
+              showcase.map((app) => (
+                <li class="flex h-20 items-center justify-center rounded-[--radius-btn] border border-brand-100 bg-surface px-4">
+                  <Image
+                    src={app.data.image}
+                    alt={app.data.title}
+                    height={36}
+                    densities={[1, 2]}
+                    loading="eager"
+                    class="h-9 w-auto object-contain"
+                  />
+                </li>
+              ))
+            }
+          </ul>
+
+          <a
+            href="/services/mobile-app-development#apps"
+            class="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand-700 hover:text-plum-600"
+          >
+            All {apps.length} apps
+            <Icon name="arrow-right" class="size-4" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

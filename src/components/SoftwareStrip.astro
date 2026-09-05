@@ -1,0 +1,107 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+import Reveal from './Reveal.astro';
+import SectionHeading from './SectionHeading.astro';
+
+/**
+ * Homepage "software we build" strip: three tiles deep-linking into the
+ * service pages that carry the detail, plus a CSS marquee of the app
+ * screenshots (same `.marquee-track` keyframes as the partner logos).
+ */
+const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
+const track = [...apps, ...apps];
+
+const tiles: { icon: IconName; title: string; body: string; href: string; cta: string }[] = [
+  {
+    icon: 'smartphone',
+    title: 'Mobile apps',
+    body: `${apps.length || 'Ten'} Android apps — attendance, chat, POS, rentals and store checks — each one signed into your Odoo server.`,
+    href: '/services/mobile-app-development#apps',
+    cta: 'See the apps',
+  },
+  {
+    icon: 'monitor',
+    title: 'Desktop software',
+    body: 'Offline-first Windows billing and back-office applications that keep working when the connection does not.',
+    href: '/services/erp-solutions#desktop',
+    cta: 'Desktop software',
+  },
+  {
+    icon: 'cpu',
+    title: 'IoT & automation',
+    body: 'Smart locks, vending machines and robotics — all reporting into the same ERP core.',
+    href: '/services/iot-and-automation',
+    cta: 'Connected devices',
+  },
+];
+---
+
+<section class="cc-surface border-t border-brand-100 py-18 lg:py-24">
+  <div class="container-page">
+    <SectionHeading
+      eyebrow="Software we build"
+      title="Every app you run. Every tool you use. One core."
+      lead="Mobile, desktop and connected devices — all landing in a single Odoo back office, with nothing re-typed in between."
+    />
+
+    <div class="mt-12 grid gap-6 md:grid-cols-3">
+      {
+        tiles.map((t, i) => (
+          <Reveal as="article" delay={i} class="group h-full">
+            <a
+              href={t.href}
+              class="flex h-full flex-col rounded-[--radius-card] border border-brand-100 bg-white p-6 transition-[border-color,box-shadow] duration-300 ease-[--ease-out-soft] hover:border-plum-300 hover:shadow-[--shadow-lift]"
+            >
+              <span class="flex size-12 items-center justify-center rounded-[--radius-btn] bg-plum-50 text-plum-600 transition-colors duration-300 group-hover:bg-plum-600 group-hover:text-white">
+                <Icon name={t.icon} class="size-6" />
+              </span>
+              <h3 class="mt-5 text-lg font-semibold text-ink">{t.title}</h3>
+              <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{t.body}</p>
+              <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700">
+                {t.cta}
+                <Icon
+                  name="arrow-right"
+                  class="size-4 transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </span>
+            </a>
+          </Reveal>
+        ))
+      }
+    </div>
+  </div>
+
+  {
+    apps.length > 0 && (
+      <div class="marquee relative mt-14 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+        <ul class="marquee-track items-end gap-8 px-4">
+          {track.map((app, i) => {
+            const decorative = i >= apps.length;
+            return (
+              <li class="shrink-0">
+                <a
+                  href="/services/mobile-app-development#apps"
+                  tabindex={decorative ? -1 : undefined}
+                  aria-hidden={decorative ? 'true' : undefined}
+                  class="flex h-20 items-center rounded-[--radius-card] border border-brand-100 bg-white px-6 transition-colors duration-300 hover:border-plum-300"
+                >
+                  <Image
+                    src={app.data.image}
+                    alt={decorative ? '' : `${app.data.title} logo`}
+                    height={40}
+                    densities={[1, 2]}
+                    loading="lazy"
+                    class="h-10 w-auto object-contain"
+                  />
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )
+  }
+</section>

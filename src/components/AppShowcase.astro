@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import AppCard from './AppCard.astro';
+import SectionHeading from './SectionHeading.astro';
+
+/** Rendered on /services/mobile-app-development via `showcase: apps`. */
+const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
+---
+
+{
+  apps.length > 0 && (
+    <section
+      id="apps"
+      class="scroll-mt-24 cc-surface border-t border-brand-100 py-16 lg:py-20"
+    >
+      <div class="container-page">
+        <SectionHeading
+          eyebrow="Our apps"
+          title="Ten apps. One connected back office."
+          lead="Purpose-built Android apps for the people who do not sit at a desk — each one signs into your Odoo server and works with live company data. Built in-house, deployed on your own server, supported 24/7."
+        />
+
+        <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {apps.map((app, i) => (
+            <AppCard app={app} delay={i % 3} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}

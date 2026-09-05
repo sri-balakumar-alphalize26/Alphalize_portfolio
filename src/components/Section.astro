@@ -1,0 +1,63 @@
+---
+/**
+ * Odoo's "colour combo" system (o-cc1…o-cc5): background, heading colour and
+ * body colour move together, and pages alternate between combos down the page.
+ * The `cc-*` classes live in global.css.
+ */
+type Variant = 'white' | 'surface' | 'blue' | 'plum' | 'ink';
+type Space = 'none' | 'sm' | 'md' | 'lg';
+
+interface Props {
+  variant?: Variant;
+  /** Vertical rhythm. `none` when the child manages its own padding. */
+  space?: Space;
+  /** Wrap children in the standard page container. */
+  contained?: boolean;
+  id?: string;
+  class?: string;
+  as?: 'section' | 'div' | 'footer';
+}
+
+// Annotated explicitly: local type aliases in Astro frontmatter stop the
+// generated Astro.props type from resolving, which widens these to `any`.
+const {
+  variant = 'white',
+  space = 'lg',
+  contained = true,
+  id,
+  class: className,
+  as: Tag = 'section',
+}: Props = Astro.props;
+
+const combos: Record<Variant, string> = {
+  white: 'cc-white',
+  surface: 'cc-surface',
+  blue: 'cc-blue',
+  plum: 'cc-plum',
+  ink: 'cc-ink',
+};
+const cc = combos[variant];
+
+const spacing: Record<Space, string> = {
+  none: '',
+  sm: 'py-10 lg:py-12',
+  md: 'py-14 lg:py-18',
+  lg: 'py-16 lg:py-24',
+};
+const padding = spacing[space];
+
+// A hairline between two light sections keeps the rhythm readable.
+const border = variant === 'white' || variant === 'surface' ? 'border-t border-brand-100/70' : '';
+---
+
+<Tag id={id} class:list={[cc, padding, border, className]}>
+  {
+    contained ? (
+      <div class="container-page">
+        <slot />
+      </div>
+    ) : (
+      <slot />
+    )
+  }
+</Tag>

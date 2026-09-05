@@ -4,6 +4,14 @@ import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
 import { contact } from '@/config/site';
 
+/**
+ * Closing CTA band: plum card, handwritten headline with Sparkle's burst lines,
+ * two buttons.
+ *
+ * A slow highlight drifts across the card so the block is never quite static,
+ * the headline rises out of a mask as the card arrives, and the primary button
+ * answers a hover with a shine sweep.
+ */
 interface Props {
   title?: string;
   body?: string;
@@ -18,29 +26,123 @@ const {
 <section class="container-page py-16 lg:py-20">
   <Reveal
     direction="scale"
-    class="cc-plum relative isolate overflow-hidden rounded-card px-6 pt-8 pb-14 text-center sm:px-12 lg:pt-12 lg:pb-18"
+    class="cc-plum rounded-card relative isolate overflow-hidden px-6 pt-8 pb-14 text-center sm:px-12 lg:pt-12 lg:pb-18"
   >
     <div
       aria-hidden="true"
       class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_70%_80%_at_50%_-10%,rgba(255,255,255,0.18),transparent_65%)]"
     >
     </div>
+    <span class="cta-sheen" aria-hidden="true"></span>
 
     <!-- Odoo's "Unleash your growth potential" treatment: burst lines around the heading. -->
     <Sparkle color="yellow" hearts={false} class="mx-auto max-w-2xl">
-      <Heading as="h2" size="lg" align="center" class="text-white">{title}</Heading>
+      <span class="cta-mask">
+        <Heading as="h2" size="lg" align="center" class="cta-line text-white">{title}</Heading>
+      </span>
     </Sparkle>
-    <p class="lead mx-auto mt-4 max-w-2xl text-plum-100">{body}</p>
+    <p class="lead text-plum-100 mx-auto mt-4 max-w-2xl">{body}</p>
 
     <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-      <a href="/contact" class="btn btn-light">
+      <a href="/contact" class="btn btn-light cta-go">
         Start a conversation
         <Icon name="arrow-right" class="size-4" />
       </a>
-      <a href={contact.phoneHref} class="btn btn-outline text-white">
+      <a href={contact.phoneHref} class="btn btn-outline cta-call text-white">
         <Icon name="phone" class="size-4" />
         {contact.phone}
       </a>
     </div>
   </Reveal>
 </section>
+
+<style>
+  /* A light that never settles, so the card reads as lit rather than filled. */
+  .cta-sheen {
+    position: absolute;
+    z-index: -1;
+    inset: -40% -10%;
+    pointer-events: none;
+    background: radial-gradient(38% 46% at 22% 30%, rgb(255 255 255 / 0.16), transparent 70%);
+  }
+
+  /* The headline rises out of a mask as the card arrives. */
+  .cta-mask {
+    display: block;
+    overflow: hidden;
+  }
+
+  .cta-go,
+  .cta-call {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .cta-go :global(svg),
+  .cta-call :global(svg) {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .cta-go::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    pointer-events: none;
+    background: linear-gradient(
+      105deg,
+      transparent,
+      color-mix(in srgb, var(--color-brand-900) 16%, transparent),
+      transparent
+    );
+    transform: skewX(-18deg);
+  }
+  .cta-go:hover :global(svg),
+  .cta-go:focus-visible :global(svg) {
+    transform: translateX(5px);
+  }
+  .cta-call:hover :global(svg),
+  .cta-call:focus-visible :global(svg) {
+    transform: rotate(-12deg) scale(1.12);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cta-sheen {
+      animation: cta-drift 14s ease-in-out infinite alternate;
+    }
+    .cta-go:hover::after,
+    .cta-go:focus-visible::after {
+      animation: cta-shine 0.9s ease-out;
+    }
+    @supports (animation-timeline: view()) {
+      /* :global, because the heading is rendered by <Heading> and so never
+         carries this component's scope attribute. */
+      .cta-mask :global(.cta-line) {
+        animation: cta-rise 1s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        animation-timeline: view();
+        animation-range: entry 10% cover 28%;
+      }
+    }
+  }
+
+  @keyframes cta-drift {
+    from {
+      transform: translate3d(-6%, -4%, 0) scale(1);
+    }
+    to {
+      transform: translate3d(12%, 6%, 0) scale(1.15);
+    }
+  }
+  @keyframes cta-shine {
+    to {
+      left: 130%;
+    }
+  }
+  /* `to` is omitted on purpose: it resolves to the heading's resting position. */
+  @keyframes cta-rise {
+    from {
+      translate: 0 105%;
+    }
+  }
+</style>

@@ -1,0 +1,202 @@
+---
+import Section from './Section.astro';
+
+/**
+ * The navy stat band, counted on an odometer rather than by incrementing text.
+ *
+ * Every digit is a reel of 0-9 repeated three times; on reveal each reel slides
+ * down to its digit, rolling through two whole cycles on the way. Symbols
+ * (+, %, /) are static and pop in behind the numbers.
+ *
+ * The final values are in the HTML, and the parked state is applied by the
+ * script — so with JS off, or under reduced motion, the band simply reads
+ * correctly. A scroll timeline would have been less code but it scrubs, and a
+ * stat left frozen on a half-rolled digit reads as a wrong number.
+ */
+interface Stat {
+  value: string;
+  label: string;
+}
+
+const stats: Stat[] = [
+  { value: '7+', label: 'Service lines' },
+  { value: '15', label: 'ERP modules' },
+  { value: '100%', label: 'Tailored builds' },
+  { value: '24/7', label: 'Support cover' },
+];
+
+/** Cycles of 0-9 the reel travels through before it lands. */
+const REPEAT = 3;
+const REEL = [...Array(REPEAT * 10)].map((_, i) => i % 10);
+const DIGITS = '0123456789';
+
+// Tokenised here so the template holds no parsing.
+const rows = stats.map((stat, si) => {
+  let d = -1;
+  const tokens = [...stat.value].map((char) => {
+    const isDigit = DIGITS.includes(char);
+    if (isDigit) d += 1;
+    return {
+      isDigit,
+      char,
+      /** Two full cycles, then the digit itself. */
+      index: isDigit ? (REPEAT - 1) * 10 + Number(char) : 0,
+      delay: isDigit ? si * 130 + d * 110 : 560 + si * 130,
+    };
+  });
+  return { ...stat, tokens, labelDelay: 700 + si * 130 };
+});
+---
+
+<Section variant="blue" space="md">
+  <div class="sb-grid" data-stat-band>
+    {
+      rows.map((row) => (
+        <div>
+          <p class="sb-num" aria-label={row.value}>
+            {row.tokens.map((token) =>
+              token.isDigit ? (
+                <span
+                  class="sb-reel"
+                  aria-hidden="true"
+                  style={`--i:${token.index};--d:${token.delay}ms`}
+                >
+                  <span class="sb-strip">
+                    {REEL.map((n) => (
+                      <span class="sb-digit">{n}</span>
+                    ))}
+                  </span>
+                </span>
+              ) : (
+                <span class="sb-sym" aria-hidden="true" style={`--d:${token.delay}ms`}>
+                  {token.char}
+                </span>
+              )
+            )}
+          </p>
+          <p class="sb-label" style={`--d:${row.labelDelay}ms`}>
+            {row.label}
+          </p>
+        </div>
+      ))
+    }
+  </div>
+</Section>
+
+<style>
+  .sb-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.375rem 1.5rem;
+    text-align: center;
+  }
+  @media (width >= 64rem) {
+    .sb-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+  }
+
+  .sb-num {
+    /* The height of one window in the reel; every part below is sized off it. */
+    --h: 1.05em;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    font-size: 2.25rem;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+  @media (width >= 64rem) {
+    .sb-num {
+      font-size: 3rem;
+    }
+  }
+
+  .sb-reel {
+    display: inline-block;
+    height: var(--h);
+    overflow: hidden;
+    vertical-align: top;
+  }
+  .sb-strip {
+    display: block;
+    transform: translateY(calc(var(--i) * var(--h) * -1));
+  }
+  .sb-digit {
+    display: block;
+    height: var(--h);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--h);
+  }
+  .sb-sym {
+    display: inline-block;
+    height: var(--h);
+    line-height: var(--h);
+  }
+
+  .sb-label {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-brand-200);
+  }
+
+  /* Parked state, applied by the script only — without it the band is already
+     showing its final numbers. */
+  [data-armed] .sb-strip {
+    transform: translateY(0);
+    transition: transform 1.5s cubic-bezier(0.62, 0.03, 0.21, 1) var(--d, 0ms);
+  }
+  [data-armed] .sb-sym {
+    opacity: 0;
+    transform: translateY(12px) scale(0.7);
+    transition:
+      opacity 0.5s ease var(--d, 0ms),
+      transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) var(--d, 0ms);
+  }
+  [data-armed] .sb-label {
+    opacity: 0;
+    transform: translateY(10px);
+    transition:
+      opacity 0.6s ease var(--d, 0ms),
+      transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) var(--d, 0ms);
+  }
+
+  [data-armed][data-rolling] .sb-strip {
+    transform: translateY(calc(var(--i) * var(--h) * -1));
+  }
+  [data-armed][data-rolling] .sb-sym,
+  [data-armed][data-rolling] .sb-label {
+    opacity: 1;
+    transform: none;
+  }
+</style>
+
+<script>
+  function mountStatBand() {
+    document.querySelectorAll<HTMLElement>('[data-stat-band]').forEach((band) => {
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      // Park the reels first; the markup ships showing the real numbers so that
+      // nothing depends on this script having run.
+      band.dataset.armed = '';
+
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            band.dataset.rolling = '';
+            io.disconnect();
+          }
+        },
+        { threshold: 0.4 }
+      );
+      io.observe(band);
+    });
+  }
+
+  document.addEventListener('astro:page-load', mountStatBand);
+</script>

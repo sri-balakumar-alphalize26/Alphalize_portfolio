@@ -1,0 +1,349 @@
+---
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+
+/**
+ * The app line-up as an auto-scrolling logo strip.
+ *
+ * Clicking a tile lifts a clone of it out of the strip, flies it to the middle
+ * of the screen flipping three times, then floods the page with brand blue and
+ * navigates. The clone and the flood go in an overlay the script appends to
+ * <body>: the strip both clips (`overflow: hidden`) and masks its edges, and a
+ * mask makes its element the containing block for `position: fixed` children —
+ * so an overlay nested inside would fly *within* the strip, not over the page.
+ *
+ * The scroll speed is set in JS from the track's width (~110px/s), so adding an
+ * app makes the loop longer rather than faster.
+ *
+ * Class prefix is `am-`, deliberately not `pm-`: the flood and the clone are
+ * built in JS and so need unscoped styles, and `pm-` is already taken by
+ * PartnerMosaic on this same page.
+ */
+const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
+
+/** Doubled so the -50% translate loops seamlessly. */
+const track = [...apps, ...apps];
+
+/** Each tile lands on its own card in the showcase, which flags itself on :target. */
+const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
+---
+
+{
+  apps.length > 0 && (
+    <div class="am" data-app-marquee>
+      <ul class="am-track" data-track>
+        {track.map((app, i) => {
+          const decorative = i >= apps.length;
+          return (
+            <li>
+              <a
+                class="am-tile"
+                href={hrefFor(app.id)}
+                data-tile
+                tabindex={decorative ? -1 : undefined}
+                aria-hidden={decorative ? 'true' : undefined}
+              >
+                <Image
+                  src={app.data.image}
+                  alt={decorative ? '' : `${app.data.title} logo`}
+                  height={40}
+                  densities={[1, 2]}
+                  loading="lazy"
+                  draggable={false}
+                />
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )
+}
+
+<style>
+  .am {
+    position: relative;
+    margin-top: 2.25rem;
+    overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  }
+  .am-track {
+    display: flex;
+    width: max-content;
+    gap: 1.25rem;
+    /* Room for the hover lift and its shadow, which `overflow: hidden` on the
+       strip would otherwise shave off. */
+    padding: 1.75rem 0.75rem;
+    list-style: none;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .am-track {
+      animation: am-scroll var(--am-dur, 34s) linear infinite;
+    }
+    .am:hover .am-track,
+    .am:focus-within .am-track,
+    .am-track.is-paused {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes am-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .am-tile {
+    display: grid;
+    place-items: center;
+    width: 11.25rem;
+    height: 5.75rem;
+    padding: 0 1.25rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      border-color 0.35s ease,
+      box-shadow 0.35s ease,
+      opacity 0.2s ease;
+  }
+  .am-tile :global(img) {
+    max-width: 100%;
+    max-height: 2.5rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .am-tile:hover,
+  .am-tile:focus-visible {
+    transform: translateY(-6px);
+    border-color: var(--color-plum-300);
+    box-shadow: var(--shadow-lift);
+  }
+  .am-tile:hover :global(img) {
+    transform: scale(1.06);
+  }
+  .am-tile:active {
+    transform: translateY(-2px) scale(0.97);
+  }
+  /* The original hides while its clone flies. */
+  .am-tile.is-flying {
+    opacity: 0;
+  }
+
+  @media (max-width: 640px) {
+    .am-tile {
+      width: 9.25rem;
+      height: 4.875rem;
+    }
+  }
+</style>
+
+{/* The clone and the flood are built in JS, so their styles cannot be scoped. */}
+<style is:global>
+  .am-stage {
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    pointer-events: none;
+  }
+  .am-fly {
+    position: fixed;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .am-fly.is-going {
+    animation:
+      am-lift 0.95s cubic-bezier(0.22, 0.9, 0.32, 1.05) forwards,
+      am-spin 1s cubic-bezier(0.45, 0.05, 0.3, 1) forwards;
+  }
+  .am-fly.is-leaving {
+    animation: none;
+    transform: translate(var(--dx), var(--dy)) scale(var(--sc));
+    opacity: 0;
+    transition: opacity 0.3s ease 0.12s;
+  }
+  /* Two faces, so the logo is never seen mirrored mid-flip. */
+  .am-face {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    inset: 0;
+    padding: 0 1.25rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: 0 26px 60px rgb(4 30 57 / 0.22);
+    backface-visibility: hidden;
+  }
+  .am-face.is-back {
+    transform: rotateY(180deg);
+  }
+  .am-face img {
+    max-width: 100%;
+    max-height: 44%;
+    width: auto;
+    object-fit: contain;
+    pointer-events: none;
+  }
+  @keyframes am-lift {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    55% {
+      transform: translate(calc(var(--dx) * 0.6), calc(var(--dy) * 0.6 - 14px))
+        scale(calc(var(--sc) * 0.8));
+    }
+    100% {
+      transform: translate(var(--dx), var(--dy)) scale(var(--sc));
+    }
+  }
+  @keyframes am-spin {
+    from {
+      rotate: y 0deg;
+    }
+    to {
+      rotate: y 1080deg;
+    }
+  }
+
+  .am-wash {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      var(--color-brand-500),
+      var(--color-brand-700) 60%,
+      var(--color-brand-900)
+    );
+    opacity: 0;
+    transform: scale(0);
+  }
+  .am-wash.is-on {
+    animation: am-wash 0.62s cubic-bezier(0.5, 0, 0.3, 1) forwards;
+  }
+  @keyframes am-wash {
+    from {
+      opacity: 0.9;
+      transform: scale(0);
+    }
+    to {
+      opacity: 1;
+      transform: scale(320);
+    }
+  }
+</style>
+
+<script>
+  function mountAppMarquee() {
+    document.querySelectorAll<HTMLElement>('[data-app-marquee]').forEach((root) => {
+      const track = root.querySelector<HTMLElement>('[data-track]');
+      if (!track) return;
+
+      // Built here and parented to <body>, not to the strip: the strip's mask
+      // would otherwise be the containing block for these fixed elements and
+      // clip the flight to the width of a tile.
+      document.querySelectorAll('.am-stage').forEach((n) => n.remove());
+      const stage = document.createElement('div');
+      stage.className = 'am-stage';
+      stage.hidden = true;
+      const wash = document.createElement('span');
+      wash.className = 'am-wash';
+      stage.appendChild(wash);
+      document.body.appendChild(stage);
+
+      // Constant ~110px/s: another app lengthens the loop instead of speeding it up.
+      const setSpeed = () => {
+        const w = track.scrollWidth / 2;
+        if (w > 0) track.style.setProperty('--am-dur', `${Math.max(18, w / 110)}s`);
+      };
+      setSpeed();
+      if ('ResizeObserver' in window) new ResizeObserver(setSpeed).observe(track);
+
+      const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+      let busy = false;
+
+      const reset = () => {
+        stage.hidden = true;
+        stage.querySelectorAll('.am-fly').forEach((n) => n.remove());
+        wash.classList.remove('is-on');
+        track.classList.remove('is-paused');
+        track.querySelectorAll('.is-flying').forEach((n) => n.classList.remove('is-flying'));
+        busy = false;
+      };
+
+      track.querySelectorAll<HTMLAnchorElement>('[data-tile]').forEach((tile) => {
+        tile.addEventListener('click', (event) => {
+          // Reduced motion, a modified click or a flight already in progress all
+          // fall through to the browser's own navigation.
+          if (reduced.matches || busy) return;
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+          if (event.button !== 0) return;
+
+          const img = tile.querySelector('img');
+          const href = tile.getAttribute('href');
+          if (!img || !href) return;
+
+          event.preventDefault();
+          busy = true;
+
+          const box = tile.getBoundingClientRect();
+          const fly = document.createElement('div');
+          fly.className = 'am-fly';
+          fly.style.cssText = `left:${box.left}px;top:${box.top}px;width:${box.width}px;height:${box.height}px`;
+
+          const face = (back: boolean) => {
+            const el = document.createElement('span');
+            el.className = back ? 'am-face is-back' : 'am-face';
+            const clone = document.createElement('img');
+            clone.src = img.currentSrc || img.src;
+            clone.alt = '';
+            el.appendChild(clone);
+            return el;
+          };
+          fly.appendChild(face(false));
+          fly.appendChild(face(true));
+
+          stage.hidden = false;
+          stage.appendChild(fly);
+          track.classList.add('is-paused');
+          tile.classList.add('is-flying');
+
+          // Fly to the middle of the viewport, growing to ~36% of its width.
+          fly.style.setProperty('--dx', `${innerWidth / 2 - (box.left + box.width / 2)}px`);
+          fly.style.setProperty('--dy', `${innerHeight / 2 - (box.top + box.height / 2)}px`);
+          fly.style.setProperty('--sc', String(Math.min(1.9, (innerWidth * 0.36) / box.width)));
+          requestAnimationFrame(() => fly.classList.add('is-going'));
+
+          fly.addEventListener('animationend', (e) => {
+            if ((e as AnimationEvent).animationName !== 'am-spin') return;
+            wash.style.left = `${innerWidth / 2}px`;
+            wash.style.top = `${innerHeight / 2}px`;
+            wash.classList.add('is-on');
+            fly.classList.add('is-leaving');
+            // A full load rather than the router: the flood already covers the
+            // screen, and this way nothing has to survive the DOM swap.
+            setTimeout(() => {
+              location.href = href;
+            }, 460);
+          });
+        });
+      });
+
+      // Coming back through the bfcache must not leave the flood on screen.
+      addEventListener('pageshow', (e) => {
+        if (e.persisted) reset();
+      });
+      // The overlay lives outside the component now, so it has to be cleared up
+      // by hand when the router swaps this page out.
+      document.addEventListener('astro:before-swap', () => stage.remove(), { once: true });
+    });
+  }
+
+  document.addEventListener('astro:page-load', mountAppMarquee);
+</script>

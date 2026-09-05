@@ -15,10 +15,11 @@ const { title, tagline, image, features, platform } = app.data;
 
 <Reveal as="article" delay={delay} class="h-full">
   <div
-    class="flex h-full flex-col overflow-hidden rounded-card border border-brand-100 bg-white transition-[border-color,box-shadow] duration-300 ease-out-soft hover:border-plum-300 hover:shadow-lift"
+    id={`app-${app.id}`}
+    class="app-card rounded-card border-brand-100 ease-out-soft hover:border-plum-300 hover:shadow-lift flex h-full flex-col overflow-hidden border bg-white transition-[border-color,box-shadow] duration-300"
   >
     <!-- Artwork is a transparent wordmark logo: show it contained at a fixed, modest height. -->
-    <div class="flex h-28 items-center justify-center bg-surface px-8">
+    <div class="bg-surface flex h-28 items-center justify-center px-8">
       <Image
         src={image}
         alt={`${title} logo`}
@@ -30,17 +31,17 @@ const { title, tagline, image, features, platform } = app.data;
     </div>
 
     <div class="flex flex-1 flex-col p-6">
-      <span class="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum-600">
+      <span class="text-plum-600 text-[11px] font-semibold tracking-[0.16em] uppercase">
         {platform === 'tablet' ? 'Android · tablet' : 'Android'}
       </span>
-      <h3 class="mt-1.5 text-lg font-semibold text-ink">{title}</h3>
-      <p class="mt-1 text-sm leading-relaxed text-muted">{tagline}</p>
+      <h3 class="text-ink mt-1.5 text-lg font-semibold">{title}</h3>
+      <p class="text-muted mt-1 text-sm leading-relaxed">{tagline}</p>
 
       <ul class="mt-4 space-y-2">
         {
           features.map((f) => (
-            <li class="flex gap-2.5 text-sm leading-relaxed text-muted">
-              <Icon name="check" class="mt-0.5 size-4 shrink-0 text-plum-600" />
+            <li class="text-muted flex gap-2.5 text-sm leading-relaxed">
+              <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
               <span>{f}</span>
             </li>
           ))
@@ -49,3 +50,34 @@ const { title, tagline, image, features, platform } = app.data;
     </div>
   </div>
 </Reveal>
+
+<style>
+  /* Arriving from the app marquee, which links to #app-<id>: clear the sticky
+     header, then ripple twice so the right card is obvious in a grid of ten. */
+  .app-card {
+    scroll-margin-top: 6rem;
+  }
+  .app-card:target {
+    border-color: var(--color-plum-400);
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--color-plum-600) 22%, transparent),
+      var(--shadow-lift);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .app-card:target {
+      animation: app-flag 1.2s var(--ease-out-soft) 2;
+    }
+  }
+  @keyframes app-flag {
+    from {
+      box-shadow:
+        0 0 0 0 color-mix(in srgb, var(--color-plum-600) 45%, transparent),
+        var(--shadow-lift);
+    }
+    to {
+      box-shadow:
+        0 0 0 14px color-mix(in srgb, var(--color-plum-600) 0%, transparent),
+        var(--shadow-lift);
+    }
+  }
+</style>

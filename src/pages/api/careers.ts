@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 // Bindings, vars and secrets from wrangler.toml / .dev.vars (adapter 14 API).
 import { env } from 'cloudflare:workers';
+import { PDFDocument } from 'pdf-lib';
 import { sendNotification } from '@/lib/email';
 import { checkRateLimit, clientIp } from '@/lib/rate-limit';
 import { verifyTurnstile } from '@/lib/turnstile';
@@ -12,6 +13,12 @@ import {
   safeFilename,
   sniffResume,
 } from '@/lib/validation';
+
+/**
+ * Ceiling for the PDF re-save below. Well under MAX_RESUME_BYTES: the point is
+ * to stay clear of the Workers CPU limit, not to compress every file.
+ */
+const COMPRESS_MAX_BYTES = 2 * 1024 * 1024;
 
 export const prerender = false;
 
@@ -128,18 +135,41 @@ export const POST: APIRoute = async ({ request }) => {
 
   const displayName = safeFilename(resume.name, `cv.${sniffed}`);
 
+  // --- Best-effort shrink. Re-saving with object streams deduplicates the
+  // bloat Word and Docs exporters leave behind. It cannot re-encode images, so
+  // photo-heavy CVs pass through nearly unchanged, and encrypted or quirky
+  // PDFs throw — those are stored exactly as uploaded. Keep the smaller of the
+  // two: pdf-lib can occasionally grow an already-tight file.
+  //
+  // Gated on size on purpose. This runs on Workers, where exceeding the CPU
+  // limit is NOT catchable — the request is killed and the application is lost,
+  // which is far worse than storing a file that is a little larger. Anything
+  // above the threshold is passed through untouched.
+  let stored = bytes;
+  if (sniffed === 'pdf' && bytes.length <= COMPRESS_MAX_BYTES) {
+    try {
+      const doc = await PDFDocument.load(bytes);
+      const packed = await doc.save({ useObjectStreams: true });
+      if (packed.length < stored.length) stored = packed;
+    } catch {
+      /* not a PDF pdf-lib can parse; store as uploaded */
+    }
+  }
+
   // Store under a random key — never a client-supplied path.
   let storedUrl: string | undefined;
   if (env.RESUMES) {
     const key = `applications/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${sniffed}`;
     try {
-      await env.RESUMES.put(key, bytes, {
+      await env.RESUMES.put(key, stored, {
         httpMetadata: { contentType: resume.type },
         customMetadata: {
           applicant: data.name,
           email: data.email,
+          phone: data.phone,
           position: data.position,
           originalName: displayName,
+          submittedAt: new Date().toISOString(),
         },
       });
       storedUrl = key;
@@ -160,12 +190,17 @@ export const POST: APIRoute = async ({ request }) => {
       { label: 'Position', value: data.position },
       { label: 'Email', value: data.email },
       { label: 'Phone', value: data.phone },
-      { label: 'CV', value: `${displayName} (${Math.round(resume.size / 1024)}KB)` },
+      {
+        label: 'CV',
+        value: `${displayName} (${Math.round(stored.length / 1024)}KB${
+          stored.length < bytes.length ? `, from ${Math.round(bytes.length / 1024)}KB` : ''
+        })`,
+      },
       ...(storedUrl ? [{ label: 'Stored at', value: storedUrl }] : []),
       ...(data.message ? [{ label: 'Message', value: data.message, pre: true }] : []),
       { label: 'Received', value: new Date().toISOString() },
     ],
-    attachments: [{ filename: displayName, content: toBase64(bytes) }],
+    attachments: [{ filename: displayName, content: toBase64(stored) }],
   });
 
   if (!sent.ok) {

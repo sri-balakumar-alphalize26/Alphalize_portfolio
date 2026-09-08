@@ -49,17 +49,33 @@ import Turnstile from './Turnstile.astro';
     />
   </div>
 
-  <div class="mt-5">
-    <Turnstile />
+  {/* No wrapper margin: interaction-only means this is usually zero-height,
+      and a fixed margin would leave a gap. When a challenge does appear, the
+      submit row below supplies the separation. */}
+  <Turnstile />
+
+  <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+    <button
+      type="submit"
+      class="btn btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+    >
+      <span data-submit-label>Send message</span>
+      <Icon name="arrow-right" class="size-4" />
+    </button>
+
+    {/* Opens WhatsApp with the entered details already written. Not a submit:
+        it never posts, so the enquiry only reaches us if they press send there.
+        WhatsAppManage wires the click and resolves the number. */}
+    <button type="button" data-wa-send class="btn btn-outline w-full sm:w-auto">
+      Send on WhatsApp
+      <Icon name="whatsapp" class="size-4" />
+    </button>
   </div>
 
-  <button
-    type="submit"
-    class="btn btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-  >
-    Send message
-    <Icon name="arrow-right" class="size-4" />
-  </button>
+  <p class="mt-3 text-xs text-muted">
+    Fill this in and "Send on WhatsApp" opens a chat with your details already written — press send
+    there.
+  </p>
 
   <p class="mt-3 text-xs text-muted">
     We use your details only to respond to this enquiry. See our

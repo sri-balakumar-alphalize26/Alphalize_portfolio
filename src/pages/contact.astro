@@ -3,6 +3,7 @@ import ContactForm from '@/components/ContactForm.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import Reveal from '@/components/Reveal.astro';
+import WhatsAppManage from '@/components/WhatsAppManage.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { contact, offices } from '@/config/site';
 
@@ -35,6 +36,26 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
             </span>
             <span>
               <span class="text-ink block text-sm font-semibold">Call us</span>
+              <span class="text-muted mt-0.5 block text-sm">{contact.phone}</span>
+            </span>
+          </a>
+
+          {/* href is a working fallback; WhatsAppManage rewrites it to the
+              resolved number once its script runs. */}
+          <a
+            href={`https://wa.me/${contact.phone.replace(/\D/g, '')}`}
+            data-wa-link
+            target="_blank"
+            rel="noopener"
+            class="rounded-card border-brand-100 hover:border-brand-200 hover:bg-brand-50/50 flex gap-4 border p-5 transition-colors"
+          >
+            <span
+              class="rounded-btn bg-plum-600 flex size-11 shrink-0 items-center justify-center text-white"
+            >
+              <Icon name="whatsapp" class="size-5" />
+            </span>
+            <span>
+              <span class="text-ink block text-sm font-semibold">Chat on WhatsApp</span>
               <span class="text-muted mt-0.5 block text-sm">{contact.phone}</span>
             </span>
           </a>
@@ -94,6 +115,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
       <!-- Form -->
       <div class="lg:col-span-7">
+        <WhatsAppManage />
         <Reveal direction="right">
           <ContactForm />
         </Reveal>

@@ -1,0 +1,135 @@
+---
+import { contact } from '@/config/site';
+import ManageBar from './ManageBar.astro';
+
+/**
+ * Resolves the WhatsApp number for every `[data-wa-link]` and `[data-wa-send]`
+ * on the page, and — only under `?manage=1` — offers a field to override it.
+ *
+ * The override is stored per-browser; visitors keep the number built into the
+ * page until contact.phone in src/config/site.ts changes and the site is
+ * redeployed. See manage.ts.
+ */
+
+/** wa.me wants digits only. */
+const defaultNumber = contact.phone.replace(/\D/g, '');
+---
+
+<div data-wa-root data-default={defaultNumber}>
+  <ManageBar scope="Number changes" keys={['alphalize:wa-number']}>
+    <div class="wa-row">
+      <label class="sr-only" for="wa-num">WhatsApp number</label>
+      <input id="wa-num" type="text" name="number" inputmode="numeric" placeholder={defaultNumber} data-wa-input />
+      <button type="button" class="btn btn-primary wa-btn" data-wa-save>Save</button>
+    </div>
+    <p class="wa-current" data-wa-current></p>
+  </ManageBar>
+</div>
+
+<script>
+  import { inManageMode, readRaw, writeRaw } from './manage';
+
+  const NUM_KEY = 'alphalize:wa-number';
+
+  function resolveNumber(root: HTMLElement | null): string {
+    const stored = (readRaw(NUM_KEY) ?? '').replace(/\D/g, '');
+    return stored || (root?.dataset.default ?? '');
+  }
+
+  function initWhatsApp() {
+    const root = document.querySelector<HTMLElement>('[data-wa-root]');
+    const number = resolveNumber(root);
+    if (!number) return;
+
+    // --- point every WhatsApp affordance at the resolved number ---
+    document.querySelectorAll<HTMLAnchorElement>('[data-wa-link]').forEach((a) => {
+      a.href = `https://wa.me/${number}`;
+    });
+
+    document.querySelectorAll<HTMLElement>('[data-wa-send]').forEach((btn) => {
+      if (btn.dataset.wired) return;
+      btn.dataset.wired = '1';
+      btn.addEventListener('click', () => {
+        const form = btn.closest('form');
+        if (!form) return;
+        // Report validity first, so nobody lands in WhatsApp with half a message.
+        if (!form.reportValidity()) return;
+
+        const data = new FormData(form);
+        const line = (label: string, key: string) => {
+          const value = (data.get(key) ?? '').toString().trim();
+          return value ? `${label}: ${value}` : '';
+        };
+        const body = [
+          line('Name', 'name'),
+          line('Email', 'email'),
+          line('Phone', 'phone'),
+          line('Subject', 'subject'),
+          line('Message', 'message'),
+        ]
+          .filter(Boolean)
+          .join('\n');
+
+        // Re-resolve at click time so a change made in manage mode applies
+        // without a reload.
+        window.open(
+          `https://wa.me/${resolveNumber(root)}?text=${encodeURIComponent(body)}`,
+          '_blank',
+          'noopener'
+        );
+      });
+    });
+
+    // --- manage control, only under ?manage=1 ---
+    if (!root || !inManageMode()) return;
+    const input = root.querySelector<HTMLInputElement>('[data-wa-input]');
+    const save = root.querySelector<HTMLButtonElement>('[data-wa-save]');
+    const current = root.querySelector<HTMLElement>('[data-wa-current]');
+    if (!input || !save) return;
+
+    const stored = (readRaw(NUM_KEY) ?? '').replace(/\D/g, '');
+    input.value = number;
+    if (current) {
+      current.textContent = `Currently using ${number}${stored ? ' (changed here)' : ' (built-in)'}.`;
+    }
+
+    if (!save.dataset.wired) {
+      save.dataset.wired = '1';
+      save.addEventListener('click', () => {
+        const digits = input.value.replace(/\D/g, '');
+        if (digits.length < 8) {
+          if (current) current.textContent = 'That does not look like a full number with country code.';
+          return;
+        }
+        writeRaw(NUM_KEY, digits);
+        initWhatsApp();
+      });
+    }
+  }
+
+  document.addEventListener('astro:page-load', initWhatsApp);
+  document.addEventListener('manage:unlocked', initWhatsApp);
+  if (document.readyState !== 'loading') initWhatsApp();
+  else document.addEventListener('DOMContentLoaded', initWhatsApp, { once: true });
+</script>
+
+<style>
+  .wa-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .wa-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+  }
+  .wa-current {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  .wa-current:empty {
+    display: none;
+  }
+</style>

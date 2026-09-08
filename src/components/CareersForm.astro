@@ -3,6 +3,16 @@ import Field from './Field.astro';
 import Icon from './Icon.astro';
 import Turnstile from './Turnstile.astro';
 
+/**
+ * Careers application form.
+ *
+ * The submit path is unchanged and deliberately boring: a real
+ * <form method="post"> at /api/careers, progressively enhanced by
+ * form-enhance.ts, with Turnstile in front and magic-byte sniffing behind it.
+ * Everything added here — the drop zone, the focus line, the sending state —
+ * is presentation. The client-side file check is a courtesy so people find out
+ * about a bad file before uploading it; api/careers.ts remains the authority.
+ */
 interface Props {
   /** Open roles, plus a general option. */
   positions: string[];
@@ -17,10 +27,10 @@ const { positions } = Astro.props;
   method="post"
   enctype="multipart/form-data"
   data-enhance
-  class="rounded-card border border-brand-100 bg-white p-6 sm:p-8"
+  class="apply-card rounded-card border-brand-100 ab border bg-white p-6 sm:p-8"
 >
-  <h2 class="text-xl font-semibold text-ink">Apply to join the team</h2>
-  <p class="mt-1.5 text-sm text-muted">
+  <h2 class="text-ink ab text-xl font-semibold" style="--d:0ms">Apply to join the team</h2>
+  <p class="text-muted ab mt-1.5 text-sm" style="--d:80ms">
     Attach your CV and tell us which role you are after. We read every application.
   </p>
 
@@ -29,7 +39,14 @@ const { positions } = Astro.props;
   </div>
 
   <div class="mt-5 grid gap-5 sm:grid-cols-2">
-    <Field name="name" label="Name" required autocomplete="name" placeholder="Your full name" />
+    <Field
+      name="name"
+      label="Name"
+      required
+      autocomplete="name"
+      placeholder="Your full name"
+      class="ab apply-f"
+    />
     <Field
       name="email"
       label="Email"
@@ -37,6 +54,7 @@ const { positions } = Astro.props;
       required
       autocomplete="email"
       placeholder="you@example.com"
+      class="ab apply-f"
     />
     <Field
       name="phone"
@@ -45,46 +63,65 @@ const { positions } = Astro.props;
       required
       autocomplete="tel"
       placeholder="+91 00000 00000"
+      class="ab apply-f"
     />
-    <Field
-      name="position"
-      label="Position"
-      type="select"
-      required
-      options={positions}
-    />
-    <Field
-      name="resume"
-      label="CV / Résumé"
-      type="file"
-      required
-      accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      hint="PDF, DOC or DOCX. Maximum 5MB."
-      class="sm:col-span-2"
-    />
+    <Field name="position" label="Position" type="select" required options={positions} class="ab apply-f" />
+  </div>
+
+  {/* Custom markup rather than <Field type="file">: the drop zone needs its
+      own states. The error slot keeps the [data-error-for] name the server
+      uses, so a server-side rejection lands in the same place. */}
+  <div class="ab apply-f mt-5" style="--d:400ms">
+    <span class="text-ink block text-sm font-medium">CV / Résumé <span class="text-red-600">*</span></span>
+    <span class="text-muted mt-1 block text-xs">PDF, DOC or DOCX. Maximum 5MB.</span>
+
+    <label class="apply-drop mt-2" data-drop>
+      <input
+        type="file"
+        name="resume"
+        required
+        accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        aria-describedby="f-resume-error"
+      />
+      <span class="apply-drop-in">
+        <Icon name="upload" class="apply-up size-5" />
+        <Icon name="check" draw class="apply-ok size-5" />
+        <span class="apply-drop-txt" data-drop-text>
+          <b>Choose a file</b> or drop it here
+        </span>
+      </span>
+    </label>
+
+    <p id="f-resume-error" data-error-for="resume" class="mt-2 hidden text-sm text-red-600"></p>
+  </div>
+
+  <div class="mt-5 grid">
     <Field
       name="message"
       label="Anything else?"
       type="textarea"
       rows={4}
-      class="sm:col-span-2"
+      class="ab apply-f"
       placeholder="Optional — a note on what you are looking for, or a link to your work."
     />
   </div>
 
-  <div class="mt-5">
-    <Turnstile />
-  </div>
+  {/* No wrapper margin, and no .ab entrance: interaction-only means this is
+      usually zero-height. See ContactForm for the reasoning. */}
+  <Turnstile />
 
   <button
     type="submit"
-    class="btn btn-primary mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+    class="btn btn-primary apply-submit ab mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+    style="--d:580ms"
   >
-    Submit application
-    <Icon name="upload" class="size-4" />
+    <span data-submit-label>Submit application</span>
+    <Icon name="upload" class="apply-s-ico size-4" />
+    <span class="apply-spin" aria-hidden="true"></span>
+    <span class="apply-prog" data-progress aria-hidden="true"></span>
   </button>
 
-  <p class="mt-3 text-xs text-muted">
+  <p class="text-muted ab mt-3 text-xs" style="--d:640ms">
     Your CV is used only to assess this application. See our
     <a href="/legal/privacy-policy" class="text-brand-700 underline">privacy policy</a>.
   </p>
@@ -92,5 +129,322 @@ const { positions } = Astro.props;
 
 <script>
   import { initForms } from './form-enhance';
-  document.addEventListener('astro:page-load', initForms);
+
+  const MAX = 5 * 1024 * 1024;
+  const OK = ['pdf', 'doc', 'docx'];
+
+  /**
+   * Drag-and-drop plus a client-side file check. Purely to give feedback before
+   * a pointless upload — api/careers.ts re-checks size, declared type and the
+   * leading magic bytes, and is the only thing that decides.
+   */
+  function initDropZones() {
+    document.querySelectorAll<HTMLElement>('[data-drop]').forEach((drop) => {
+      if (drop.dataset.wired) return;
+      drop.dataset.wired = '1';
+
+      const input = drop.querySelector<HTMLInputElement>('input[type=file]');
+      const text = drop.querySelector<HTMLElement>('[data-drop-text]');
+      const form = drop.closest('form');
+      const err = form?.querySelector<HTMLElement>('[data-error-for="resume"]');
+      if (!input || !text || !form) return;
+
+      const idle = text.innerHTML;
+
+      const fail = (msg: string) => {
+        if (err) {
+          err.textContent = msg;
+          err.classList.remove('hidden');
+        }
+        input.value = '';
+        input.setAttribute('aria-invalid', 'true');
+        drop.classList.remove('has');
+        drop.classList.add('bad');
+        text.innerHTML = idle;
+      };
+
+      const accept = (file: File) => {
+        const ext = (file.name.split('.').pop() ?? '').toLowerCase();
+        if (!OK.includes(ext)) {
+          fail('That file type is not accepted — use PDF, DOC or DOCX.');
+          return;
+        }
+        if (file.size > MAX) {
+          fail(`That file is ${(file.size / 1048576).toFixed(1)}MB — the limit is 5MB.`);
+          return;
+        }
+        err?.classList.add('hidden');
+        input.removeAttribute('aria-invalid');
+        drop.classList.remove('bad');
+        drop.classList.add('has');
+        text.textContent = `${file.name} · ${(file.size / 1024).toFixed(0)} KB`;
+      };
+
+      input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (file) accept(file);
+      });
+
+      for (const ev of ['dragenter', 'dragover']) {
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.add('over');
+        });
+      }
+      for (const ev of ['dragleave', 'drop']) {
+        drop.addEventListener(ev, (e) => {
+          e.preventDefault();
+          drop.classList.remove('over');
+        });
+      }
+      drop.addEventListener('drop', (e) => {
+        const file = (e as DragEvent).dataTransfer?.files?.[0];
+        if (!file) return;
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        accept(file);
+      });
+
+      // Fired by form-enhance.ts after a successful submit.
+      form.addEventListener('form:reset-drop', () => {
+        text.innerHTML = idle;
+        err?.classList.add('hidden');
+      });
+    });
+  }
+
+  function init() {
+    initForms();
+    initDropZones();
+  }
+
+  document.addEventListener('astro:page-load', init);
+  if (document.readyState !== 'loading') init();
+  else document.addEventListener('DOMContentLoaded', init, { once: true });
 </script>
+
+<style>
+  .apply-card {
+    --ap-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --ap-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+
+  /* Focus: an accent line grows under the field and the label tints. Layered
+     over Field.astro's markup rather than replacing it, so its label, hint,
+     aria-invalid and [data-error-for] wiring all stay intact. */
+  .apply-f {
+    position: relative;
+  }
+  .apply-f::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-brand-600), var(--color-plum-600));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ap-ease);
+  }
+  .apply-f:focus-within::after {
+    transform: scaleX(1);
+  }
+  .apply-f:focus-within :global(label) {
+    color: var(--color-brand-700);
+  }
+
+  /* --- CV drop zone --- */
+  .apply-drop {
+    position: relative;
+    display: block;
+    padding: 1rem;
+    border: 1.5px dashed var(--color-brand-300);
+    border-radius: var(--radius-card);
+    background: var(--color-brand-50);
+    cursor: pointer;
+    transition:
+      border-color 0.3s ease,
+      background 0.3s ease,
+      transform 0.3s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .apply-drop input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .apply-drop-in {
+    display: flex;
+    align-items: center;
+    gap: 0.6875rem;
+    pointer-events: none;
+  }
+  .apply-drop-txt {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  .apply-drop-txt :global(b) {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+  .apply-drop :global(.apply-up),
+  .apply-drop :global(.apply-ok) {
+    flex: none;
+    color: var(--color-brand-600);
+    transition:
+      transform 0.4s var(--ap-spring),
+      opacity 0.3s ease;
+  }
+  .apply-drop :global(.apply-ok) {
+    position: absolute;
+    left: 1rem;
+    color: var(--color-teal-600);
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  .apply-drop :global(.apply-ok path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .apply-drop:hover {
+    border-color: var(--color-brand-400);
+    background: var(--color-brand-100);
+  }
+  .apply-drop:hover :global(.apply-up) {
+    transform: translateY(-2px);
+  }
+  .apply-drop:focus-within {
+    border-color: var(--color-brand-600);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-600) 20%, transparent);
+  }
+  .apply-drop.over {
+    border-style: solid;
+    border-color: var(--color-brand-600);
+    background: var(--color-brand-100);
+    transform: scale(1.01);
+  }
+  .apply-drop.over :global(.apply-up) {
+    transform: translateY(-4px) scale(1.12);
+  }
+  .apply-drop.has {
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--color-teal-600) 45%, #fff);
+    background: color-mix(in srgb, var(--color-teal-600) 6%, #fff);
+  }
+  .apply-drop.has :global(.apply-up) {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  .apply-drop.has :global(.apply-ok) {
+    opacity: 1;
+    transform: none;
+  }
+  .apply-drop.has :global(.apply-ok path) {
+    animation: ap-tick 0.45s cubic-bezier(0.55, 0, 0.35, 1) 0.05s forwards;
+  }
+  @keyframes ap-tick {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .apply-drop.bad {
+    border-style: solid;
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 6%, #fff);
+    animation: ap-shake 0.4s ease;
+  }
+  @keyframes ap-shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-5px);
+    }
+    40% {
+      transform: translateX(5px);
+    }
+    60% {
+      transform: translateX(-3px);
+    }
+    80% {
+      transform: translateX(3px);
+    }
+  }
+
+  /* --- submit --- */
+  .apply-submit {
+    position: relative;
+    overflow: hidden;
+  }
+  .apply-submit :global(.apply-s-ico) {
+    transition:
+      transform 0.35s var(--ap-spring),
+      opacity 0.25s ease;
+  }
+  .apply-submit:hover :global(.apply-s-ico) {
+    transform: translateY(-2px);
+  }
+  .apply-spin {
+    position: absolute;
+    right: 1.375rem;
+    width: 0.9375rem;
+    height: 0.9375rem;
+    border-radius: 50%;
+    border: 2px solid rgb(255 255 255 / 0.35);
+    border-top-color: #fff;
+    opacity: 0;
+  }
+  .apply-prog {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: rgb(255 255 255 / 0.75);
+    transform: scaleX(0);
+    transform-origin: left;
+    /* Driven from real bytes-sent by form-enhance.ts, not an animation. The
+       transition just smooths the steps between progress events. */
+    transition: transform 0.15s linear;
+  }
+  :global(form.is-sending) .apply-submit :global(.apply-s-ico) {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  :global(form.is-sending) .apply-spin {
+    opacity: 1;
+    animation: ap-spin 0.7s linear infinite;
+  }
+  @keyframes ap-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .apply-f::after,
+    .apply-drop,
+    .apply-drop :global(.apply-up),
+    .apply-drop :global(.apply-ok),
+    .apply-submit :global(.apply-s-ico) {
+      transition: none;
+    }
+    .apply-drop.bad {
+      animation: none;
+    }
+    .apply-drop.has :global(.apply-ok path) {
+      stroke-dashoffset: 0;
+      animation: none;
+    }
+    :global(form.is-sending) .apply-spin {
+      animation: none;
+    }
+  }
+</style>

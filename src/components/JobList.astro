@@ -1,0 +1,431 @@
+---
+import { getCollection, render } from 'astro:content';
+import Icon from './Icon.astro';
+import SectionHeading from './SectionHeading.astro';
+
+/**
+ * Careers — "Current openings".
+ *
+ * Rows wipe in from the left, then open on click: the panel grows, the chevron
+ * turns and the detail lines rise in sequence. Entrance trigger comes from
+ * <AboutAnim>; the accordion itself ships **no JavaScript**.
+ *
+ * Kept on native <details> rather than the reference's button + aria-expanded:
+ * that keeps it working with JS off, keeps the semantics free, and keeps
+ * Ctrl+F able to expand a panel to reveal a match — which matters on a page
+ * candidates search for "Angular" or "PostgreSQL" in. `name` gives the
+ * one-open-at-a-time behaviour natively.
+ */
+const jobs = (await getCollection('jobs', ({ data }) => data.open)).sort(
+  (a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime()
+);
+
+const rendered = await Promise.all(
+  jobs.map(async (job) => ({ job, Content: (await render(job)).Content }))
+);
+---
+
+<section class="jobs container-page py-16 lg:py-20" data-ab>
+  <SectionHeading
+    anim
+    align="left"
+    eyebrow={`${jobs.length} open ${jobs.length === 1 ? 'role' : 'roles'}`}
+    title="Current openings"
+    lead="All roles are based in our Kollam, Kerala office."
+  />
+
+  <ul class="job-list mt-10">
+    {
+      rendered.map(({ job, Content }, i) => (
+        <li class="job-row rounded-card border-brand-100 border bg-white" style={`--d:${640 + i * 150}ms`}>
+          <span class="job-accent" aria-hidden="true" />
+
+          <details name="jobs" class="job-details">
+            <summary class="job-top">
+              <span class="job-tile rounded-btn">
+                <Icon name="briefcase" class="size-5" />
+              </span>
+
+              <span class="job-meta">
+                <span class="job-h text-ink block text-lg font-semibold" data-edit-job={job.id} data-edit-field="title">{job.data.title}</span>
+                <span class="text-muted mt-1 block text-sm leading-relaxed" data-edit-job={job.id} data-edit-field="summary">{job.data.summary}</span>
+                <span class="mt-3 flex flex-wrap gap-2">
+                  <span class="job-chip">
+                    <Icon name="pin" class="size-3" />
+                    <span data-edit-job={job.id} data-edit-field="location">{job.data.location}</span>
+                  </span>
+                  <span class="job-chip">
+                    <Icon name="clock" class="size-3" />
+                    <span data-edit-job={job.id} data-edit-field="experience">{job.data.experience}</span>
+                  </span>
+                </span>
+              </span>
+
+              <span class="job-chev border-brand-200 text-brand-700" aria-hidden="true">
+                <Icon name="chevron-down" class="size-4" />
+              </span>
+            </summary>
+
+            <div class="job-panel">
+              <div class="border-brand-100 border-t px-6 py-6">
+                <div class="prose-content job-line" style="--k:0" data-edit-job={job.id} data-edit-field="body" data-edit-html>
+                  <Content />
+                </div>
+
+                <div class="mt-6 grid gap-6 sm:grid-cols-2">
+                  {job.data.responsibilities.length > 0 && (
+                    <div>
+                      <h3 class="text-ink job-line text-sm font-semibold" style="--k:1">
+                        What you will do
+                      </h3>
+                      <ul class="mt-2.5 space-y-2">
+                        {job.data.responsibilities.map((r, k) => (
+                          <li
+                            class="text-muted job-line flex gap-2.5 text-sm leading-relaxed"
+                            style={`--k:${2 + k}`}
+                          >
+                            <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
+                            <span data-edit-job={job.id} data-edit-field="responsibilities" data-edit-index={k}>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {job.data.requirements.length > 0 && (
+                    <div>
+                      <h3 class="text-ink job-line text-sm font-semibold" style="--k:1">
+                        What we are looking for
+                      </h3>
+                      <ul class="mt-2.5 space-y-2">
+                        {job.data.requirements.map((r, k) => (
+                          <li
+                            class="text-muted job-line flex gap-2.5 text-sm leading-relaxed"
+                            style={`--k:${2 + k}`}
+                          >
+                            <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
+                            <span data-edit-job={job.id} data-edit-field="requirements" data-edit-index={k}>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                <a href="#apply" class="btn btn-primary job-line mt-7" style="--k:6">
+                  Apply for this role
+                  <Icon name="arrow-right" class="size-4" />
+                </a>
+              </div>
+            </div>
+          </details>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<script>
+  import { inManageMode, readJson, status, writeJson } from './manage';
+
+  const KEY = 'alphalize:jobs';
+  type Drafts = Record<string, Record<string, string>>;
+
+  /** Field identity: `title`, or `responsibilities.2` for a bullet. */
+  function fieldKey(el: HTMLElement): string {
+    const field = el.dataset.editField ?? '';
+    const index = el.dataset.editIndex;
+    return index === undefined ? field : `${field}.${index}`;
+  }
+
+  /**
+   * The body round-trips as HTML because it is rendered markdown. It is the
+   * editor's own content in their own browser, but stored HTML gets re-injected
+   * on every load, so strip the parts that would execute.
+   */
+  function sanitize(html: string): string {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.body.querySelectorAll('script, style, iframe, object, embed').forEach((n) => n.remove());
+    doc.body.querySelectorAll('*').forEach((n) => {
+      for (const attr of [...n.attributes]) {
+        const name = attr.name.toLowerCase();
+        if (name.startsWith('on') || (name === 'href' && attr.value.trim().toLowerCase().startsWith('javascript:'))) {
+          n.removeAttribute(attr.name);
+        }
+      }
+    });
+    return doc.body.innerHTML;
+  }
+
+  function applyDrafts() {
+    const drafts = readJson<Drafts>(KEY, {});
+    document.querySelectorAll<HTMLElement>('[data-edit-job]').forEach((el) => {
+      const value = drafts[el.dataset.editJob ?? '']?.[fieldKey(el)];
+      if (value === undefined) return;
+      if (el.dataset.editHtml !== undefined) el.innerHTML = sanitize(value);
+      else el.textContent = value;
+    });
+  }
+
+  function enableEditing() {
+    document.querySelectorAll<HTMLElement>('[data-edit-job]').forEach((el) => {
+      if (el.dataset.wired) return;
+      el.dataset.wired = '1';
+
+      // plaintext-only keeps pasted markup out of single-line fields; the body
+      // needs real HTML, and its paste is flattened by the handler below.
+      el.setAttribute('contenteditable', el.dataset.editHtml === undefined ? 'plaintext-only' : 'true');
+      el.classList.add('is-editable');
+
+      // Title, summary, location and experience all sit inside <summary>, where
+      // a click would toggle the accordion instead of placing the caret.
+      if (el.closest('summary')) {
+        el.addEventListener('pointerdown', (e) => e.preventDefault());
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          el.focus();
+        });
+      }
+
+      // Fallback for engines without plaintext-only, and for the body.
+      el.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = e.clipboardData?.getData('text/plain') ?? '';
+        document.execCommand('insertText', false, text);
+      });
+
+      el.addEventListener('blur', () => {
+        const drafts = readJson<Drafts>(KEY, {});
+        const job = el.dataset.editJob ?? '';
+        const value = el.dataset.editHtml !== undefined ? sanitize(el.innerHTML) : (el.textContent ?? '');
+        drafts[job] = { ...drafts[job], [fieldKey(el)]: value };
+        writeJson(KEY, drafts);
+      });
+    });
+  }
+
+  async function initJobEditing() {
+    // A plain /careers stays a visitor page: drafts are not even applied.
+    if (!inManageMode()) return;
+    applyDrafts();
+    // The server decides; this only chooses whether to show the affordances.
+    if ((await status()).unlocked) enableEditing();
+  }
+
+  document.addEventListener("astro:page-load", () => void initJobEditing());
+  document.addEventListener("manage:unlocked", () => void initJobEditing());
+  if (document.readyState !== "loading") void initJobEditing();
+  else document.addEventListener("DOMContentLoaded", () => void initJobEditing(), { once: true });
+</script>
+
+<style>
+  /* Only ever applied under ?manage=1 with the passcode entered. */
+  .is-editable {
+    outline: 1px dashed var(--color-brand-300);
+    outline-offset: 3px;
+    border-radius: 2px;
+    cursor: text;
+  }
+  .is-editable:hover {
+    outline-color: var(--color-brand-500);
+    background: color-mix(in srgb, var(--color-brand-500) 6%, transparent);
+  }
+  .is-editable:focus {
+    outline: 2px solid var(--color-brand-600);
+    background: #fff;
+  }
+
+  .job-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin-block: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .job-row {
+    position: relative;
+    overflow: hidden;
+    transition:
+      border-color 0.35s ease,
+      box-shadow 0.4s ease;
+  }
+  .job-accent {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    z-index: 1;
+    background: linear-gradient(180deg, var(--color-plum-600), var(--color-brand-500));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .job-row:hover {
+    border-color: var(--color-brand-200);
+    box-shadow: var(--shadow-lift);
+  }
+  .job-row:hover .job-accent,
+  .job-row:has([open]) .job-accent {
+    transform: scaleY(1);
+  }
+
+  /* --- summary row --- */
+  .job-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  .job-top::-webkit-details-marker {
+    display: none;
+  }
+  .job-meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .job-tile {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: var(--color-plum-50);
+    color: var(--color-plum-600);
+    transition:
+      background 0.35s ease,
+      color 0.35s ease,
+      transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .job-row:hover .job-tile,
+  .job-row:has([open]) .job-tile {
+    background: var(--color-plum-600);
+    color: #fff;
+    transform: rotate(-6deg);
+  }
+  .job-h {
+    transition: color 0.3s ease;
+  }
+  .job-row:hover .job-h,
+  .job-row:has([open]) .job-h {
+    color: var(--color-plum-600);
+  }
+
+  .job-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 99px;
+    background: var(--color-brand-50);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-brand-700);
+  }
+
+  .job-chev {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    margin-top: 0.25rem;
+    border-radius: 50%;
+    border-width: 1px;
+    background: #fff;
+    transition:
+      transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1),
+      background 0.3s ease,
+      color 0.3s ease,
+      border-color 0.3s ease;
+  }
+  .job-row:hover .job-chev {
+    border-color: var(--color-plum-600);
+    color: var(--color-plum-600);
+  }
+  .job-details[open] .job-chev {
+    transform: rotate(180deg);
+    background: var(--color-plum-600);
+    border-color: var(--color-plum-600);
+    color: #fff;
+  }
+
+  /* --- the panel opens --- */
+  /* Guarded: without support the details simply snaps open, which is the
+     native behaviour and leaves nothing unreachable. */
+  @supports (interpolate-size: allow-keywords) {
+    .job-details {
+      interpolate-size: allow-keywords;
+    }
+    .job-details::details-content {
+      block-size: 0;
+      overflow: hidden;
+      transition:
+        block-size 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+        content-visibility 0.5s allow-discrete;
+    }
+    .job-details[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  /* Contents rise as the panel grows. */
+  .job-line {
+    opacity: 0;
+    transform: translateY(8px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .job-details[open] .job-line {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(160ms + var(--k, 0) * 55ms);
+  }
+
+  /* --- entrance: rows wipe in from the left --- */
+  :global(html.ab-js) .job-row {
+    clip-path: inset(0 100% 0 0 round var(--radius-card));
+    transition:
+      clip-path 0.7s cubic-bezier(0.62, 0.03, 0.21, 1),
+      border-color 0.35s ease,
+      box-shadow 0.4s ease;
+    transition-delay: calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+  :global(html.ab-js) .jobs.in .job-row {
+    clip-path: inset(0 0 0 0 round var(--radius-card));
+  }
+  /* Release the clip once settled: inset(0) still clips at the border box, so
+     the hover shadow would never show. Also clears the entrance delay. */
+  :global(html.ab-js) .jobs.in.done .job-row {
+    clip-path: none;
+    transition:
+      border-color 0.35s ease,
+      box-shadow 0.4s ease;
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.ab-js) .job-row {
+      clip-path: none !important;
+      transition: none;
+    }
+    .job-line {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .job-details::details-content {
+      transition: none;
+    }
+    .job-row,
+    .job-accent,
+    .job-tile,
+    .job-chev {
+      transition: none;
+    }
+  }
+</style>

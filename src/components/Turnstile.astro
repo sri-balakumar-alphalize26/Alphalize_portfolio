@@ -8,6 +8,11 @@
  * POSTing directly to the endpoint.
  *
  * The site key is public by design. Configure it as PUBLIC_TURNSTILE_SITE_KEY.
+ *
+ * `interaction-only` keeps the widget from drawing itself — and with it the
+ * Cloudflare branding — unless a visitor actually gets challenged. It still
+ * runs and still produces a token, so this is cosmetic: the real control is
+ * verifyTurnstile() on the two API routes, which is unchanged.
  */
 const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 ---
@@ -21,6 +26,7 @@ const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
         data-theme="light"
         data-size="flexible"
         data-action="website-form"
+        data-appearance="interaction-only"
       />
       <script
         is:inline

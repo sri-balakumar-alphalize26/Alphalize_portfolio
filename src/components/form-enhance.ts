@@ -52,40 +52,100 @@ function applyFieldErrors(form: HTMLFormElement, fields: Record<string, string>)
   firstInvalid?.focus();
 }
 
+/**
+ * Submit with real upload progress.
+ *
+ * `fetch` has no progress event on the request body, so a form carrying a file
+ * goes over XMLHttpRequest instead — `xhr.upload` is the only way to know how
+ * many bytes have actually gone. Both paths resolve to the same ApiResult, so
+ * the caller does not care which ran.
+ */
+function post(form: HTMLFormElement, onProgress?: (fraction: number) => void): Promise<ApiResult> {
+  const body = new FormData(form);
+  const isUpload = form.enctype === 'multipart/form-data';
+
+  if (!isUpload || !onProgress) {
+    return fetch(form.action, { method: 'POST', body, headers: { accept: 'application/json' } })
+      .then((res) => res.json() as Promise<ApiResult>)
+      .catch(() => ({ ok: false, error: 'Unexpected response from the server.' }));
+  }
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', form.action);
+    xhr.setRequestHeader('accept', 'application/json');
+
+    xhr.upload.addEventListener('progress', (e) => {
+      if (e.lengthComputable) onProgress(e.loaded / e.total);
+    });
+    // Bytes are all sent, but the server is still verifying the captcha,
+    // sniffing the file, compressing it, storing it and sending the mail.
+    xhr.upload.addEventListener('load', () => onProgress(1));
+
+    xhr.addEventListener('load', () => {
+      try {
+        resolve(JSON.parse(xhr.responseText) as ApiResult);
+      } catch {
+        resolve({ ok: false, error: 'Unexpected response from the server.' });
+      }
+    });
+    xhr.addEventListener('error', () => resolve({ ok: false, error: 'network' }));
+    xhr.addEventListener('abort', () => resolve({ ok: false, error: 'network' }));
+    xhr.send(body);
+  });
+}
+
 function enhance(form: HTMLFormElement) {
   if (form.dataset.enhanced) return;
   form.dataset.enhanced = '1';
 
   const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-  const submitLabel = submit?.textContent ?? 'Send';
+  // Write into the label span where there is one. The careers button also holds
+  // an icon, a spinner and a progress bar, and setting textContent on the button
+  // itself would delete them.
+  const label = submit?.querySelector<HTMLElement>('[data-submit-label]') ?? submit;
+  const submitLabel = label?.textContent ?? 'Send';
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     clearErrors(form);
 
-    if (submit) {
-      submit.disabled = true;
-      submit.textContent = 'Sending…';
-    }
+    // Drives the sending state in CSS (spinner, progress bar).
+    form.classList.add('is-sending');
+    form.classList.remove('is-sent');
+    if (submit) submit.disabled = true;
+    if (label) label.textContent = 'Sending…';
+
+    const bar = form.querySelector<HTMLElement>('[data-progress]');
+    const onProgress = (fraction: number) => {
+      if (bar) bar.style.transform = `scaleX(${fraction})`;
+      if (!label) return;
+      // At 100% the upload is done but the request is not: hold the bar and say
+      // so, rather than sitting at "100%" looking hung.
+      label.textContent =
+        fraction >= 1 ? 'Processing…' : `Uploading ${Math.round(fraction * 100)}%`;
+    };
 
     try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { accept: 'application/json' },
-      });
+      if (bar) bar.style.transform = 'scaleX(0)';
+      const result = await post(form, onProgress);
 
-      let result: ApiResult;
-      try {
-        result = (await res.json()) as ApiResult;
-      } catch {
-        result = { ok: false, error: 'Unexpected response from the server.' };
-      }
-
-      if (result.ok) {
+      if (result.error === 'network') {
+        showBanner(
+          form,
+          'We could not reach the server. Please check your connection and try again.',
+          'error'
+        );
+      } else if (result.ok) {
         form.reset();
+        // form.reset() does not clear the file-picker's confirmed state.
+        form
+          .querySelectorAll<HTMLElement>('[data-drop]')
+          .forEach((el) => el.classList.remove('has', 'bad'));
+        form.dispatchEvent(new CustomEvent('form:reset-drop'));
         // Reset the captcha so a second submission gets a fresh token.
         window.turnstile?.reset?.();
+        form.classList.add('is-sent');
         showBanner(form, result.message ?? 'Thanks — we have received your message.', 'success');
       } else {
         if (result.fields) applyFieldErrors(form, result.fields);
@@ -99,10 +159,10 @@ function enhance(form: HTMLFormElement) {
         'error'
       );
     } finally {
-      if (submit) {
-        submit.disabled = false;
-        submit.textContent = submitLabel;
-      }
+      form.classList.remove('is-sending');
+      if (bar) bar.style.transform = '';
+      if (submit) submit.disabled = false;
+      if (label) label.textContent = submitLabel;
     }
   });
 }

@@ -1,0 +1,206 @@
+---
+import { env } from 'cloudflare:workers';
+import Icon from '@/components/Icon.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { isUnlocked } from '@/lib/manage-auth';
+
+/**
+ * Who applied, for what, and their CV. Owner-only.
+ *
+ * Rendered per-request because it needs the session cookie — the rest of
+ * /careers stays static. A locked visitor gets a flat 404 rather than a
+ * redirect, so the page's existence is not advertised.
+ */
+export const prerender = false;
+
+if (!(await isUnlocked(Astro.request, env))) {
+  return new Response('Not found', { status: 404 });
+}
+
+type Row = {
+  key: string;
+  name: string;
+  email: string;
+  phone: string;
+  position: string;
+  fileName: string;
+  size: number;
+  at: Date;
+};
+
+let rows: Row[] = [];
+let listFailed = false;
+
+try {
+  const listed = await env.RESUMES?.list({ prefix: 'applications/', include: ['customMetadata'] });
+  rows = (listed?.objects ?? [])
+    .map((o) => {
+      const m = o.customMetadata ?? {};
+      return {
+        key: o.key,
+        name: m.applicant ?? 'Unknown',
+        email: m.email ?? '',
+        phone: m.phone ?? '',
+        position: m.position ?? '',
+        fileName: m.originalName ?? o.key.split('/').pop() ?? 'cv',
+        size: o.size,
+        at: m.submittedAt ? new Date(m.submittedAt) : o.uploaded,
+      };
+    })
+    .sort((a, b) => b.at.getTime() - a.at.getTime());
+} catch (err) {
+  console.error('[applications] R2 list failed', err);
+  listFailed = true;
+}
+
+const fmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+---
+
+<BaseLayout title="Applications" description="Received job applications." noindex>
+  <section class="container-page py-12 lg:py-16">
+    <a href="/careers?manage=1" class="text-brand-700 inline-flex items-center gap-1.5 text-sm">
+      <Icon name="chevron-right" class="size-4 rotate-180" />
+      Back to careers
+    </a>
+
+    <h1 class="text-heading mt-5 text-3xl font-semibold">Applications</h1>
+    <p class="text-muted mt-2 max-w-2xl text-sm leading-relaxed">
+      {rows.length}
+      {rows.length === 1 ? ' application' : ' applications'} stored. Every application is also
+      emailed to {'hr@alphalize.com'} with the CV attached — if storage ever fails the email still
+      goes out, so <strong>the mailbox is the record of truth</strong>, not this list.
+    </p>
+
+    {
+      listFailed && (
+        <p class="rounded-card mt-6 border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+          Could not read the storage bucket. The applications themselves are unaffected — check the
+          mailbox.
+        </p>
+      )
+    }
+
+    {
+      rows.length === 0 && !listFailed && (
+        <p class="rounded-card border-brand-100 text-muted mt-6 border bg-white px-4 py-6 text-sm">
+          Nothing yet.
+        </p>
+      )
+    }
+
+    <ul class="mt-8 space-y-4">
+      {
+        rows.map((r) => (
+          <li
+            class="rounded-card border-brand-100 border bg-white p-5"
+            data-application
+            data-key={r.key}
+          >
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p class="text-ink text-base font-semibold">{r.name}</p>
+                <p class="text-muted mt-0.5 text-sm">{r.position}</p>
+              </div>
+              <p class="text-muted text-xs">{fmt.format(r.at)}</p>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              {r.email && (
+                <a href={`mailto:${r.email}`} class="app-chip">
+                  <Icon name="mail" class="size-3.5" />
+                  {r.email}
+                </a>
+              )}
+              {r.phone && (
+                <a
+                  href={`https://wa.me/${r.phone.replace(/\D/g, '')}`}
+                  target="_blank"
+                  rel="noopener"
+                  class="app-chip"
+                >
+                  <Icon name="whatsapp" class="size-3.5" />
+                  {r.phone}
+                </a>
+              )}
+              <a href={`/api/cv/${r.key}`} class="app-chip">
+                <Icon name="upload" class="size-3.5 rotate-180" />
+                {r.fileName} · {Math.round(r.size / 1024)}KB
+              </a>
+              <button type="button" class="app-chip app-del" data-delete>
+                Delete
+              </button>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-delete]').forEach((btn) => {
+    let confirming = false;
+    btn.addEventListener('click', async () => {
+      // Two-step rather than confirm(): deleting a CV is not undoable.
+      if (!confirming) {
+        confirming = true;
+        btn.textContent = 'Delete — sure?';
+        setTimeout(() => {
+          confirming = false;
+          btn.textContent = 'Delete';
+        }, 4000);
+        return;
+      }
+
+      const row = btn.closest<HTMLElement>('[data-application]');
+      const key = row?.dataset.key;
+      if (!row || !key) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Deleting…';
+      const body = new FormData();
+      body.set('key', key);
+      const res = await fetch('/api/applications', { method: 'POST', body });
+      if (res.ok) row.remove();
+      else {
+        btn.disabled = false;
+        btn.textContent = 'Delete failed';
+      }
+    });
+  });
+</script>
+
+<style>
+  .app-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.625rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: 99px;
+    background: var(--color-brand-50);
+    font-size: 0.75rem;
+    color: var(--color-brand-700);
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease;
+  }
+  .app-chip:hover {
+    background: var(--color-brand-100);
+    border-color: var(--color-brand-200);
+  }
+  .app-del {
+    margin-left: auto;
+    border-color: color-mix(in srgb, var(--color-accent) 35%, #fff);
+    background: color-mix(in srgb, var(--color-accent) 8%, #fff);
+    color: var(--color-accent);
+    cursor: pointer;
+  }
+  .app-del:hover {
+    background: color-mix(in srgb, var(--color-accent) 16%, #fff);
+  }
+  .app-del:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+</style>

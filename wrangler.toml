@@ -17,6 +17,10 @@ bucket_name = "alphalize-resumes"
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 
+# Manage-mode passcode + auto-lock setting. Same auto-provisioning as above.
+[[kv_namespaces]]
+binding = "MANAGE"
+
 # (The adapter adds its own SESSION KV binding for Astro sessions; nothing to do.)
 
 [vars]
@@ -28,4 +32,5 @@ MAIL_FROM = "website@alphalize.com"
 # Secrets (set with `wrangler secret put <NAME>`, never committed):
 #   RESEND_API_KEY
 #   TURNSTILE_SECRET_KEY
+#   MANAGE_PASSCODE        first-run manage passcode; ignored once changed on screen
 # Locally these come from .dev.vars (gitignored).

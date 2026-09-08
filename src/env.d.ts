@@ -12,6 +12,8 @@ declare namespace Cloudflare {
     /** Secrets. */
     RESEND_API_KEY?: string;
     TURNSTILE_SECRET_KEY?: string;
+    /** First-run manage passcode; ignored once one is set on screen. */
+    MANAGE_PASSCODE?: string;
 
     /** Plain `[vars]`. */
     PUBLIC_TURNSTILE_SITE_KEY?: string;
@@ -22,6 +24,7 @@ declare namespace Cloudflare {
     /** Bindings. */
     RATE_LIMIT?: KVNamespace;
     RESUMES?: R2Bucket;
+    MANAGE?: KVNamespace;
   }
 }
 

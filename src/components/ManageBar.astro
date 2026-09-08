@@ -99,7 +99,14 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
 </div>
 
 <script>
-  import { inManageMode, manageAction, refreshStatus, status, writeRaw } from './manage';
+  import {
+    handleInstantLock,
+    inManageMode,
+    manageAction,
+    refreshStatus,
+    status,
+    writeRaw,
+  } from './manage';
 
   const UNLOCK_MESSAGES: Record<string, string> = {
     wrong: 'That passcode is not right.',
@@ -132,6 +139,10 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
   }
 
   async function initManageBar() {
+    // ?manage=0 ends the session and lands on the clean page; once it has taken
+    // over, nothing else here should run.
+    if (handleInstantLock()) return;
+
     const bar = document.querySelector<HTMLElement>('[data-manage-bar]');
     if (!bar || !inManageMode()) return;
 

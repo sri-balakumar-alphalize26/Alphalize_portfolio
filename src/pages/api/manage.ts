@@ -1,6 +1,12 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 import {
+  isValidEmail,
+  isValidPhone,
+  readContact,
+  writeContact,
+} from '@/lib/contact-settings';
+import {
   changePasscode,
   clearCookie,
   isUnlocked,
@@ -69,6 +75,22 @@ export const POST: APIRoute = async ({ request }) => {
         field('confirm')
       );
       return json({ ok: outcome === 'ok', outcome }, outcome === 'ok' ? 200 : 400, cookie);
+    }
+
+    case 'get-contact': {
+      return json({ ok: true, contact: await readContact(env) });
+    }
+
+    case 'set-contact': {
+      if (!(await isUnlocked(request, env))) return json({ ok: false, outcome: 'locked' }, 403);
+      const phoneDisplay = field('phoneDisplay').trim();
+      const email = field('email').trim();
+      // Refuse rather than store a blank, which would render a dead tel: or
+      // mailto: for every visitor.
+      if (!isValidPhone(phoneDisplay)) return json({ ok: false, outcome: 'bad-phone' }, 400);
+      if (!isValidEmail(email)) return json({ ok: false, outcome: 'bad-email' }, 400);
+      const saved = await writeContact(env, { phoneDisplay, email });
+      return json({ ok: saved, contact: await readContact(env) }, saved ? 200 : 400);
     }
 
     case 'set-hours': {

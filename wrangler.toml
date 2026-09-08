@@ -25,7 +25,7 @@ binding = "MANAGE"
 
 [vars]
 PUBLIC_TURNSTILE_SITE_KEY = "REPLACE_WITH_TURNSTILE_SITE_KEY"
-CONTACT_TO_EMAIL = "info@alphalize.com"
+CONTACT_TO_EMAIL = "hr@alphalize.com"
 CAREERS_TO_EMAIL = "hr@alphalize.com"
 MAIL_FROM = "website@alphalize.com"
 

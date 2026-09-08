@@ -1,0 +1,207 @@
+---
+import 'intl-tel-input/styles';
+
+/**
+ * A phone box with a country dropdown and per-country validity rules.
+ *
+ * Two inputs: the visible one the visitor types in, and a hidden one carrying
+ * the full +E.164 number — never a bare national number, so a +91 and a +968
+ * enquiry can never be confused. Validity is reported through the visible
+ * input's own `setCustomValidity`, so the form's native validation handles it;
+ * there is nothing for the parent to wire up.
+ *
+ * The library is imported lazily and retried once. If it never loads the box
+ * stays a plain tel input and whatever was typed is still submitted — a failed
+ * chunk must not cost someone a job application.
+ *
+ * Ported from 369ai_portfolio/components/careers/PhoneField.tsx. Markup mirrors
+ * Field.astro so the label, hint and [data-error-for] slot behave the same and
+ * form-enhance.ts can still write server-side field errors into it.
+ */
+interface Props {
+  name: string;
+  label: string;
+  required?: boolean;
+  placeholder?: string;
+  invalidMessage?: string;
+  class?: string;
+}
+
+const {
+  name,
+  label,
+  required = false,
+  placeholder,
+  invalidMessage = 'Enter a valid mobile number for the selected country.',
+  class: className,
+} = Astro.props;
+
+const id = `f-${name}`;
+const errorId = `${id}-error`;
+---
+
+<div class={className} data-phone-field data-invalid-message={invalidMessage}>
+  <label for={id} class="text-ink block text-sm font-medium">
+    {label}
+    {required && <span class="text-red-600" aria-hidden="true"> *</span>}
+  </label>
+
+  <div class="phone-wrap mt-1.5">
+    {/* Display only — no `name`, so the national digits never post. */}
+    <input
+      id={id}
+      type="tel"
+      dir="ltr"
+      autocomplete="tel"
+      required={required}
+      placeholder={placeholder}
+      aria-describedby={errorId}
+      class="border-brand-200 text-ink placeholder:text-muted/60 focus:border-brand-600 focus:ring-brand-600/20 aria-[invalid=true]:border-red-500 aria-[invalid=true]:ring-red-500/20 w-full rounded-lg border bg-white px-3.5 py-2.5 text-sm transition-colors focus:ring-2 focus:outline-none"
+    />
+    <input type="hidden" name={name} data-phone-value />
+  </div>
+
+  <p id={errorId} data-error-for={name} class="mt-1.5 hidden text-sm text-red-600"></p>
+</div>
+
+<script>
+  type Iti = {
+    /** Full libphonenumber validation, per country. */
+    isValidNumberPrecise: () => boolean | null;
+    /** 'MOBILE' | 'FIXED_LINE' | 'FIXED_LINE_OR_MOBILE' | … */
+    getNumberType: () => string | null;
+    getNumber: () => string;
+    getSelectedCountryData: () => { dialCode?: string };
+    destroy: () => void;
+  };
+
+  /**
+   * These forms ask for a mobile, so a valid landline is still the wrong
+   * answer — we may need to send a WhatsApp message to it.
+   *
+   * FIXED_LINE_OR_MOBILE has to be accepted: in the NANP (US, Canada) the
+   * numbering plan genuinely cannot tell the two apart, so rejecting it would
+   * reject every American number.
+   */
+  const MOBILE_TYPES = new Set(['MOBILE', 'FIXED_LINE_OR_MOBILE']);
+
+  const instances = new Map<HTMLElement, Iti>();
+
+  function setUp(field: HTMLElement) {
+    const input = field.querySelector<HTMLInputElement>('input[type=tel]');
+    const hidden = field.querySelector<HTMLInputElement>('[data-phone-value]');
+    const error = field.querySelector<HTMLElement>('[data-error-for]');
+    const message = field.dataset.invalidMessage ?? 'Enter a valid mobile number.';
+    if (!input || !hidden || field.dataset.wired) return;
+    field.dataset.wired = '1';
+
+    /** Keep the hidden field in international form whatever happens. */
+    function sync() {
+      const typed = input!.value.trim();
+      if (!typed) {
+        hidden!.value = '';
+        return;
+      }
+      const iti = instances.get(field);
+      const full = iti?.getNumber() || '';
+      if (full) {
+        hidden!.value = full;
+        return;
+      }
+      // No library, or nothing parseable yet: post the dial code plus what was
+      // typed rather than a bare national number.
+      const dial = iti?.getSelectedCountryData()?.dialCode;
+      hidden!.value = dial ? `+${dial} ${typed}` : typed;
+    }
+
+    function check(strict: boolean) {
+      const iti = instances.get(field);
+      const typed = input!.value.trim();
+      sync();
+      if (!iti) {
+        input!.setCustomValidity('');
+        return;
+      }
+      // Two checks, because neither alone is enough:
+      //
+      //   isValidNumber()        LENGTH ONLY (its own source says so), so
+      //                          +91 4566666666 passes on ten digits.
+      //   isValidNumberPrecise() real libphonenumber rules, but +91 45… is a
+      //                          valid Indian LANDLINE, so it passes too.
+      //
+      // Requiring a mobile number type is what actually rejects it. This is
+      // per-country data, not an India special case: it equally rejects a
+      // Dubai or London landline.
+      const valid =
+        iti.isValidNumberPrecise() === true && MOBILE_TYPES.has(iti.getNumberType() ?? '');
+      const ok = typed === '' || valid;
+      // While typing, only complain once the number is long enough to judge.
+      const show = !ok && (strict || typed.replace(/\D/g, '').length >= 6);
+      input!.toggleAttribute('aria-invalid', show);
+      if (error) {
+        error.textContent = show ? message : '';
+        error.classList.toggle('hidden', !show);
+      }
+      input!.setCustomValidity(ok ? '' : message);
+    }
+
+    input.addEventListener('input', () => check(false));
+    input.addEventListener('blur', () => check(true));
+    input.addEventListener('countrychange', () => check(false));
+
+    const load = () => import('intl-tel-input/intlTelInputWithUtils').then((m) => m.default);
+    load()
+      .catch(() => new Promise((r) => setTimeout(r, 400)).then(load))
+      .then((factory) => {
+        if (!factory || !input.isConnected) return;
+        instances.set(
+          field,
+          factory(input, {
+            initialCountry: 'in',
+            separateDialCode: true,
+            strictMode: true,
+            // Where we have offices, then the neighbours people contact us from.
+            countryOrder: ['in', 'ae', 'om', 'us', 'qa', 'sa', 'gb'],
+          }) as unknown as Iti
+        );
+        if (input.value.trim()) check(false);
+      })
+      .catch(() => {
+        console.warn('[phone] intl-tel-input did not load; the field is left unvalidated');
+      });
+  }
+
+  function initPhoneFields() {
+    document.querySelectorAll<HTMLElement>('[data-phone-field]').forEach(setUp);
+  }
+
+  /** <ClientRouter /> swaps the DOM; a stale instance would leave a second
+      country dropdown behind on the way back. */
+  function teardown() {
+    for (const [field, iti] of instances) {
+      iti.destroy();
+      delete field.dataset.wired;
+    }
+    instances.clear();
+  }
+
+  document.addEventListener('astro:before-swap', teardown);
+  document.addEventListener('astro:page-load', initPhoneFields);
+  if (document.readyState !== 'loading') initPhoneFields();
+  else document.addEventListener('DOMContentLoaded', initPhoneFields, { once: true });
+</script>
+
+<style is:global>
+  /* The library sizes its own wrapper; make it fill the field like every other
+     input, and keep the flag button inside our border radius. */
+  .phone-wrap .iti {
+    width: 100%;
+  }
+  .phone-wrap .iti__tel-input {
+    width: 100%;
+  }
+  .phone-wrap .iti--separate-dial-code .iti__selected-country {
+    border-radius: 0.5rem 0 0 0.5rem;
+    background: var(--color-brand-50);
+  }
+</style>

@@ -1,20 +1,69 @@
 ---
+import { env } from 'cloudflare:workers';
+import AboutAnim from '@/components/AboutAnim.astro';
 import ContactForm from '@/components/ContactForm.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
-import Reveal from '@/components/Reveal.astro';
 import WhatsAppManage from '@/components/WhatsAppManage.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { contact, offices } from '@/config/site';
+import { offices } from '@/config/site';
+import { readContact, telHref, waNumber } from '@/lib/contact-settings';
 
-const email = `${contact.emailUser}@${contact.emailDomain}`;
+/**
+ * Rendered per-request so an edit made in manage mode reaches every visitor —
+ * the whole point of making the details editable.
+ *
+ * Note the Organization JSON-LD in BaseLayout is still built from the static
+ * seed on every page. Making that follow KV would mean making every page
+ * dynamic, which is not worth it for a phone number.
+ */
+export const prerender = false;
+
+const details = await readContact(env);
+const { email, phoneDisplay: phone } = details;
+const wa = waNumber(details);
+
+/**
+ * Class names here are `ct-` prefixed on purpose: the reveal engine owns the
+ * bare `.done` and `.in` classes globally, and `.rail`, `.node` and `.tile` are
+ * generic enough to collide with a future component.
+ */
+const methods = [
+  {
+    key: 'call',
+    icon: 'phone' as const,
+    label: 'Call us',
+    value: phone,
+    href: telHref(details),
+    copy: phone,
+  },
+  {
+    key: 'wa',
+    icon: 'whatsapp' as const,
+    label: 'Chat on WhatsApp',
+    value: phone,
+    href: `https://wa.me/${wa}`,
+    copy: '',
+  },
+  {
+    key: 'mail',
+    icon: 'mail' as const,
+    label: 'Email us',
+    value: email,
+    href: `mailto:${email}`,
+    copy: email,
+  },
+];
 ---
 
 <BaseLayout
   title="Contact"
   description="Talk to Alphalize about ERP, business intelligence or custom software. Office in Kollam, Kerala."
 >
+  <AboutAnim />
+
   <PageHero
+    anim
     eyebrow="Contact"
     title="Contact Us"
     lead="Describe your current setup and what you want to change. We will come back with a straight assessment rather than a sales deck."
@@ -22,104 +71,401 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
   <section class="container-page py-16 lg:py-20">
     <div class="grid gap-10 lg:grid-cols-12 lg:gap-12">
-      <!-- Details -->
-      <div class="lg:col-span-5">
-        <Reveal direction="left" class="space-y-4">
-          <a
-            href={contact.phoneHref}
-            class="rounded-card border-brand-100 hover:border-brand-200 hover:bg-brand-50/50 flex gap-4 border p-5 transition-colors"
-          >
-            <span
-              class="rounded-btn bg-plum-600 flex size-11 shrink-0 items-center justify-center text-white"
-            >
-              <Icon name="phone" class="size-5" />
-            </span>
-            <span>
-              <span class="text-ink block text-sm font-semibold">Call us</span>
-              <span class="text-muted mt-0.5 block text-sm">{contact.phone}</span>
-            </span>
-          </a>
+      {/* Left: a rail that draws downward, each card hooking on as it reaches. */}
+      <div class="ct-rail-col lg:col-span-5" data-ab data-hold="900">
+        <span class="ct-rail" aria-hidden="true"><span class="ct-rail-fill"></span></span>
 
-          {/* href is a working fallback; WhatsAppManage rewrites it to the
-              resolved number once its script runs. */}
-          <a
-            href={`https://wa.me/${contact.phone.replace(/\D/g, '')}`}
-            data-wa-link
-            target="_blank"
-            rel="noopener"
-            class="rounded-card border-brand-100 hover:border-brand-200 hover:bg-brand-50/50 flex gap-4 border p-5 transition-colors"
-          >
-            <span
-              class="rounded-btn bg-plum-600 flex size-11 shrink-0 items-center justify-center text-white"
+        {
+          methods.map((m, i) => (
+            <div
+              class="ct-card"
+              style={`--d:${180 + i * 220}ms`}
+              data-copy={m.copy || undefined}
             >
-              <Icon name="whatsapp" class="size-5" />
-            </span>
-            <span>
-              <span class="text-ink block text-sm font-semibold">Chat on WhatsApp</span>
-              <span class="text-muted mt-0.5 block text-sm">{contact.phone}</span>
-            </span>
-          </a>
-
-          <a
-            href={`mailto:${email}`}
-            class="rounded-card border-brand-100 hover:border-brand-200 hover:bg-brand-50/50 flex gap-4 border p-5 transition-colors"
-          >
-            <span
-              class="rounded-btn bg-plum-600 flex size-11 shrink-0 items-center justify-center text-white"
-            >
-              <Icon name="mail" class="size-5" />
-            </span>
-            <span>
-              <span class="text-ink block text-sm font-semibold">Email us</span>
-              <span class="text-muted mt-0.5 block text-sm break-all">{email}</span>
-            </span>
-          </a>
-
-          <div class="rounded-card border-brand-100 border p-5">
-            <h2 class="text-ink text-sm font-semibold">Office addresses</h2>
-            <ul class="mt-4 space-y-5">
+              <span class="ct-node" aria-hidden="true" />
+              <a
+                class="ct-row rounded-card border-brand-100 border bg-white"
+                href={m.href}
+                data-wa-link={m.key === 'wa' ? '' : undefined}
+                target={m.key === 'wa' ? '_blank' : undefined}
+                rel={m.key === 'wa' ? 'noopener' : undefined}
+              >
+                <span class="ct-tile">
+                  <span class="ct-face ct-front">
+                    <Icon name={m.icon} class="size-4" />
+                  </span>
+                  <span class="ct-face ct-back">
+                    <Icon name="arrow-right" class="size-4" />
+                  </span>
+                </span>
+                <span class="ct-txt">
+                  <b class="text-ink">{m.label}</b>
+                  <span class="text-muted">
+                    {m.value}
+                  </span>
+                </span>
+              </a>
               {
-                offices.map((o) => (
-                  <li class="flex gap-4">
-                    <span class="rounded-btn bg-plum-50 text-plum-600 flex size-11 shrink-0 items-center justify-center">
-                      <Icon name="pin" class="size-5" />
-                    </span>
-                    <span class="text-muted text-sm leading-relaxed">
-                      <span class="text-ink block font-semibold">{o.label}</span>
-                      {o.street}
-                      <br />
-                      {o.locality}, {o.region} {o.postalCode}
-                      <br />
-                      {o.country}
-                    </span>
-                  </li>
-                ))
+                m.copy && (
+                  <button class="ct-copy" type="button" aria-label={`Copy ${m.label}`}>
+                    <Icon name="copy" class="ct-ci size-3.5" />
+                    <Icon name="check" draw class="ct-co size-3.5" />
+                  </button>
+                )
               }
-            </ul>
-          </div>
+            </div>
+          ))
+        }
 
-          <div class="cc-surface rounded-card border-brand-100 flex gap-4 border p-5">
-            <span
-              class="rounded-btn text-plum-600 flex size-11 shrink-0 items-center justify-center bg-white"
-            >
-              <Icon name="clock" class="size-5" />
-            </span>
-            <span class="text-muted text-sm leading-relaxed">
-              <span class="text-ink block font-semibold">Response time</span>
-              We aim to reply within one business day, with 24/7 support cover across Indian, Gulf and
-              US business hours.
-            </span>
+        <div class="ct-card" style="--d:840ms">
+          <span class="ct-node" aria-hidden="true"></span>
+          <div class="ct-block rounded-card border-brand-100 border">
+            <p class="text-ink ct-bh">Office addresses</p>
+            {
+              offices.map((o) => (
+                <div class="ct-office">
+                  <span class="ct-pin rounded-btn bg-plum-50 text-plum-600">
+                    <Icon name="pin" class="size-4" />
+                  </span>
+                  <p class="text-muted">
+                    <b class="text-ink">{o.label}</b>
+                    {o.street}
+                    <br />
+                    {o.locality}, {o.region} {o.postalCode}
+                    <br />
+                    {o.country}
+                  </p>
+                </div>
+              ))
+            }
           </div>
-        </Reveal>
+        </div>
+
+        <div class="ct-card" style="--d:1000ms">
+          <span class="ct-node" aria-hidden="true"></span>
+          <div class="ct-block rounded-card border-brand-100 border">
+            <div class="ct-office">
+              <span class="ct-pin rounded-btn bg-plum-50 text-plum-600">
+                <Icon name="clock" class="size-4" />
+              </span>
+              <p class="text-muted">
+                <b class="text-ink">Response time</b>
+                We aim to reply within one business day, and support runs around the clock from
+                Kollam.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- Form -->
-      <div class="lg:col-span-7">
+      <div class="lg:col-span-7" data-ab data-hold="1100">
         <WhatsAppManage />
-        <Reveal direction="right">
-          <ContactForm />
-        </Reveal>
+        <ContactForm />
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<script>
+  /** Copy-to-clipboard on the phone and email cards. */
+  function initContactCopy() {
+    document.querySelectorAll<HTMLElement>('.ct-card[data-copy]').forEach((card) => {
+      const btn = card.querySelector<HTMLButtonElement>('.ct-copy');
+      const value = card.dataset.copy;
+      if (!btn || !value || card.dataset.wired) return;
+      card.dataset.wired = '1';
+
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          // Clipboard API needs a secure context and permission; fall back so
+          // the button still works on http:// and in older browsers.
+          const ta = document.createElement('textarea');
+          ta.value = value;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.append(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        card.classList.add('is-copied');
+        setTimeout(() => card.classList.remove('is-copied'), 1600);
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initContactCopy);
+  if (document.readyState !== 'loading') initContactCopy();
+  else document.addEventListener('DOMContentLoaded', initContactCopy, { once: true });
+</script>
+
+<style>
+  .ct-rail-col {
+    position: relative;
+    padding-left: 1.25rem;
+  }
+
+  /* The rail draws downward; each node pops as the line reaches it. */
+  .ct-rail {
+    position: absolute;
+    left: 5px;
+    top: 14px;
+    bottom: 14px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--color-brand-100);
+    overflow: hidden;
+  }
+  .ct-rail-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--color-brand-500), var(--color-plum-600));
+    transform-origin: top;
+    transition: transform 1.5s cubic-bezier(0.4, 0.05, 0.2, 1);
+    transition-delay: calc(var(--b, 0ms) + 120ms);
+  }
+  /* Guarded, like every other start state: `.in` only ever lands when the
+     engine runs, so an unguarded scaleY(0) would leave the rail permanently
+     empty with JS off. */
+  :global(html.ab-js) .ct-rail-fill {
+    transform: scaleY(0);
+  }
+  :global(html.ab-js) .ct-rail-col.in .ct-rail-fill {
+    transform: scaleY(1);
+  }
+
+  .ct-card {
+    position: relative;
+    margin-bottom: 0.75rem;
+  }
+  .ct-node {
+    position: absolute;
+    left: -19px;
+    top: 22px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--color-brand-500);
+    transition:
+      transform 0.4s cubic-bezier(0.34, 1.6, 0.64, 1),
+      border-color 0.3s ease;
+    transition-delay: calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+  :global(html.ab-js) .ct-node {
+    transform: scale(0);
+  }
+  :global(html.ab-js) .ct-rail-col.in .ct-node {
+    transform: scale(1);
+  }
+
+  .ct-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 0.9375rem;
+    transition:
+      border-color 0.3s ease,
+      box-shadow 0.35s ease,
+      transform 0.35s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .ct-card:hover .ct-row {
+    border-color: var(--color-plum-300);
+    box-shadow: var(--shadow-lift);
+    transform: translateX(3px);
+  }
+
+  /* The icon tile turns to reveal an arrow. */
+  .ct-tile {
+    position: relative;
+    flex: none;
+    width: 2.125rem;
+    height: 2.125rem;
+    transform-style: preserve-3d;
+    transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
+  }
+  .ct-card:hover .ct-tile {
+    transform: rotateY(180deg);
+  }
+  .ct-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-btn);
+    backface-visibility: hidden;
+  }
+  .ct-front {
+    background: var(--color-plum-50);
+    color: var(--color-plum-600);
+  }
+  .ct-back {
+    background: var(--color-plum-600);
+    color: #fff;
+    transform: rotateY(180deg);
+  }
+
+  .ct-txt {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .ct-txt b {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .ct-txt span {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    word-break: break-all;
+  }
+
+  /* --- copy button --- */
+  .ct-copy {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 1.625rem;
+    height: 1.625rem;
+    margin-top: -13px;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-btn);
+    background: #fff;
+    color: var(--color-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.25s ease,
+      color 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.3s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .ct-card:hover .ct-copy,
+  .ct-copy:focus-visible {
+    opacity: 1;
+  }
+  .ct-copy:hover {
+    color: var(--color-brand-600);
+    border-color: var(--color-brand-200);
+    transform: scale(1.08);
+  }
+  .ct-copy :global(.ct-co) {
+    position: absolute;
+    color: var(--color-teal-600);
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      opacity 0.2s ease,
+      transform 0.3s cubic-bezier(0.34, 1.6, 0.64, 1);
+  }
+  .ct-copy :global(.ct-co path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .is-copied .ct-copy {
+    opacity: 1;
+    border-color: color-mix(in srgb, var(--color-teal-600) 40%, #fff);
+    background: color-mix(in srgb, var(--color-teal-600) 6%, #fff);
+  }
+  .is-copied :global(.ct-ci) {
+    opacity: 0;
+  }
+  .is-copied :global(.ct-co) {
+    opacity: 1;
+    transform: none;
+  }
+  .is-copied :global(.ct-co path) {
+    animation: ct-tick 0.4s cubic-bezier(0.55, 0, 0.35, 1) forwards;
+  }
+  @keyframes ct-tick {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .is-copied::after {
+    content: 'Copied';
+    position: absolute;
+    right: 42px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: var(--color-teal-600);
+    animation: ct-pop 0.25s ease;
+  }
+  @keyframes ct-pop {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(6px);
+    }
+  }
+
+  /* --- plain blocks --- */
+  .ct-block {
+    padding: 0.875rem 0.9375rem;
+    background: var(--color-surface);
+  }
+  .ct-bh {
+    margin: 0 0 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+  .ct-office {
+    display: flex;
+    gap: 0.6875rem;
+  }
+  .ct-office + .ct-office {
+    margin-top: 0.75rem;
+  }
+  .ct-pin {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+  .ct-office p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+  .ct-office b {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct-rail-fill {
+      transform: scaleY(1);
+      transition: none;
+    }
+    :global(html.ab-js) .ct-node {
+      transform: scale(1);
+    }
+    .ct-row,
+    .ct-tile,
+    .ct-copy,
+    .ct-node {
+      transition: none;
+    }
+    .ct-card:hover .ct-tile {
+      transform: none;
+    }
+    .is-copied :global(.ct-co path) {
+      stroke-dashoffset: 0;
+      animation: none;
+    }
+    .is-copied::after {
+      animation: none;
+    }
+  }
+</style>

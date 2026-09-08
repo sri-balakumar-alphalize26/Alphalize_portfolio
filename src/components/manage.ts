@@ -50,6 +50,24 @@ export function inManageMode(): boolean {
   return new URLSearchParams(location.search).get('manage') === '1';
 }
 
+/**
+ * `?manage=0` is the instant lock — a link you can bookmark or hand to someone
+ * to end the session wherever they are.
+ *
+ * The cookie is httpOnly, so only the server can clear it; this hands off to
+ * /api/manage/lock, which clears it and redirects back to the clean path.
+ * Returns true when it has taken over, so callers stop what they were doing.
+ *
+ * "End up locked", not "toggle": running it while already locked is a harmless
+ * no-op that just lands on the clean page.
+ */
+export function handleInstantLock(): boolean {
+  if (new URLSearchParams(location.search).get('manage') !== '0') return false;
+  const next = location.pathname + location.hash;
+  location.replace(`/api/manage/lock?next=${encodeURIComponent(next)}`);
+  return true;
+}
+
 export interface ManageStatus {
   unlocked: boolean;
   sessionHours: number;

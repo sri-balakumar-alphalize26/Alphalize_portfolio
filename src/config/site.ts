@@ -17,9 +17,9 @@ export const contact = {
   phone: '+91 70252 05503',
   phoneHref: 'tel:+917025205503',
   /** General enquiries — shown publicly and the contact-form recipient. */
-  email: 'info@alphalize.com',
+  email: 'hr@alphalize.com',
   // Split so the address is assembled at build time rather than sitting in the markup.
-  emailUser: 'info',
+  emailUser: 'hr',
   emailDomain: 'alphalize.com',
   /** Applications — the careers-form recipient. */
   careersEmail: 'hr@alphalize.com',

@@ -1,129 +1,161 @@
 ---
-import { contact } from '@/config/site';
 import ManageBar from './ManageBar.astro';
 
 /**
- * Resolves the WhatsApp number for every `[data-wa-link]` and `[data-wa-send]`
- * on the page, and — only under `?manage=1` — offers a field to override it.
+ * Manage-mode editing for the public contact details, and the "Send message"
+ * button that composes a WhatsApp message from the enquiry form.
  *
- * The override is stored per-browser; visitors keep the number built into the
- * page until contact.phone in src/config/site.ts changes and the site is
- * redeployed. See manage.ts.
+ * Phone and email are stored in KV and served to every visitor — see
+ * src/lib/contact-settings.ts. There is deliberately no WhatsApp field: it is
+ * derived from the phone, so the two cannot drift apart.
+ *
+ * The links themselves are rendered server-side from the same store, so there
+ * is nothing for this script to rewrite. It only handles the compose button and
+ * the manage panel.
  */
-
-/** wa.me wants digits only. */
-const defaultNumber = contact.phone.replace(/\D/g, '');
 ---
 
-<div data-wa-root data-default={defaultNumber}>
-  <ManageBar scope="Number changes" keys={['alphalize:wa-number']}>
-    <div class="wa-row">
-      <label class="sr-only" for="wa-num">WhatsApp number</label>
-      <input id="wa-num" type="text" name="number" inputmode="numeric" placeholder={defaultNumber} data-wa-input />
+<div data-wa-root>
+  <ManageBar scope="Contact detail changes">
+    <div class="wa-set">
+      <p class="wa-set-h">Contact details</p>
+      <label class="sr-only" for="wa-phone">Phone</label>
+      <input id="wa-phone" type="tel" name="phoneDisplay" placeholder="+91 70252 05503" data-wa-phone />
+      <label class="sr-only" for="wa-email">Email</label>
+      <input id="wa-email" type="email" name="email" placeholder="hr@alphalize.com" data-wa-email />
       <button type="button" class="btn btn-primary wa-btn" data-wa-save>Save</button>
     </div>
     <p class="wa-current" data-wa-current></p>
+    <p class="wa-note">
+      WhatsApp is derived from the phone number, so there is nothing separate to keep in step.
+      Saving publishes to every visitor — no redeploy needed.
+    </p>
   </ManageBar>
 </div>
 
 <script>
-  import { inManageMode, readRaw, writeRaw } from './manage';
+  import { inManageMode, manageAction } from './manage';
 
-  const NUM_KEY = 'alphalize:wa-number';
+  const MESSAGES: Record<string, string> = {
+    'bad-phone': 'That does not look like a full number with country code.',
+    'bad-email': 'That does not look like an email address.',
+    locked: 'That session has expired. Reload and unlock again.',
+    network: 'Could not reach the server.',
+  };
 
-  function resolveNumber(root: HTMLElement | null): string {
-    const stored = (readRaw(NUM_KEY) ?? '').replace(/\D/g, '');
-    return stored || (root?.dataset.default ?? '');
-  }
-
-  function initWhatsApp() {
-    const root = document.querySelector<HTMLElement>('[data-wa-root]');
-    const number = resolveNumber(root);
-    if (!number) return;
-
-    // --- point every WhatsApp affordance at the resolved number ---
-    document.querySelectorAll<HTMLAnchorElement>('[data-wa-link]').forEach((a) => {
-      a.href = `https://wa.me/${number}`;
-    });
-
+  function initContactManage() {
+    // --- the enquiry form's compose button, on every visit ---
     document.querySelectorAll<HTMLElement>('[data-wa-send]').forEach((btn) => {
       if (btn.dataset.wired) return;
       btn.dataset.wired = '1';
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', async (e) => {
         const form = btn.closest('form');
         if (!form) return;
-        // Report validity first, so nobody lands in WhatsApp with half a message.
+        // The button is the form's submit control, so stop the submission
+        // before anything else: WhatsApp is the delivery, there is no endpoint.
+        e.preventDefault();
+        // Validate first, so nobody lands in WhatsApp with half a message.
         if (!form.reportValidity()) return;
 
         const data = new FormData(form);
-        const line = (label: string, key: string) => {
-          const value = (data.get(key) ?? '').toString().trim();
-          return value ? `${label}: ${value}` : '';
-        };
-        const body = [
-          line('Name', 'name'),
-          line('Email', 'email'),
-          line('Phone', 'phone'),
-          line('Subject', 'subject'),
-          line('Message', 'message'),
-        ]
-          .filter(Boolean)
-          .join('\n');
+        const get = (key: string) => (data.get(key) ?? '').toString().trim();
 
-        // Re-resolve at click time so a change made in manage mode applies
+        // Blank optional fields are dropped so we never receive empty lines.
+        const lines = ['Enquiry from the Alphalize website', ''];
+        for (const [key, label] of [
+          ['name', 'Name'],
+          ['email', 'Email'],
+          ['phone', 'Phone'],
+          ['subject', 'Subject'],
+        ] as const) {
+          const value = get(key);
+          if (value) lines.push(`${label}: ${value}`);
+        }
+        const body = get('message');
+        if (body) lines.push('', 'Message:', body);
+
+        // Read the number at click time, so a change saved moments ago applies
         // without a reload.
-        window.open(
-          `https://wa.me/${resolveNumber(root)}?text=${encodeURIComponent(body)}`,
+        const link = document.querySelector<HTMLAnchorElement>('[data-wa-link]');
+        const number = link?.href.split('/').pop() ?? '';
+
+        const opened = window.open(
+          `https://wa.me/${number}?text=${encodeURIComponent(lines.join('\n'))}`,
           '_blank',
           'noopener'
         );
+
+        const hint = form.querySelector<HTMLElement>('[data-wa-hint]');
+        if (hint) {
+          hint.textContent = opened
+            ? 'WhatsApp is opening — press send there to reach us.'
+            : 'Your browser blocked the WhatsApp tab. Allow popups, or message us directly.';
+        }
       });
     });
 
-    // --- manage control, only under ?manage=1 ---
+    // --- manage panel, only under ?manage=1 ---
+    const root = document.querySelector<HTMLElement>('[data-wa-root]');
     if (!root || !inManageMode()) return;
-    const input = root.querySelector<HTMLInputElement>('[data-wa-input]');
+
+    const phone = root.querySelector<HTMLInputElement>('[data-wa-phone]');
+    const email = root.querySelector<HTMLInputElement>('[data-wa-email]');
     const save = root.querySelector<HTMLButtonElement>('[data-wa-save]');
     const current = root.querySelector<HTMLElement>('[data-wa-current]');
-    if (!input || !save) return;
+    if (!phone || !email || !save) return;
 
-    const stored = (readRaw(NUM_KEY) ?? '').replace(/\D/g, '');
-    input.value = number;
-    if (current) {
-      current.textContent = `Currently using ${number}${stored ? ' (changed here)' : ' (built-in)'}.`;
-    }
+    const show = (c: { phoneDisplay?: string; email?: string } | undefined) => {
+      if (!c) return;
+      phone.value = c.phoneDisplay ?? '';
+      email.value = c.email ?? '';
+    };
+
+    void manageAction('get-contact').then((r) => show(r.contact as never));
 
     if (!save.dataset.wired) {
       save.dataset.wired = '1';
-      save.addEventListener('click', () => {
-        const digits = input.value.replace(/\D/g, '');
-        if (digits.length < 8) {
-          if (current) current.textContent = 'That does not look like a full number with country code.';
+      save.addEventListener('click', async () => {
+        const result = await manageAction('set-contact', {
+          phoneDisplay: phone.value,
+          email: email.value,
+        });
+        if (result.ok === true) {
+          show(result.contact as never);
+          if (current) current.textContent = 'Saved. Reload to see it on the page.';
           return;
         }
-        writeRaw(NUM_KEY, digits);
-        initWhatsApp();
+        if (current) {
+          current.textContent = MESSAGES[String(result.outcome)] ?? 'Could not save the details.';
+        }
       });
     }
   }
 
-  document.addEventListener('astro:page-load', initWhatsApp);
-  document.addEventListener('manage:unlocked', initWhatsApp);
-  if (document.readyState !== 'loading') initWhatsApp();
-  else document.addEventListener('DOMContentLoaded', initWhatsApp, { once: true });
+  document.addEventListener('astro:page-load', initContactManage);
+  document.addEventListener('manage:unlocked', initContactManage);
+  if (document.readyState !== 'loading') initContactManage();
+  else document.addEventListener('DOMContentLoaded', initContactManage, { once: true });
 </script>
 
 <style>
-  .wa-row {
+  .wa-set {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+  .wa-set-h {
+    flex: 0 0 100%;
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-heading);
   }
   .wa-btn {
     padding: 0.5rem 1rem;
     font-size: 0.8125rem;
   }
-  .wa-current {
+  .wa-current,
+  .wa-note {
     margin: 0.5rem 0 0;
     font-size: 0.75rem;
     line-height: 1.5;

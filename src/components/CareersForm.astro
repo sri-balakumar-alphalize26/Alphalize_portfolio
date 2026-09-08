@@ -1,5 +1,6 @@
 ---
 import Field from './Field.astro';
+import PhoneField from './PhoneField.astro';
 import Icon from './Icon.astro';
 import Turnstile from './Turnstile.astro';
 
@@ -56,15 +57,7 @@ const { positions } = Astro.props;
       placeholder="you@example.com"
       class="ab apply-f"
     />
-    <Field
-      name="phone"
-      label="Phone"
-      type="tel"
-      required
-      autocomplete="tel"
-      placeholder="+91 00000 00000"
-      class="ab apply-f"
-    />
+    <PhoneField name="phone" label="Phone" required placeholder="70252 05503" class="ab apply-f" />
     <Field name="position" label="Position" type="select" required options={positions} class="ab apply-f" />
   </div>
 

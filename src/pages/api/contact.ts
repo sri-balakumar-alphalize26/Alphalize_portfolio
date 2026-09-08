@@ -70,7 +70,7 @@ export const POST: APIRoute = async ({ request }) => {
   const sent = await sendNotification({
     apiKey: env.RESEND_API_KEY,
     from: env.MAIL_FROM ?? 'website@alphalize.com',
-    to: env.CONTACT_TO_EMAIL ?? 'info@alphalize.com',
+    to: env.CONTACT_TO_EMAIL ?? 'hr@alphalize.com',
     subject: `Website enquiry: ${data.subject}`,
     replyTo: data.email,
     fields: [

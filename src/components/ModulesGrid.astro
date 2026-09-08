@@ -1,10 +1,16 @@
 ---
 import { getCollection } from 'astro:content';
 import Icon from './Icon.astro';
-import Reveal from './Reveal.astro';
 import SectionHeading from './SectionHeading.astro';
 
-/** Rendered on /services/erp-solutions via `showcase: erp`. */
+/**
+ * Rendered on /services/erp-solutions via `showcase: erp`.
+ *
+ * The grid is tall, so each card is its own [data-ab] unit rather than the
+ * whole section being one: rows animate as you reach them, and the column
+ * index staggers each row into a ripple running left → right. Trigger comes
+ * from <AboutAnim>, which the service page loads.
+ */
 const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
 ---
 
@@ -12,30 +18,180 @@ const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b
   modules.length > 0 && (
     <section id="modules" class="cc-surface border-brand-100 scroll-mt-24 border-t py-16 lg:py-20">
       <div class="container-page">
-        <SectionHeading
-          eyebrow="ERP modules"
-          title="From sales to service — modules we have built"
-          highlight="we have built"
-          color="blue"
-          lead="Ready-made modules that drop into your Odoo deployment and cover the complete business lifecycle, from the counter to the back office."
-        />
+        <div data-ab>
+          <SectionHeading
+            anim
+            eyebrow="ERP modules"
+            title="From sales to service — modules we have built"
+            highlight="we have built"
+            color="blue"
+            lead="Ready-made modules that drop into your Odoo deployment and cover the complete business lifecycle, from the counter to the back office."
+          />
+        </div>
 
         <ul class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {modules.map((m, i) => (
-            <Reveal as="li" delay={i % 3} class="h-full">
-              <div class="rounded-card border-brand-100 hover:border-plum-300 flex h-full gap-4 border bg-white p-5 transition-colors">
-                <span class="rounded-btn bg-plum-50 text-plum-600 flex size-10 shrink-0 items-center justify-center">
-                  <Icon name={m.data.icon} class="size-5" />
-                </span>
-                <div>
-                  <h3 class="text-ink text-sm font-semibold">{m.data.title}</h3>
-                  <p class="text-muted mt-1 text-sm leading-relaxed">{m.data.summary}</p>
-                </div>
+            <li class="mg-card" data-ab style={`--d:${(i % 3) * 110}ms`}>
+              <span class="mg-wash" aria-hidden="true" />
+              <span class="mg-ico">
+                <Icon name={m.data.icon} class="size-5" />
+              </span>
+              <div class="mg-txt">
+                <h3>{m.data.title}</h3>
+                <p>{m.data.summary}</p>
               </div>
-            </Reveal>
+            </li>
           ))}
         </ul>
       </div>
     </section>
   )
 }
+
+<style>
+  .mg-card {
+    --mg-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --mg-settle: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    height: 100%;
+    gap: 0.8125rem;
+    padding: 1.25rem;
+    background: #fff;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    transition:
+      transform 0.45s var(--mg-settle),
+      box-shadow 0.4s ease,
+      border-color 0.35s ease;
+  }
+
+  /* Tint that grows out of the icon on hover. */
+  .mg-wash {
+    position: absolute;
+    left: 1.375rem;
+    top: 1.4rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--color-plum-600) 12%, transparent),
+      color-mix(in srgb, var(--color-brand-500) 8%, transparent) 60%,
+      transparent 72%
+    );
+    transform: scale(0);
+    transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  .mg-ico {
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-plum-600);
+    transition:
+      transform 0.45s var(--mg-spring),
+      color 0.3s ease;
+  }
+  .mg-txt {
+    position: relative;
+  }
+  .mg-card h3 {
+    margin: 0 0 0.4375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-ink);
+    transition: color 0.3s ease;
+  }
+  .mg-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    color: var(--color-muted);
+  }
+
+  .mg-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-plum-300);
+    box-shadow: var(--shadow-lift);
+  }
+  .mg-card:hover .mg-wash {
+    transform: scale(26);
+  }
+  .mg-card:hover .mg-ico {
+    color: var(--color-brand-600);
+    transform: scale(1.16) rotate(-8deg);
+  }
+  .mg-card:hover h3 {
+    color: var(--color-plum-600);
+  }
+
+  /* --- entrance: each card is its own observed unit --- */
+  :global(html.ab-js) .mg-card {
+    opacity: 0;
+    transform: translateY(26px) rotate(-1.6deg) scale(0.965);
+    transition:
+      opacity 0.55s ease,
+      transform 0.7s var(--mg-settle),
+      box-shadow 0.4s ease,
+      border-color 0.35s ease;
+    transition-delay: calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+  :global(html.ab-js) .mg-card.in {
+    opacity: 1;
+    transform: none;
+  }
+  :global(html.ab-js) .mg-ico,
+  :global(html.ab-js) .mg-txt {
+    opacity: 0;
+    transform: translateY(9px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1),
+      color 0.3s ease;
+    transition-delay: calc(var(--b, 0ms) + var(--d, 0ms) + 220ms);
+  }
+  :global(html.ab-js) .mg-card.in .mg-ico,
+  :global(html.ab-js) .mg-card.in .mg-txt {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Once settled, hover owns these transitions again — otherwise it would sit
+     behind the entrance delay. */
+  :global(html.ab-js) .mg-card.in.done {
+    transition:
+      transform 0.45s var(--mg-settle),
+      box-shadow 0.4s ease,
+      border-color 0.35s ease;
+    transition-delay: 0s;
+  }
+  :global(html.ab-js) .mg-card.in.done .mg-ico {
+    transition:
+      transform 0.45s var(--mg-spring),
+      color 0.3s ease;
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.ab-js) .mg-card,
+    :global(html.ab-js) .mg-ico,
+    :global(html.ab-js) .mg-txt {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none;
+    }
+    .mg-card,
+    .mg-wash,
+    .mg-ico {
+      transition: none;
+    }
+  }
+</style>

@@ -7,12 +7,17 @@ import Icon from './Icon.astro';
 
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 
+// Derived from the collection rather than a flag on `nav`, so the badge goes
+// away on its own once every role is closed.
+const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
+
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
 ---
 
 <!-- Utility bar: contact details that were buried in the old off-canvas panel. -->
+<span id="hdr-top" aria-hidden="true"></span>
 <div class="hidden bg-brand-900 text-brand-200 lg:block">
   <div class="container-page flex h-9 items-center justify-between text-xs">
     <p>ERP, business intelligence and custom software — Kollam, Kerala</p>
@@ -54,7 +59,7 @@ const isActive = (href: string) =>
         {
           nav.map((item) =>
             item.hasChildren ? (
-              <li class="group relative">
+              <li class="nav-drop group relative" data-drop>
                 <a
                   href={item.href}
                   aria-current={isActive(item.href) ? 'page' : undefined}
@@ -76,14 +81,14 @@ const isActive = (href: string) =>
                   open for keyboard users tabbing through the links.
                 -->
                 <div
-                  class="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 pt-2 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                  class="nav-drop-menu invisible absolute left-1/2 top-full w-72 -translate-x-1/2 pt-2 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
                 >
                   <ul
                     class="overflow-hidden rounded-card border border-brand-100 bg-white p-2 shadow-lift"
                   >
                     {
-                      services.map((s) => (
-                        <li>
+                      services.map((s, i) => (
+                        <li class="nav-drop-item" style={`--k:${i}`}>
                           <a
                             href={`/services/${s.id}`}
                             class="flex items-start gap-3 rounded-btn px-3 py-2.5 transition-colors hover:bg-plum-50"
@@ -108,6 +113,14 @@ const isActive = (href: string) =>
                   ]}
                 >
                   {item.label}
+                  {item.href === '/careers' && openRoles > 0 && (
+                    <span class="hiring-badge">
+                      Hiring<span aria-hidden="true">&nbsp;!!</span>
+                      <span class="sr-only">
+                        , {openRoles} open {openRoles === 1 ? 'role' : 'roles'}
+                      </span>
+                    </span>
+                  )}
                 </a>
               </li>
             )
@@ -153,6 +166,14 @@ const isActive = (href: string) =>
                 ]}
               >
                 {item.label}
+                {item.href === '/careers' && openRoles > 0 && (
+                  <span class="hiring-badge">
+                    Hiring<span aria-hidden="true">&nbsp;!!</span>
+                    <span class="sr-only">
+                      , {openRoles} open {openRoles === 1 ? 'role' : 'roles'}
+                    </span>
+                  </span>
+                )}
               </a>
               {item.hasChildren && (
                 <ul class="mb-2 ml-3 space-y-0.5 border-l border-brand-100 pl-3">
@@ -229,13 +250,116 @@ const isActive = (href: string) =>
       if (e.matches) setOpen(false);
     });
 
-    const onScroll = () => {
-      if (window.scrollY > 8) header.setAttribute('data-stuck', '');
-      else header.removeAttribute('data-stuck');
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    // Compact the header once the page has scrolled past the top. A sentinel
+    // above the header costs nothing per frame, unlike a scroll listener.
+    const sentinel = document.getElementById('hdr-top');
+    if (sentinel && 'IntersectionObserver' in window) {
+      new IntersectionObserver(
+        ([entry]) => header.toggleAttribute('data-stuck', !entry.isIntersecting),
+        { threshold: 0 }
+      ).observe(sentinel);
+    }
+
+    // Services dropdown. The CSS-only hover is the no-JS baseline; `js-nav`
+    // hands control over to this so hover-intent and Escape can apply. Services
+    // stays a real link either way.
+    const drop = header.querySelector<HTMLElement>('[data-drop]');
+    const trigger = drop?.querySelector<HTMLAnchorElement>('a');
+    if (drop && trigger) {
+      header.classList.add('js-nav');
+      let closeTimer: ReturnType<typeof setTimeout>;
+      const setOpenDrop = (open: boolean) => {
+        clearTimeout(closeTimer);
+        drop.classList.toggle('open', open);
+        trigger.setAttribute('aria-expanded', String(open));
+      };
+
+      drop.addEventListener('pointerenter', () => setOpenDrop(true));
+      // A short delay so the menu survives the pointer clipping a corner.
+      drop.addEventListener('pointerleave', () => {
+        closeTimer = setTimeout(() => setOpenDrop(false), 160);
+      });
+      drop.addEventListener('focusin', () => setOpenDrop(true));
+      drop.addEventListener('focusout', (e) => {
+        if (!drop.contains(e.relatedTarget as Node)) setOpenDrop(false);
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drop.classList.contains('open')) {
+          setOpenDrop(false);
+          trigger.focus();
+        }
+      });
+    }
   }
 
   document.addEventListener('astro:page-load', initHeader);
 </script>
+
+<style>
+  /* --- "Hiring !!" badge. Derived from the jobs collection, so it clears
+         itself once every role is closed. --- */
+  .hiring-badge {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4rem;
+    padding: 0.1rem 0.4rem;
+    border-radius: 99px;
+    background: var(--color-plum-600);
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hiring-badge {
+      animation: hdr-pulse 2.4s var(--ease-out-soft) infinite;
+    }
+  }
+  @keyframes hdr-pulse {
+    0%,
+    70%,
+    100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-plum-600) 55%, transparent);
+    }
+    35% {
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-plum-600) 0%, transparent);
+    }
+  }
+
+  /* The zip collapses its utility bar on scroll, but its bar lives inside the
+     sticky header. Ours sits above it and scrolls away on its own, so there is
+     nothing to collapse — the sentinel is only driving the shadow. */
+
+  /* --- Dropdown: JS takes over from the CSS-only hover once `js-nav` is set,
+         so hover-intent and Escape apply only where they can work. The scoped
+         attribute selector gives these the specificity to win over Tailwind's
+         group-hover utilities. --- */
+  :global(.js-nav) .nav-drop-menu {
+    visibility: hidden;
+    opacity: 0;
+  }
+  :global(.js-nav) .nav-drop.open .nav-drop-menu {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  /* Items cascade in as the panel opens. */
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-drop-item {
+      opacity: 0;
+      transform: translateY(-6px);
+      transition:
+        opacity 0.28s ease,
+        transform 0.28s var(--ease-out-soft);
+    }
+    .nav-drop:hover .nav-drop-item,
+    .nav-drop:focus-within .nav-drop-item,
+    .nav-drop.open .nav-drop-item {
+      opacity: 1;
+      transform: none;
+      transition-delay: calc(var(--k, 0) * 35ms);
+    }
+  }
+</style>

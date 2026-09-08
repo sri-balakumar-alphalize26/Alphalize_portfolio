@@ -1,11 +1,14 @@
 ---
 import { Heading, Marker } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
-import Reveal from './Reveal.astro';
 
 /**
  * Windows desktop software band. Rendered on /services/erp-solutions via
  * `showcase: erp`; the homepage software strip deep-links to `#desktop`.
+ *
+ * The panel boots up: a light sweep crosses it once as it arrives, the rows
+ * slide in from the right, and each tile flashes on like a screen powering up.
+ * Trigger comes from <AboutAnim>, which the service page loads.
  */
 const points = [
   'Runs natively on the counter PC — fast even on modest hardware.',
@@ -14,45 +17,226 @@ const points = [
 ];
 ---
 
-<section id="desktop" class="scroll-mt-24 py-16 lg:py-20">
+<section id="desktop" class="dp scroll-mt-24 py-16 lg:py-20" data-ab>
   <div class="container-page">
-    <Reveal
-      direction="scale"
-      class="cc-blue relative isolate grid gap-10 overflow-hidden rounded-card px-6 py-12 sm:px-12 lg:grid-cols-2 lg:items-center lg:py-16"
+    <div
+      class="dp-panel cc-blue rounded-card ab relative isolate grid gap-10 overflow-hidden px-6 py-12 sm:px-12 lg:grid-cols-2 lg:items-center lg:py-16"
     >
       <div
         aria-hidden="true"
         class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_60%_80%_at_0%_0%,rgba(96,179,255,0.35),transparent_60%)]"
       >
       </div>
+      <span class="dp-sweep" aria-hidden="true"></span>
 
       <div>
-        <p class="eyebrow">Windows · Offline-first</p>
-        <Heading as="h2" size="md" class="mt-2">
-          Desktop <Marker type="underline" color="sky">software</Marker>
-        </Heading>
-        <p class="lead mt-4 max-w-lg text-brand-100">
-          Installable Windows .exe applications for billing counters and back-office machines,
-          built for speed on local hardware.
+        <p class="eyebrow ab-track">Windows · Offline-first</p>
+        <div class="ab-ln mt-2">
+          <Heading as="h2" size="md" class="ab-lni">
+            Desktop <Marker type="underline" color="sky" delay={950}>software</Marker>
+          </Heading>
+        </div>
+        <p
+          class="lead text-brand-100 ab-words mt-4 max-w-lg"
+          data-base="520"
+          data-step="26"
+        >
+          Installable Windows .exe applications for billing counters and back-office machines, built
+          for speed on local hardware.
         </p>
-        <a href="/contact" class="btn btn-light mt-7">
+        <a href="/contact" class="btn btn-light dp-cta ab mt-7" style="--d:900ms">
           Ask about desktop billing
           <Icon name="arrow-right" class="size-4" />
+          <span class="dp-shine" aria-hidden="true"></span>
         </a>
       </div>
 
-      <ul class="space-y-4">
+      <ul class="dp-rows">
         {
-          points.map((p) => (
-            <li class="flex gap-3 rounded-btn border border-white/10 bg-white/5 p-4">
-              <span class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/10">
+          points.map((p, i) => (
+            <li class="rounded-btn ab" style={`--d:${560 + i * 150}ms`}>
+              <span class="dp-bar" aria-hidden="true" />
+              <span class="dp-tile">
                 <Icon name="monitor" class="size-4" />
               </span>
-              <span class="text-sm leading-relaxed text-brand-100">{p}</span>
+              <span class="text-brand-100 text-sm leading-relaxed">{p}</span>
             </li>
           ))
         }
       </ul>
-    </Reveal>
+    </div>
   </div>
 </section>
+
+<style>
+  .dp-panel {
+    --dp-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dp-glow: var(--color-brand-400);
+  }
+
+  /* One diagonal light pass as the panel arrives. */
+  .dp-sweep {
+    position: absolute;
+    top: -20%;
+    left: -45%;
+    width: 32%;
+    height: 140%;
+    pointer-events: none;
+    opacity: 0;
+    transform: skewX(-14deg);
+    background: linear-gradient(
+      105deg,
+      transparent,
+      rgb(120 190 255 / 0.16) 45%,
+      rgb(255 255 255 / 0.1) 52%,
+      transparent
+    );
+  }
+  .dp.in .dp-sweep {
+    animation: dp-sweep 1.25s cubic-bezier(0.4, 0, 0.25, 1) 0.25s 1;
+  }
+  @keyframes dp-sweep {
+    0% {
+      opacity: 0;
+      left: -45%;
+    }
+    12%,
+    88% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      left: 135%;
+    }
+  }
+
+  /* Same shine technique as .sd-shine and .wc-shine, tinted for a light button. */
+  .dp-cta {
+    position: relative;
+    overflow: hidden;
+  }
+  .dp-shine {
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 38%;
+    height: 100%;
+    pointer-events: none;
+    transform: skewX(-18deg);
+    background: linear-gradient(
+      105deg,
+      transparent,
+      color-mix(in srgb, var(--color-brand-800) 16%, transparent),
+      transparent
+    );
+  }
+  .dp.in .dp-shine {
+    animation: dp-shine 1s ease-out 1.7s 1;
+  }
+  @keyframes dp-shine {
+    to {
+      left: 130%;
+    }
+  }
+
+  /* --- feature rows --- */
+  .dp-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .dp-rows li {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.125rem;
+    background: rgb(255 255 255 / 0.045);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    transition:
+      background 0.35s ease,
+      border-color 0.35s ease,
+      transform 0.4s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .dp-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--color-brand-400), var(--color-brand-300));
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .dp-tile {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 0.4375rem;
+    background: rgb(255 255 255 / 0.08);
+    color: var(--color-brand-200);
+    transition:
+      background 0.35s ease,
+      color 0.35s ease,
+      transform 0.45s var(--dp-spring),
+      box-shadow 0.4s ease;
+  }
+
+  .dp-rows li:hover {
+    background: rgb(255 255 255 / 0.08);
+    border-color: color-mix(in srgb, var(--dp-glow) 38%, transparent);
+    transform: translateX(-4px);
+  }
+  .dp-rows li:hover .dp-bar {
+    transform: scaleY(1);
+  }
+  .dp-rows li:hover .dp-tile {
+    background: var(--color-brand-500);
+    color: #fff;
+    transform: scale(1.08);
+    box-shadow: 0 0 18px color-mix(in srgb, var(--dp-glow) 50%, transparent);
+  }
+
+  /* Each tile flashes on as its row lands. `to` is omitted so the resting
+     state resolves back to the static rule above, leaving hover free. */
+  .dp.in .dp-rows li .dp-tile {
+    animation: dp-power 0.7s ease-out;
+    animation-delay: calc(var(--b, 0ms) + var(--d, 0ms) + 260ms);
+  }
+  @keyframes dp-power {
+    0% {
+      background: rgb(255 255 255 / 0.08);
+      color: color-mix(in srgb, var(--color-brand-200) 55%, transparent);
+      box-shadow: 0 0 0 rgb(96 179 255 / 0);
+    }
+    28% {
+      background: color-mix(in srgb, var(--dp-glow) 55%, transparent);
+      color: #fff;
+      box-shadow: 0 0 22px color-mix(in srgb, var(--dp-glow) 55%, transparent);
+    }
+  }
+
+  /* Clear the entrance delay once settled, or the row hover would sit behind
+     the stagger by up to 860ms. */
+  :global(html.ab-js) .dp.in.done .ab {
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dp.in .dp-sweep,
+    .dp.in .dp-shine,
+    .dp.in .dp-rows li .dp-tile {
+      animation: none;
+    }
+    .dp-rows li,
+    .dp-tile,
+    .dp-bar {
+      transition: none;
+    }
+  }
+</style>

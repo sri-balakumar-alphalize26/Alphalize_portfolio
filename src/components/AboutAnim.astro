@@ -1,0 +1,35 @@
+---
+/**
+ * Loads the sequenced reveal engine used by the About page. Drop it once per
+ * page, then annotate the markup:
+ *
+ *   <section data-ab data-hold="0">          observed unit; .in lands on it
+ *     <p class="ab" style="--d:120ms">        rise in (+ .ab-left / .ab-right / .ab-fade / .ab-pop)
+ *     <span class="ab-ln"><span class="ab-lni">  heading rises out of a clip box
+ *     <p class="ab-track">                    eyebrow fades up, tracking relaxes
+ *     <p class="ab-words" data-base="600" data-step="38">   word cascade
+ *     <span class="ab-line">                  rule grows from the left
+ *     <span class="ab-pin">…icon…</span>      pin drop + ring
+ *     <aside class="ab ab-card">              card from the right
+ *
+ * `data-hold` delays a section, but only when it is already on screen at page
+ * load — that keeps the top-to-bottom order without stalling scrolled-to
+ * sections later on.
+ *
+ * NOT for headings containing <Marker>: the word splitter replaces
+ * textContent, which would drop the marker SVG. Use <Marker delay> instead.
+ */
+import '@/styles/about-anim.css';
+---
+
+{/* Set the flag before first paint, otherwise the page renders visible and
+    then snaps to the hidden start state. Skipped under reduced motion so
+    those users never see the hidden state at all. */}
+<script is:inline>
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+    document.documentElement.classList.add('ab-js');
+</script>
+
+<script>
+  import '@/components/about-anim';
+</script>

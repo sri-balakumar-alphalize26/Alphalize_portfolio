@@ -16,6 +16,15 @@ interface Props {
   /** Use on dark backgrounds. */
   invert?: boolean;
   class?: string;
+  /**
+   * Opt into the sequenced entrance from <AboutAnim>, replacing the default
+   * <Reveal>. The two cannot share an element: [data-reveal]'s
+   * `animation-timeline: view()` animation would override the .ab-* transitions.
+   *
+   * This does NOT emit `data-ab` — the enclosing section owns that, and these
+   * classes react to the `.in` it receives.
+   */
+  anim?: boolean;
 }
 
 const {
@@ -28,19 +37,40 @@ const {
   align = 'center',
   invert = false,
   class: className,
+  anim = false,
 } = Astro.props;
+
+const Wrapper = anim ? 'div' : Reveal;
 ---
 
-<Reveal class:list={['max-w-3xl', align === 'center' && 'mx-auto text-center', className]}>
-  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-  <Heading as="h2" size="lg" align={align} class:list={['mt-2', invert && 'text-white']}>
-    <MarkedTitle title={title} highlight={highlight} marker={marker} color={color} />
-  </Heading>
+<Wrapper class:list={['max-w-3xl', align === 'center' && 'mx-auto text-center', className]}>
+  {eyebrow && <p class:list={['eyebrow', anim && 'ab-track']}>{eyebrow}</p>}
+  {/* Under `anim` the wrapper is the clip box the heading rises out of. One
+      mask for the whole heading, not one per line: `title` is a string that
+      wraps wherever the viewport puts it, so there are no line boxes to split. */}
+  <div class:list={['mt-2', anim && 'ab-ln']}>
+    <Heading as="h2" size="lg" align={align} class:list={[invert && 'text-white', anim && 'ab-lni']}>
+      <MarkedTitle
+        title={title}
+        highlight={highlight}
+        marker={marker}
+        color={color}
+        delay={anim ? 1000 : 0}
+      />
+    </Heading>
+  </div>
   {
     lead && (
-      <p class:list={['mt-4 text-base leading-relaxed', invert ? 'text-brand-200' : 'text-muted']}>
+      <p
+        class:list={[
+          'mt-4 text-base leading-relaxed',
+          invert ? 'text-brand-200' : 'text-muted',
+          anim && 'ab ab-fade',
+        ]}
+        style={anim ? '--d:1150ms' : undefined}
+      >
         {lead}
       </p>
     )
   }
-</Reveal>
+</Wrapper>

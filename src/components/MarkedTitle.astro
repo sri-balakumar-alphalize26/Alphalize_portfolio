@@ -13,13 +13,15 @@ interface Props {
   highlight?: string;
   marker?: MarkerType;
   color?: string;
+  /** ms to hold the stroke back, so it can land after a heading entrance. */
+  delay?: number;
 }
 
-const { title, highlight = '', marker = 'underline', color = 'blue' } = Astro.props;
+const { title, highlight = '', marker = 'underline', color = 'blue', delay = 0 } = Astro.props;
 
 const at = highlight ? title.indexOf(highlight) : -1;
 const hit = at >= 0 ? highlight : '';
 ---
 
 {/* Kept on one line: whitespace here would render as a stray space before punctuation. */}
-{hit ? <>{title.slice(0, at)}<Marker type={marker} color={color}>{hit}</Marker>{title.slice(at + hit.length)}</> : title}
+{hit ? <>{title.slice(0, at)}<Marker type={marker} color={color} delay={delay}>{hit}</Marker>{title.slice(at + hit.length)}</> : title}

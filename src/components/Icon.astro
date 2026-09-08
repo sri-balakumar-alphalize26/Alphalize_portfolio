@@ -6,13 +6,22 @@ interface Props {
   class?: string;
   /** Supply to expose the icon to assistive tech; otherwise it is decorative. */
   label?: string;
+  /**
+   * Add `pathLength="1"` to every subpath so the shape can be drawn on with
+   * `stroke-dasharray: 1; stroke-dashoffset: 1 → 0`. Normalising the length
+   * keeps that exact for any icon, instead of guessing a dasharray per glyph.
+   */
+  draw?: boolean;
 }
 
-const { name, class: className = 'size-6', label } = Astro.props;
+const { name, class: className = 'size-6', label, draw = false } = Astro.props;
 
 // `instagram` is drawn as a line icon despite being a brand mark.
 const isFilled = filledIcons.includes(name) && name !== 'instagram';
 const path = iconPaths[name];
+const markup = draw
+  ? path.replace(/<(path|circle|rect|line|polyline|polygon|ellipse)\b/g, '$& pathLength="1"')
+  : path;
 ---
 
 <svg
@@ -26,5 +35,5 @@ const path = iconPaths[name];
   role={label ? 'img' : undefined}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}
-  set:html={path}
+  set:html={markup}
 />

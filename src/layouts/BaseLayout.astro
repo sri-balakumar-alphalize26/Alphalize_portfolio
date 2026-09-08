@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
+import SplashScreen from '@/components/SplashScreen.astro';
 import { contact, offices, site } from '@/config/site';
 import inter400 from '@alphalize/astro-marker/fonts/inter-latin-400-normal.woff2?url';
 import caveat700 from '@alphalize/astro-marker/fonts/caveat-latin-700-normal.woff2?url';
@@ -67,6 +68,8 @@ const organization = {
   </head>
 
   <body class="flex min-h-dvh flex-col">
+    <SplashScreen />
+
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-brand-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"

@@ -1,0 +1,209 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+import type { IconName } from './icons';
+
+/**
+ * Sidebar for a service detail page: the "At a glance" card and the rail of
+ * sibling services.
+ *
+ * Both cards are their own [data-ab] units so they arrive after the prose has
+ * started, and they carry their own hover treatment — a shine across the CTA,
+ * and rows that slide with a gradient underline. Trigger comes from <AboutAnim>.
+ */
+interface Props {
+  icon: IconName;
+  highlights: string[];
+  others: CollectionEntry<'services'>[];
+}
+
+const { icon, highlights, others } = Astro.props;
+---
+
+<div class="lg:sticky lg:top-28 lg:space-y-6">
+  {
+    highlights.length > 0 && (
+      <section
+        class="sd-card cc-surface rounded-card border-brand-100 ab ab-right border p-6"
+        data-ab
+        data-hold="1100"
+      >
+        <span class="rounded-btn bg-plum-600 ab flex size-11 items-center justify-center text-white" style="--d:180ms">
+          <Icon name={icon} class="size-5" />
+        </span>
+        <h2 class="text-ink ab mt-4 text-base font-semibold" style="--d:280ms">At a glance</h2>
+        <ul class="mt-3 space-y-2.5">
+          {highlights.map((h, i) => (
+            <li
+              class="text-muted ab flex gap-2.5 text-sm leading-relaxed"
+              style={`--d:${400 + i * 150}ms`}
+            >
+              <Icon name="check" draw class="sd-tick text-plum-600 mt-0.5 size-4 shrink-0" />
+              <span>{h}</span>
+            </li>
+          ))}
+        </ul>
+        <a href="/contact" class="btn btn-primary sd-cta ab mt-6 w-full" style="--d:900ms">
+          Discuss this service
+          <Icon name="arrow-right" class="size-4" />
+          <span class="sd-shine" aria-hidden="true" />
+        </a>
+      </section>
+    )
+  }
+
+  <section
+    class="sd-card rounded-card border-brand-100 ab ab-right mt-6 border p-6 lg:mt-0"
+    data-ab
+    data-hold="1400"
+  >
+    <h2 class="text-ink ab text-sm font-semibold tracking-wider uppercase" style="--d:0ms">
+      Other services
+    </h2>
+    <ul class="sd-others mt-3">
+      {
+        others.map((s, i) => (
+          <li class="ab" style={`--d:${120 + i * 90}ms`}>
+            <a href={`/services/${s.id}`}>
+              <span class="sd-oico">
+                <Icon name={s.data.icon} class="size-4" />
+              </span>
+              <span>{s.data.title}</span>
+              <span class="sd-oline" aria-hidden="true" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</div>
+
+<style>
+  /* The card slides in on .ab/.ab-right; once it has settled, hand the CTA and
+     the rows back to their own hover transitions (see the .done rules). */
+  .sd-card {
+    --sd-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --sd-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    background-color: #fff;
+  }
+  .sd-card.cc-surface {
+    background-color: var(--color-surface);
+  }
+
+  /* Ticks draw themselves. `draw` on <Icon> normalises the path to length 1,
+     so this is exact rather than a dasharray guessed per glyph. */
+  .sd-card :global(.sd-tick path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  :global(html.ab-js) .sd-card.in :global(.sd-tick path) {
+    animation: sd-tick 0.45s cubic-bezier(0.55, 0, 0.35, 1) forwards;
+    animation-delay: calc(var(--b, 0ms) + var(--d, 0ms) + 120ms);
+  }
+  @keyframes sd-tick {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* One light pass across the CTA after the card lands. Same technique as
+     .wc-shine in WhyCards. */
+  .sd-cta {
+    position: relative;
+    overflow: hidden;
+  }
+  .sd-shine {
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 38%;
+    height: 100%;
+    pointer-events: none;
+    transform: skewX(-18deg);
+    background: linear-gradient(105deg, transparent, rgb(255 255 255 / 0.34), transparent);
+  }
+  :global(html.ab-js) .sd-card.in .sd-shine {
+    animation: sd-shine 1s ease-out 1.5s 1;
+  }
+  @keyframes sd-shine {
+    to {
+      left: 130%;
+    }
+  }
+
+  /* --- sibling services rail --- */
+  .sd-others {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sd-others a {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.125rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-muted);
+    transition:
+      color 0.28s ease,
+      transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .sd-oico {
+    flex: none;
+    display: grid;
+    place-items: center;
+    color: var(--color-plum-600);
+    transition: transform 0.38s var(--sd-spring);
+  }
+  .sd-oline {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 1px;
+    background: var(--color-brand-100);
+  }
+  .sd-oline::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--color-plum-600), var(--color-brand-500));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--sd-ease);
+  }
+  .sd-others li:last-child .sd-oline {
+    display: none;
+  }
+  .sd-others a:hover {
+    color: var(--color-heading);
+    transform: translateX(4px);
+  }
+  .sd-others a:hover .sd-oico {
+    transform: scale(1.18) rotate(-8deg);
+  }
+  .sd-others a:hover .sd-oline::after {
+    transform: scaleX(1);
+  }
+
+  /* Clear the entrance delay once settled, or hover would sit behind the
+     stagger by up to a second. */
+  :global(html.ab-js) .sd-card.in.done .ab {
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sd-card :global(.sd-tick path) {
+      stroke-dashoffset: 0;
+      animation: none !important;
+    }
+    :global(html.ab-js) .sd-card.in .sd-shine {
+      animation: none;
+    }
+    .sd-others a,
+    .sd-oico,
+    .sd-oline::after {
+      transition: none;
+    }
+  }
+</style>

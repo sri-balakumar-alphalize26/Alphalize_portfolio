@@ -1,0 +1,253 @@
+---
+import { getImage } from 'astro:assets';
+import splashA from '@/assets/brand/splash-a.png';
+import splashB from '@/assets/brand/splash-b.png';
+
+/**
+ * Loading splash: the two halves of the mark fly in from either side, meet,
+ * then pulse while the page is still loading.
+ *
+ * Two departures from the reference demo (alphalize-splash.html):
+ *
+ *  - Its 720x1560 stage and JS `fit()` exist to fake a phone screen. Here the
+ *    overlay is simply fixed to the viewport.
+ *  - Its 3.8s loop is built for a billboard: the halves do not meet until 1.52s
+ *    in, so on a real page load it would be dismissed mid-flight. Split into a
+ *    one-shot converge and a pulse that loops only while loading.
+ *
+ * Rendered `hidden` and unhidden by the inline script below, so if JS fails the
+ * overlay never appears and the site is never covered.
+ */
+const [a, b] = await Promise.all([
+  getImage({ src: splashA, width: 360, format: 'webp' }),
+  getImage({ src: splashB, width: 360, format: 'webp' }),
+]);
+---
+
+<link rel="preload" as="image" href={a.src} />
+<link rel="preload" as="image" href={b.src} />
+
+<div class="splash" id="splash" role="status" aria-label="Loading" hidden>
+  <div class="splash-logo" aria-hidden="true">
+    <img class="splash-a" src={a.src} width="180" height="152" alt="" decoding="async" />
+    <img class="splash-b" src={b.src} width="180" height="152" alt="" decoding="async" />
+    <span class="splash-ring"></span>
+  </div>
+</div>
+
+<script is:inline>
+  // Runs in source order, before the page paints, so the overlay is up from the
+  // first frame. Nothing else unhides it: with JS off it stays hidden.
+  (function () {
+    var el = document.getElementById('splash');
+    if (!el) return;
+    el.hidden = false;
+    el.classList.add('is-playing');
+    document.documentElement.classList.add('splash-open');
+  })();
+</script>
+
+<script>
+  /** Long enough to see the halves converge; below this it reads as a glitch. */
+  const MIN_VISIBLE_MS = 1200;
+  /** Nothing may strand a visitor behind the overlay. */
+  const FAILSAFE_MS = 5000;
+
+  let shownAt = Date.now();
+  let hideTimer: ReturnType<typeof setTimeout>;
+  let failTimer: ReturnType<typeof setTimeout>;
+  let removeTimer: ReturnType<typeof setTimeout>;
+
+  const splash = () => document.getElementById('splash');
+
+  function showSplash() {
+    const el = splash();
+    if (!el) return;
+    clearTimeout(hideTimer);
+    clearTimeout(failTimer);
+    clearTimeout(removeTimer);
+    shownAt = Date.now();
+    el.hidden = false;
+    el.classList.remove('is-done');
+    // Restart the fly-in: without the reflow the class is removed and re-added
+    // in the same frame and the browser never sees a change, so on a repeat
+    // showing the halves would sit already converged.
+    el.classList.remove('is-playing');
+    void el.offsetWidth;
+    el.classList.add('is-playing');
+    document.documentElement.classList.add('splash-open');
+    failTimer = setTimeout(hideSplash, FAILSAFE_MS);
+  }
+
+  function hideSplash() {
+    const el = splash();
+    document.documentElement.classList.remove('splash-open');
+    if (!el || el.hidden) return;
+    el.classList.add('is-done');
+    // Match the fade in the stylesheet, then take it out of the a11y tree.
+    removeTimer = setTimeout(() => {
+      el.hidden = true;
+      el.classList.remove('is-playing');
+    }, 420);
+  }
+
+  function scheduleHide() {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(hideSplash, Math.max(0, MIN_VISIBLE_MS - (Date.now() - shownAt)));
+  }
+
+  // Initial load. The inline script above already put the overlay up.
+  if (document.readyState === 'complete') scheduleHide();
+  else addEventListener('load', scheduleHide, { once: true });
+  failTimer = setTimeout(hideSplash, FAILSAFE_MS);
+
+  // Client-side navigation. Cover the fetch from the moment a link is followed,
+  // then again straight after the swap — <ClientRouter /> replaces the body, so
+  // the incoming overlay is a fresh element that arrives still `hidden` and
+  // needs putting back up before the new page paints.
+  document.addEventListener('astro:before-preparation', showSplash);
+  document.addEventListener('astro:after-swap', showSplash);
+  document.addEventListener('astro:page-load', scheduleHide);
+</script>
+
+<style is:global>
+  html.splash-open,
+  html.splash-open body {
+    overflow: hidden;
+  }
+</style>
+
+<style>
+  .splash[hidden] {
+    display: none;
+  }
+  .splash {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    opacity: 1;
+    transition: opacity 0.4s var(--ease-out-soft);
+  }
+  .splash.is-done {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .splash-logo {
+    position: relative;
+    width: 180px;
+    height: 152px;
+  }
+  .splash-logo img {
+    position: absolute;
+    inset: 0;
+    width: 180px;
+    height: 152px;
+    opacity: 0;
+  }
+  /* Each half turns about its own visual centre, as in the reference. */
+  .splash-a {
+    transform-origin: 34.1% 51.2%;
+  }
+  .splash-b {
+    transform-origin: 58.2% 76%;
+  }
+
+  .splash-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 190px;
+    height: 190px;
+    margin: -95px 0 0 -95px;
+    border-radius: 50%;
+    border: 3px solid var(--color-brand-500);
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .splash.is-playing .splash-a {
+      animation: splash-in-a 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .splash.is-playing .splash-b {
+      animation: splash-in-b 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    /* Loops only while the page is still loading — the overlay is removed the
+       moment it is ready. */
+    .splash.is-playing .splash-logo {
+      animation: splash-pulse 1.4s ease-in-out 1.1s infinite;
+    }
+    .splash.is-playing .splash-ring {
+      animation: splash-ring 1.4s ease-out 1.1s infinite;
+    }
+  }
+
+  /* Reduced motion: no fly-in, no ring — the mark simply appears. */
+  @media (prefers-reduced-motion: reduce) {
+    .splash-logo img {
+      opacity: 1;
+    }
+    .splash-ring {
+      display: none;
+    }
+  }
+
+  @keyframes splash-in-a {
+    0% {
+      opacity: 0;
+      transform: translateX(-140%) rotate(-360deg);
+      filter: blur(6px);
+    }
+    15% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) rotate(0deg);
+      filter: blur(0);
+    }
+  }
+  @keyframes splash-in-b {
+    0% {
+      opacity: 0;
+      transform: translateX(140%) rotate(360deg);
+      filter: blur(6px);
+    }
+    15% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) rotate(0deg);
+      filter: blur(0);
+    }
+  }
+  @keyframes splash-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      filter: drop-shadow(0 0 0 rgb(59 147 247 / 0));
+    }
+    45% {
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 18px rgb(59 147 247 / 0.55));
+    }
+  }
+  @keyframes splash-ring {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    20% {
+      opacity: 0.7;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.15);
+    }
+  }
+</style>

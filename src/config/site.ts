@@ -37,14 +37,26 @@ export type Office = {
 };
 
 export const offices: Office[] = [
-  // Address as published on the current alphalize.com contact page.
+  /**
+   * Kept in step with the 369 site, which is the same operation — same phone
+   * number, same hr@ address.
+   *
+   * `id` is looked up by careers.astro for the JobPosting jobLocation, and the
+   * split fields feed the PostalAddress in the Organization JSON-LD, so neither
+   * the id nor the shape is free to change.
+   *
+   * If a map link is ever added, note that Google needs the full
+   * "Vadayattukotta Road, Kollam, Kerala 691001, India" — "Chinnakada" and
+   * "Rd" both fail to geocode, so do not tidy a query back to the display
+   * wording below.
+   */
   {
     id: 'kollam',
     label: 'India',
-    street: '2nd Floor, Danat Building',
+    street: 'Vadayattukotta Road, Chinnakada',
     locality: 'Kollam',
     region: 'Kerala',
-    postalCode: '691014',
+    postalCode: '691001',
     country: 'India',
     countryCode: 'IN',
   },

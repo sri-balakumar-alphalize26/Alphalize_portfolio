@@ -96,6 +96,7 @@ export type NavItem = { label: string; href: string; hasChildren?: boolean };
 export const nav: NavItem[] = [
   { label: 'Home', href: '/' },
   { label: 'About', href: '/about' },
+  { label: 'Leadership', href: '/ceo' },
   { label: 'Services', href: '/services', hasChildren: true },
   { label: 'Careers', href: '/careers' },
   { label: 'Contact', href: '/contact' },

@@ -31,7 +31,17 @@ const services = (await getCollection('services')).sort((a, b) => a.data.order -
 // away on its own once every role is closed.
 const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
 
-const path = Astro.url.pathname;
+/**
+ * `build.format: "file"` means a prerendered page sees its own pathname as
+ * "/about.html", while every href here is "/about" — so an unnormalised
+ * comparison never matches and no nav item is ever marked current. Server-
+ * rendered routes already get the clean path, where these replaces are a no-op.
+ */
+const path =
+  Astro.url.pathname
+    .replace(/\/index\.html$/, '/')
+    .replace(/\.html$/, '')
+    .replace(/(.)\/$/, '$1') || '/';
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
 

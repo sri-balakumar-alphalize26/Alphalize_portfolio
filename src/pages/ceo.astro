@@ -1,0 +1,218 @@
+---
+import { Image } from 'astro:assets';
+import AboutAnim from '@/components/AboutAnim.astro';
+import CtaBand from '@/components/CtaBand.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import Section from '@/components/Section.astro';
+import SectionHeading from '@/components/SectionHeading.astro';
+import YouTubeRail from '@/components/YouTubeRail.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { ceo, talks } from '@/config/ceo';
+
+/**
+ * The Managing Director's page, from the 369 /ceo.
+ *
+ * Four bands: the hero, the BizConnect award, his talks, then the CTA. The copy
+ * is rewritten — see the note in src/config/ceo.ts on what changed and why.
+ *
+ * The entrance is this site's own engine rather than 369's CeoReveal: `data-ab`
+ * on each band, `.ab` and `--d` on the children, hidden states declared in
+ * about-anim.css so a blocked script leaves the page readable rather than
+ * blank. `.ab-track` is its `.ceo__kicker` (tracking relaxing as it fades up)
+ * and `.ab-ln`/`.ab-lni` its `.ln`/`<i>` line mask, so the sequence matches
+ * without porting anything.
+ *
+ * `data-ab` sits on a div inside each <Section>: Section declares its props and
+ * does not spread extras, so the attribute would not reach the DOM on the
+ * component itself.
+ *
+ * data-hold on the hero because it is above the fold — without it the observer
+ * fires for it at the same instant as everything else visible at load.
+ */
+---
+
+<BaseLayout title={`${ceo.name} — ${ceo.role}`} description={ceo.intro[0].slice(0, 155)}>
+  <AboutAnim />
+
+  <Section variant="ink" space="lg">
+    <div
+      class="ceo-hero grid items-center gap-10 lg:grid-cols-12 lg:gap-14"
+      data-ab
+      data-hold="300"
+    >
+      {
+        /* The frame is the mask: the portrait rises up from behind it, then the
+          ring settles over the edge. */
+      }
+      <div class="ceo-portrait lg:col-span-4">
+        <Image
+          src={ceo.portrait}
+          alt={ceo.portraitAlt}
+          widths={[280, 560]}
+          sizes="(min-width: 1024px) 340px, 260px"
+          loading="eager"
+        />
+        <span class="ceo-ring" aria-hidden="true"></span>
+      </div>
+
+      <div class="lg:col-span-8">
+        <p class="eyebrow ab-track" style="--d:120ms">Leadership</p>
+        <h1 class="mt-4 text-4xl font-bold text-white sm:text-5xl">
+          <span class="ab-ln"><span class="ab-lni" style="--d:360ms">{ceo.name}</span></span>
+        </h1>
+        <p class="text-brand-200 ab ab-fade mt-3 text-lg" style="--d:500ms">
+          {ceo.role} &middot; {ceo.company}
+        </p>
+        {
+          ceo.intro.map((para, i) => (
+            <p
+              class="text-brand-100 ab ab-fade mt-5 leading-relaxed"
+              style={`--d:${600 + i * 100}ms`}
+            >
+              {para}
+            </p>
+          ))
+        }
+        <p class="ab ab-pop mt-9" style="--d:850ms">
+          <a href="/contact" class="btn btn-light">Talk to the team</a>
+        </p>
+      </div>
+    </div>
+  </Section>
+
+  <Section variant="surface" space="lg">
+    <div data-ab>
+      <p class="ceo-chip ab ab-pop" style="--d:50ms">{ceo.award.eyebrow}</p>
+      <h2 class="mt-5 text-2xl font-bold sm:text-3xl">
+        <span class="ab-ln"><span class="ab-lni" style="--d:260ms">{ceo.award.title}</span></span>
+      </h2>
+      <p class="text-muted ab ab-fade mt-4 max-w-[70ch] leading-relaxed" style="--d:420ms">
+        {ceo.award.body}
+      </p>
+
+      {
+        /* Column widths follow the two ratios, so both photos come out the same
+          height with neither one cropped. */
+      }
+      <div class="mt-10 grid items-center gap-5 sm:grid-cols-[0.667fr_1.555fr]">
+        {
+          ceo.award.images.map((img, i) => (
+            <div class="ab ab-pop" style={`--d:${560 + i * 120}ms`}>
+              <Lightbox src={img.src} alt={img.alt} ratio={img.ratio} shine={img.shine} />
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="ceo-clip ab ab-fade mt-12" style="--d:120ms">
+        <h3 class="text-heading text-lg font-semibold">{ceo.award.videoTitle}</h3>
+        {/* preload="metadata": a 4.8MB clip should not download until asked. */}
+        <video
+          class="mt-4 w-full"
+          src={ceo.award.video}
+          controls
+          playsinline
+          preload="metadata"
+          poster={ceo.award.images[1]?.src.src}></video>
+        <p class="text-muted mt-3 text-sm">{ceo.award.videoCaption}</p>
+      </div>
+    </div>
+  </Section>
+
+  <Section variant="white" space="lg">
+    <div data-ab>
+      <SectionHeading anim title={ceo.talks.title} lead={ceo.talks.body} />
+      <div class="mt-12">
+        <YouTubeRail talks={talks} channel={ceo.talks.channel} />
+      </div>
+    </div>
+  </Section>
+
+  <CtaBand title={ceo.cta.title} body={ceo.cta.body} />
+</BaseLayout>
+
+<style>
+  .ceo-portrait {
+    position: relative;
+    overflow: hidden;
+    margin-inline: auto;
+    width: 100%;
+    max-width: 16.25rem;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radius-card);
+    background: var(--color-brand-900);
+    box-shadow: 0 22px 44px -20px rgb(0 0 0 / 0.6);
+  }
+  @media (min-width: 1024px) {
+    .ceo-portrait {
+      margin-inline: 0;
+      max-width: none;
+    }
+  }
+  .ceo-portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1s var(--ab-ease);
+  }
+  /* The portrait rises out of the frame, which is doing the masking. */
+  :global(html.ab-js) .ceo-portrait :global(img) {
+    transform: translateY(100%);
+  }
+  :global(html.ab-js) :global(.in) .ceo-portrait :global(img) {
+    transform: none;
+  }
+
+  .ceo-ring {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 2px var(--color-brand-400);
+    opacity: 0.55;
+    transition:
+      opacity 0.6s ease 0.55s,
+      transform 0.6s var(--ab-ease) 0.55s;
+  }
+  :global(html.ab-js) .ceo-ring {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  :global(html.ab-js) :global(.in) .ceo-ring {
+    opacity: 0.55;
+    transform: none;
+  }
+
+  .ceo-chip {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 99px;
+    background: var(--color-plum-100);
+    color: var(--color-plum-700);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .ceo-clip :global(video) {
+    display: block;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: var(--color-brand-950);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ceo-portrait :global(img),
+    .ceo-ring {
+      transition: none;
+    }
+    :global(html.ab-js) .ceo-portrait :global(img) {
+      transform: none;
+    }
+    :global(html.ab-js) .ceo-ring {
+      opacity: 0.55;
+      transform: none;
+    }
+  }
+</style>

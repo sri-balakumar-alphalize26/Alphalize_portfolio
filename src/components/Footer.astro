@@ -57,7 +57,7 @@ const year = new Date().getFullYear();
           {site.description}
         </p>
         <p class="ft-kicker mt-6">Follow us</p>
-        <ul class="ft-socials" data-ab-cascade data-base="140" data-step="70">
+        <ul class="icon-dock ft-socials mt-4" data-ab-cascade data-base="140" data-step="70">
           {
             socials.map((s) => (
               <li>
@@ -66,7 +66,7 @@ const year = new Date().getFullYear();
                   rel="noopener noreferrer"
                   target="_blank"
                   aria-label={s.name}
-                  class="ft-social"
+                  class="icon-chip ft-social"
                   style={`--c:${socialMarks[s.mark].color}`}
                 >
                   <span
@@ -175,8 +175,8 @@ const year = new Date().getFullYear();
     position: relative;
     overflow: hidden;
   }
-  .ft-col a,
-  .ft-col :global(a) {
+  .ft-col a:not(.icon-chip),
+  .ft-col :global(a:not(.icon-chip)) {
     position: relative;
     transition:
       color 0.28s ease,
@@ -305,10 +305,12 @@ const year = new Date().getFullYear();
      that brand colour on hover while the mark inverts to white. The name is on
      the link as aria-label and nowhere else: the brand fill is the label.
 
-     Selectors carry .ft-col so they outrank `.ft-col a` above, which would
-     otherwise own the transition. The row is excluded from every text-link
-     hover treatment (`ul:not(.ft-socials)`) — an underline or a sliding arrow
-     under an icon pad is not the same gesture. */
+     Layout, magnify and transition come from `.icon-dock` / `.icon-chip` in
+     global.css, shared with the assistant row below. Only the colour is here.
+     The selectors carry .ft-col so they outrank the generic footer link rule,
+     and the row is excluded from every text-link hover treatment
+     (`ul:not(.ft-socials)`) — an underline or a sliding arrow under an icon pad
+     is not the same gesture. */
   .ft-kicker {
     font-size: 0.6875rem;
     font-weight: 600;
@@ -316,37 +318,16 @@ const year = new Date().getFullYear();
     text-transform: uppercase;
     color: var(--color-brand-300);
   }
-  .ft-socials {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0.625rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
   .ft-col a.ft-social {
-    display: grid;
-    place-items: center;
-    width: 2.125rem;
-    height: 2.125rem;
-    border: 1px solid rgb(255 255 255 / 0.12);
-    border-radius: var(--radius-btn);
-    background: rgb(255 255 255 / 0.05);
     /* On the dark footer the mark itself carries the brand colour; a solid pad
        at rest would put four saturated blocks in the corner of the page. */
     color: var(--c);
-    transition:
-      background 0.25s ease,
-      border-color 0.25s ease,
-      color 0.25s ease,
-      transform 0.25s cubic-bezier(0.22, 0.9, 0.32, 1.2);
   }
   .ft-col a.ft-social:hover,
   .ft-col a.ft-social:focus-visible {
     background: var(--c);
     border-color: var(--c);
     color: #fff;
-    transform: translateY(-2px);
   }
   .ft-social-mark {
     display: inline-flex;
@@ -398,13 +379,8 @@ const year = new Date().getFullYear();
     .h-underline .ft-col ul:not(.ft-socials) a::after,
     .h-arrow .ft-col ul:not(.ft-socials) a::before,
     .h-dot .ft-col ul:not(.ft-socials) a::before,
-    .h-column .ft-col,
-    .ft-col a.ft-social {
+    .h-column .ft-col {
       transition: none;
-    }
-    .ft-col a.ft-social:hover,
-    .ft-col a.ft-social:focus-visible {
-      transform: none;
     }
   }
 </style>

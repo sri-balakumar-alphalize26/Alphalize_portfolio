@@ -1,0 +1,222 @@
+---
+import { Image } from 'astro:assets';
+import markA from '@/assets/brand/splash-a.png';
+import markB from '@/assets/brand/splash-b.png';
+import { WORDMARK_H, WORDMARK_W, wordmarkLetters } from '@/lib/wordmark';
+
+/**
+ * The Alphalize lockup: mark + wordmark, animated.
+ *
+ *   Load  — the mark's two halves rise, then the wordmark wipes in left→right.
+ *   Hover — a light sweeps across the wordmark and the mark scales slightly.
+ *
+ *   <Logo />           header default
+ *   <Logo size={22} /> one number rescales the whole lockup
+ *
+ * The prototype drew a placeholder mark inline and set the wordmark in type,
+ * with a note to paste the real artwork over it. The real artwork is already
+ * here in the shape the animation wants: splash-a/splash-b are the mark's two
+ * halves (the splash screen flies them in the same way), and the wordmark is
+ * nine glyph images with exact geometry in lib/wordmark.ts. So the halves lift
+ * separately, as they do on the splash, rather than as one block.
+ *
+ * No JavaScript. The entrance is a CSS animation gated on `html.splash-open`
+ * being gone: while the splash covers the page the lockup holds its start
+ * state, and the animation begins the moment the splash lifts — otherwise the
+ * whole thing would play behind the overlay and be over before anyone saw it.
+ * With JS off the class is never set, so it simply plays on load. The header is
+ * not `transition:persist`ed, so a view-transition navigation rebuilds it and
+ * the entrance replays on its own.
+ *
+ * `size` is the mark's height in px; everything else is derived from it.
+ */
+interface Props {
+  size?: number;
+  href?: string;
+  class?: string;
+}
+
+const { size = 28, href = '/', class: className } = Astro.props;
+
+// Source ratios, so a new export of either asset rescales the lockup itself.
+const MARK_RATIO = markA.width / markA.height; // 692 / 584
+const WORD_RATIO = WORDMARK_W / WORDMARK_H;
+
+/** The wordmark sits a little shorter than the mark, as in the flat lockup. */
+const WORD_SCALE = 0.72;
+
+const vars = [
+  `--sz:${size}px`,
+  `--mark-w:${(size * MARK_RATIO).toFixed(2)}px`,
+  `--word-h:${(size * WORD_SCALE).toFixed(2)}px`,
+  `--word-w:${(size * WORD_SCALE * WORD_RATIO).toFixed(2)}px`,
+].join(';');
+---
+
+<a class:list={['logo', className]} href={href} aria-label="Alphalize — home" style={vars}>
+  <span class="mark" aria-hidden="true">
+    <Image class="half half-a" src={markA} alt="" width={72} height={61} densities={[1, 2]} />
+    <Image class="half half-b" src={markB} alt="" width={72} height={61} densities={[1, 2]} />
+  </span>
+
+  <span class="word" aria-hidden="true">
+    {
+      wordmarkLetters.map((l) => (
+        <Image
+          class="ltr"
+          src={l.src}
+          alt=""
+          width={Math.round(l.w / 4)}
+          height={Math.round(WORDMARK_H / 4)}
+          densities={[1, 2]}
+          style={`left:${((l.left / WORDMARK_W) * 100).toFixed(4)}%; width:${((l.w / WORDMARK_W) * 100).toFixed(4)}%`}
+        />
+      ))
+    }
+    <span class="sheen"></span>
+  </span>
+</a>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--sz) * 0.3);
+    text-decoration: none;
+    line-height: 1;
+  }
+  .logo:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 4px;
+    border-radius: 5px;
+  }
+
+  .mark {
+    position: relative;
+    flex: none;
+    width: var(--mark-w);
+    height: var(--sz);
+    transition: transform 0.5s cubic-bezier(0.34, 1.5, 0.64, 1);
+  }
+  /* Both halves are full-canvas overlays, so they stack rather than tile. */
+  .mark :global(.half) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  /* Each half turns about its own visual centre — the same origins the splash
+     screen uses, so the two entrances read as the same object. */
+  .mark :global(.half-a) {
+    transform-origin: 34.1% 51.2%;
+  }
+  .mark :global(.half-b) {
+    transform-origin: 58.2% 76%;
+  }
+
+  .word {
+    position: relative;
+    flex: none;
+    width: var(--word-w);
+    height: var(--word-h);
+    overflow: hidden;
+  }
+  .word :global(.ltr) {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    /* `left` and `width` are percentages of the 908-unit design box, set per
+       glyph in the template. */
+  }
+
+  /* Light bar for the hover sweep, clipped by .word. */
+  .sheen {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -45%;
+    width: 32%;
+    pointer-events: none;
+    background: linear-gradient(
+      105deg,
+      transparent,
+      color-mix(in srgb, var(--color-brand-400) 55%, transparent),
+      transparent
+    );
+    transform: skewX(-18deg);
+    opacity: 0;
+  }
+
+  /* --- entrance ---------------------------------------------------------
+     The start state is declared, not applied by script, so the lockup is
+     never painted finished and then snapped back. `html.splash-open` holds
+     it there until the splash lifts. */
+  .mark :global(.half) {
+    opacity: 0;
+  }
+  /* One clip on the strip, not one per glyph, so the wipe crosses the word as
+     a single edge rather than every letter revealing inside its own box. */
+  .word {
+    clip-path: inset(0 100% 0 0);
+  }
+  :global(html:not(.splash-open)) .mark :global(.half-a) {
+    animation: lg-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  :global(html:not(.splash-open)) .mark :global(.half-b) {
+    animation: lg-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s both;
+  }
+  :global(html:not(.splash-open)) .word {
+    animation: lg-wipe 0.8s cubic-bezier(0.55, 0, 0.3, 1) 0.3s both;
+  }
+  @keyframes lg-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes lg-wipe {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 -4% 0 0);
+    }
+  }
+
+  /* --- hover --- */
+  .logo:hover .mark {
+    transform: scale(1.06);
+  }
+  .logo:hover .sheen {
+    animation: lg-sheen 0.75s ease-out;
+  }
+  @keyframes lg-sheen {
+    from {
+      opacity: 1;
+      left: -45%;
+    }
+    to {
+      opacity: 1;
+      left: 115%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mark,
+    .mark :global(.half),
+    .word {
+      animation: none !important;
+      transition: none !important;
+      opacity: 1;
+      transform: none !important;
+      clip-path: none !important;
+    }
+    .sheen {
+      display: none;
+    }
+  }
+</style>

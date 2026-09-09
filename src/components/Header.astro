@@ -1,10 +1,30 @@
 ---
-import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
-import logo from '@/assets/brand/logo.png';
 import { contact, nav } from '@/config/site';
 import Icon from './Icon.astro';
+import Logo from './Logo.astro';
 
+/**
+ * Site header — utility bar, logo, nav with a Services dropdown, CTA.
+ *
+ * Motion, from the header prototype: the bars drop in on load, the nav items
+ * stagger, the dropdown opens as a cascade, and the whole header compacts once
+ * the page scrolls — the utility bar rolls up and the main bar loses height.
+ *
+ * Two departures from that prototype:
+ *
+ *   - Its palette is raw hex and its UI text is Plus Jakarta Sans off Google
+ *     Fonts. Both are mapped onto the tokens in global.css instead: the site
+ *     self-hosts Inter, and a third family from a third-party origin on every
+ *     page is not worth a slightly different `g`.
+ *   - The entrance is gated on `html.splash-open` clearing rather than on a
+ *     `.ready` class added by script. The splash covers the first 1.2s of every
+ *     load, so a header that animated at parse time would have finished behind
+ *     it. This way it starts as the splash lifts, and needs no JavaScript.
+ *
+ * The utility bar now lives INSIDE the sticky header so it can roll up on
+ * scroll; it used to sit above and simply scroll away.
+ */
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 
 // Derived from the collection rather than a flag on `nav`, so the badge goes
@@ -14,104 +34,84 @@ const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
 const path = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+
+const email = `${contact.emailUser}@${contact.emailDomain}`;
 ---
 
-<!-- Utility bar: contact details that were buried in the old off-canvas panel. -->
 <span id="hdr-top" aria-hidden="true"></span>
-<div class="hidden bg-brand-900 text-brand-200 lg:block">
-  <div class="container-page flex h-9 items-center justify-between text-xs">
-    <p>ERP, business intelligence and custom software — Kollam, Kerala</p>
-    <div class="flex items-center gap-6">
-      <a class="flex items-center gap-1.5 hover:text-white" href={contact.phoneHref} data-contact-tel>
-        <Icon name="phone" class="size-3.5" />
-        <span data-contact-phone>{contact.phone}</span>
-      </a>
-      <a
-        class="flex items-center gap-1.5 hover:text-white"
-        href={`mailto:${contact.emailUser}@${contact.emailDomain}`}
-        data-contact-mailto
-      >
-        <Icon name="mail" class="size-3.5" />
-        <span data-contact-email>{contact.emailUser}@{contact.emailDomain}</span>
-      </a>
+<header class="hdr" id="site-header">
+  <!-- Utility bar: contact details that were buried in the old off-canvas panel. -->
+  <div class="util">
+    <div class="container-page util-in">
+      <p class="util-tag">ERP, business intelligence and custom software — Kollam, Kerala</p>
+      <p class="util-contact">
+        <a href={contact.phoneHref} data-contact-tel>
+          <Icon name="phone" class="size-3.5" />
+          <span data-contact-phone>{contact.phone}</span>
+        </a>
+        <a href={`mailto:${email}`} data-contact-mailto>
+          <Icon name="mail" class="size-3.5" />
+          <span data-contact-email>{email}</span>
+        </a>
+      </p>
     </div>
   </div>
-</div>
 
-<header
-  id="site-header"
-  class="sticky top-0 z-50 border-b border-brand-100/70 bg-white/85 backdrop-blur-md transition-shadow data-[stuck]:shadow-md"
->
-  <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-20">
-    <a href="/" class="shrink-0" aria-label="Alphalize — home">
-      <Image
-        src={logo}
-        alt="Alphalize"
-        widths={[180, 360]}
-        sizes="180px"
-        class="h-8 w-auto lg:h-9"
-        loading="eager"
-      />
-    </a>
+  {
+    /*
+    Only the main bar needs to pin. The utility bar above scrolls away under
+    it on its own, so nothing has to animate its height.
+  */
+  }
+  <div class="stick">
+    <div class="bar">
+      <div class="container-page bar-in">
+        <Logo size={28} />
 
-    <!-- Desktop nav -->
-    <nav class="hidden lg:block" aria-label="Main">
-      <ul class="flex items-center gap-1">
-        {
-          nav.map((item) =>
-            item.hasChildren ? (
-              <li class="nav-drop group relative" data-drop>
-                <a
-                  href={item.href}
-                  aria-current={isActive(item.href) ? 'page' : undefined}
-                  class:list={[
-                    'flex items-center gap-1 rounded-btn px-3 py-2 text-sm font-medium transition-colors',
-                    isActive(item.href)
-                      ? 'text-plum-600'
-                      : 'text-heading hover:text-plum-600',
-                  ]}
-                >
-                  {item.label}
-                  <Icon
-                    name="chevron-down"
-                    class="size-4 transition-transform group-hover:rotate-180"
-                  />
-                </a>
-                <!--
-                  CSS-only dropdown: hover opens it, and focus-within keeps it
-                  open for keyboard users tabbing through the links.
-                -->
-                <div
-                  class="nav-drop-menu invisible absolute left-1/2 top-full w-72 -translate-x-1/2 pt-2 opacity-0 transition-[opacity,visibility] duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
-                >
-                  <ul
-                    class="overflow-hidden rounded-card border border-brand-100 bg-white p-2 shadow-lift"
+        <nav class="nav" aria-label="Main">
+          {
+            nav.map((item, i) =>
+              item.hasChildren ? (
+                <div class="drop" data-drop>
+                  <a
+                    class:list={['nl', { on: isActive(item.href) }]}
+                    href={item.href}
+                    aria-current={isActive(item.href) ? 'page' : undefined}
+                    aria-expanded="false"
+                    aria-controls="svc-menu"
+                    style={`--d:${i * 60}ms`}
                   >
-                    {
-                      services.map((s, i) => (
-                        <li class="nav-drop-item" style={`--k:${i}`}>
-                          <a
-                            href={`/services/${s.id}`}
-                            class="flex items-start gap-3 rounded-btn px-3 py-2.5 transition-colors hover:bg-plum-50"
-                          >
-                            <Icon name={s.data.icon} class="mt-0.5 size-4 text-plum-600" />
-                            <span class="text-sm font-medium text-ink">{s.data.title}</span>
+                    {item.label}
+                    <Icon name="chevron-down" class="chev" />
+                  </a>
+                  {/*
+                  CSS-only hover is the no-JS baseline; once the script sets
+                  `js-nav` it takes over, so hover-intent and Escape apply only
+                  where they can work. Services stays a real link either way.
+                */}
+                  <div class="menu" id="svc-menu">
+                    <span class="caret" aria-hidden="true" />
+                    <ul>
+                      {services.map((s, k) => (
+                        <li style={`--k:${k}`}>
+                          <a href={`/services/${s.id}`}>
+                            <span class="mi">
+                              <Icon name={s.data.icon} />
+                            </span>
+                            <span class="mt">{s.data.title}</span>
+                            <Icon name="arrow-right" class="marw" />
                           </a>
                         </li>
-                      ))
-                    }
-                  </ul>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-              </li>
-            ) : (
-              <li>
+              ) : (
                 <a
+                  class:list={['nl', { on: isActive(item.href) }]}
                   href={item.href}
                   aria-current={isActive(item.href) ? 'page' : undefined}
-                  class:list={[
-                    'block rounded-btn px-3 py-2 text-sm font-medium transition-colors',
-                    isActive(item.href) ? 'text-plum-600' : 'text-heading hover:text-plum-600',
-                  ]}
+                  style={`--d:${i * 60}ms`}
                 >
                   {item.label}
                   {item.href === '/careers' && openRoles > 0 && (
@@ -123,95 +123,82 @@ const isActive = (href: string) =>
                     </span>
                   )}
                 </a>
-              </li>
+              )
             )
-          )
-        }
-      </ul>
-    </nav>
+          }
+        </nav>
 
-    <div class="flex items-center gap-2">
-      <a
-        href="/contact"
-        class="btn btn-primary hidden sm:inline-flex"
-      >
-        Get a consultation
-      </a>
+        <a class="cta" href="/contact">
+          <span class="cta-fill" aria-hidden="true"></span>
+          <span class="cta-txt">Get a consultation</span>
+          <Icon name="arrow-right" class="cta-arw" />
+        </a>
 
-      <button
-        type="button"
-        id="menu-toggle"
-        class="-mr-2 inline-flex size-11 items-center justify-center rounded-md text-ink lg:hidden"
-        aria-expanded="false"
-        aria-controls="mobile-menu"
-      >
-        <span class="sr-only">Open menu</span>
-        <Icon name="menu" class="size-6" />
-      </button>
+        <button
+          type="button"
+          id="menu-toggle"
+          class="burger"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span class="sr-only">Open menu</span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+      </div>
     </div>
   </div>
 
   <!-- Mobile drawer -->
-  <div id="mobile-menu" hidden class="border-t border-brand-100 bg-white lg:hidden">
-    <nav class="container-page py-4" aria-label="Mobile">
-      <ul class="space-y-1">
-        {
-          nav.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-current={isActive(item.href) ? 'page' : undefined}
-                class:list={[
-                  'block rounded-btn px-3 py-3 text-base font-medium',
-                  isActive(item.href) ? 'bg-plum-50 text-plum-600' : 'text-heading',
-                ]}
-              >
+  <div class="mnav" id="mobile-menu">
+    <nav class="container-page mnav-in" aria-label="Mobile">
+      {
+        nav.map((item) =>
+          item.hasChildren ? (
+            <div>
+              <button class="mrow msvc" type="button" aria-expanded="false">
                 {item.label}
-                {item.href === '/careers' && openRoles > 0 && (
-                  <span class="hiring-badge">
-                    Hiring<span aria-hidden="true">&nbsp;!!</span>
-                    <span class="sr-only">
-                      , {openRoles} open {openRoles === 1 ? 'role' : 'roles'}
-                    </span>
-                  </span>
-                )}
-              </a>
-              {item.hasChildren && (
-                <ul class="mb-2 ml-3 space-y-0.5 border-l border-brand-100 pl-3">
+                <Icon name="chevron-down" class="chev" />
+              </button>
+              <div class="msub">
+                <div>
                   {services.map((s) => (
-                    <li>
-                      <a
-                        href={`/services/${s.id}`}
-                        class="block rounded-md px-3 py-2 text-sm text-muted"
-                      >
-                        {s.data.title}
-                      </a>
-                    </li>
+                    <a href={`/services/${s.id}`}>{s.data.title}</a>
                   ))}
-                </ul>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <a
+              class:list={['mrow', { on: isActive(item.href) }]}
+              href={item.href}
+              aria-current={isActive(item.href) ? 'page' : undefined}
+            >
+              {item.label}
+              {item.href === '/careers' && openRoles > 0 && (
+                <span class="hiring-badge">
+                  Hiring<span aria-hidden="true">&nbsp;!!</span>
+                  <span class="sr-only">
+                    , {openRoles} open {openRoles === 1 ? 'role' : 'roles'}
+                  </span>
+                </span>
               )}
-            </li>
-          ))
-        }
-      </ul>
-      <a
-        href="/contact"
-        class="btn btn-primary mt-3 w-full"
-      >
-        Get a consultation
-      </a>
-      <div class="mt-4 space-y-2 border-t border-brand-100 pt-4 text-sm text-muted">
-        <a class="flex items-center gap-2" href={contact.phoneHref} data-contact-tel>
-          <Icon name="phone" class="size-4 text-brand-600" />
+            </a>
+          )
+        )
+      }
+
+      <a class="mcta" href="/contact">Get a consultation</a>
+
+      <div class="mcontact">
+        <a href={contact.phoneHref} data-contact-tel>
+          <Icon name="phone" class="size-4" />
           <span data-contact-phone>{contact.phone}</span>
         </a>
-        <a
-          class="flex items-center gap-2"
-          href={`mailto:${contact.emailUser}@${contact.emailDomain}`}
-          data-contact-mailto
-        >
-          <Icon name="mail" class="size-4 text-brand-600" />
-          <span data-contact-email>{contact.emailUser}@{contact.emailDomain}</span>
+        <a href={`mailto:${email}`} data-contact-mailto>
+          <Icon name="mail" class="size-4" />
+          <span data-contact-email>{email}</span>
         </a>
       </div>
     </nav>
@@ -219,8 +206,14 @@ const isActive = (href: string) =>
 </header>
 
 <script>
-  // Mobile drawer + sticky-shadow. Re-bound on every view transition via
-  // astro:page-load, which also fires on the initial load.
+  // Mobile drawer + sticky-shadow + dropdown. Re-bound on every view transition
+  // via astro:page-load, which also fires on the initial load.
+  //
+  // The scroll listener is detached first: this module is evaluated once and
+  // initHeader runs per navigation, so without it every page visited would
+  // leave another handler doing rAF work on every scroll frame.
+  let detachScroll: (() => void) | undefined;
+
   function initHeader() {
     const toggle = document.getElementById('menu-toggle');
     const menu = document.getElementById('mobile-menu');
@@ -228,19 +221,21 @@ const isActive = (href: string) =>
     if (!toggle || !menu || !header) return;
 
     const setOpen = (open: boolean) => {
-      menu.hidden = !open;
+      menu.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', String(open));
       const label = toggle.querySelector('.sr-only');
       if (label) label.textContent = open ? 'Close menu' : 'Open menu';
+      // The drawer scrolls inside itself; the page behind it must not.
+      document.body.style.overflow = open ? 'hidden' : '';
     };
 
     toggle.addEventListener('click', () => {
-      setOpen(menu.hidden);
+      setOpen(!menu.classList.contains('open'));
     });
 
     // Close on Escape so keyboard users are never trapped in the drawer.
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !menu.hidden) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
         setOpen(false);
         toggle.focus();
       }
@@ -251,6 +246,46 @@ const isActive = (href: string) =>
     wide.addEventListener('change', (e) => {
       if (e.matches) setOpen(false);
     });
+
+    // Services accordion inside the drawer.
+    const msvc = menu.querySelector<HTMLButtonElement>('.msvc');
+    const msub = menu.querySelector<HTMLElement>('.msub');
+    if (msvc && msub) {
+      msvc.addEventListener('click', () => {
+        const open = msvc.getAttribute('aria-expanded') !== 'true';
+        msvc.setAttribute('aria-expanded', String(open));
+        msub.classList.toggle('open', open);
+      });
+    }
+
+    // Slide the whole header away on scroll down, bring it back on scroll up —
+    // the 369 behaviour. Separate from `data-stuck`, which only tints the
+    // glass: one says "the page has moved", the other "which way you are going".
+    //
+    // rAF-throttled and transform-driven, so a fast scroll costs one style
+    // change per frame. Skipped entirely under reduced motion: a header that
+    // jumps in and out of view is exactly what that setting is asking about.
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let lastY = window.scrollY;
+      let frame = 0;
+      const onScroll = () => {
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+          const y = window.scrollY;
+          // Never hide with a menu open — it would yank it off screen. The
+          // 140px floor keeps the header still through a short bounce at the
+          // top of the page.
+          const menuOpen = menu.classList.contains('open') || !!header.querySelector('.drop.open');
+          if (menuOpen || y < 8) header.removeAttribute('data-hidden');
+          else if (y > lastY && y > 140) header.setAttribute('data-hidden', '');
+          else if (y < lastY) header.removeAttribute('data-hidden');
+          lastY = y;
+        });
+      };
+      detachScroll?.();
+      addEventListener('scroll', onScroll, { passive: true });
+      detachScroll = () => removeEventListener('scroll', onScroll);
+    }
 
     // Compact the header once the page has scrolled past the top. A sentinel
     // above the header costs nothing per frame, unlike a scroll listener.
@@ -298,6 +333,643 @@ const isActive = (href: string) =>
 </script>
 
 <style>
+  /* The whole header is sticky, pinned --utilH ABOVE the viewport top, so the
+     utility bar slides out of view under its own scroll and the main bar lands
+     flush at top:0. Nothing animates a height, so nothing below the header ever
+     reflows — collapsing that bar cost a full relayout on every frame of the
+     scroll, which read as a hang on the way back to the top.
+     --utilH must match .util-in, and is 0 where the bar is not rendered. */
+  .hdr {
+    --utilH: 0px;
+    position: sticky;
+    top: calc(-1 * var(--utilH));
+    /* Must stay under the splash overlay (200) and the skip link (100): the
+       prototype used 900, which drew the header — and its accent rule — over
+       the splash on every load. 50 is what the rest of the site assumes. */
+    z-index: 50;
+    transition: transform 0.4s var(--ease-out-soft);
+    will-change: transform;
+    --hdr-line: color-mix(in srgb, var(--color-brand-100) 70%, transparent);
+  }
+
+  /* ---------- utility bar ---------- */
+  /* Its height is never animated — it simply scrolls off above the pinned bar
+     and comes back when you return to the top. The only thing that moves it is
+     the load-in below, and that is a transform, so it costs no relayout. */
+  .util {
+    display: none;
+    overflow: hidden;
+    background: var(--color-brand-900);
+    color: var(--color-brand-200);
+    transition: transform 0.55s var(--ease-out-soft);
+  }
+  .stick {
+    position: relative;
+    z-index: 2;
+  }
+  .util-in {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    height: var(--utilH);
+    font-size: 0.75rem;
+  }
+  .util-tag {
+    margin: 0;
+  }
+  .util-contact {
+    display: flex;
+    gap: 1.375rem;
+    margin: 0;
+  }
+  .util-contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    transition: color 0.25s ease;
+  }
+  .util-contact a :global(svg) {
+    color: var(--color-brand-300);
+    transition:
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      color 0.25s ease;
+  }
+  .util-contact a:hover {
+    color: #fff;
+  }
+  .util-contact a:hover :global(svg) {
+    color: #fff;
+    transform: scale(1.15) rotate(-8deg);
+  }
+  @media (min-width: 1024px) {
+    .hdr {
+      --utilH: 2.25rem;
+    }
+    .util {
+      display: block;
+    }
+  }
+
+  /* Slid away by the scroll handler; see the comment there. */
+  .hdr[data-hidden] {
+    transform: translateY(-100%);
+  }
+
+  /* ---------- main bar: frosted glass + brand accent rule ----------
+     At the top of the page the glass is nearly opaque, so it reads as a clean
+     white bar. Once `data-stuck` lands the tint drops and the blur climbs: the
+     bar only *looks* like glass when there is content moving under it. */
+  .bar {
+    position: relative;
+    background: rgb(255 255 255 / 0.94);
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    backdrop-filter: blur(10px) saturate(150%);
+    transition:
+      background 0.35s ease,
+      box-shadow 0.35s ease,
+      -webkit-backdrop-filter 0.35s ease,
+      backdrop-filter 0.35s ease;
+  }
+  .hdr[data-stuck] .bar {
+    background: rgb(255 255 255 / 0.72);
+    -webkit-backdrop-filter: blur(18px) saturate(165%);
+    backdrop-filter: blur(18px) saturate(165%);
+    box-shadow: 0 10px 26px -14px rgb(6 25 48 / 0.5);
+  }
+  /* The accent rule doubles as the bar's bottom border — 1px at rest, 2px once
+     stuck. The prototype's third stop was a warm amber it had no token for;
+     --color-accent is ours, and keeps the sweep three colours wide. */
+  .bar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      var(--color-brand-500),
+      var(--color-plum-600) 55%,
+      var(--color-accent)
+    );
+    opacity: 0.55;
+    transition:
+      height 0.35s ease,
+      opacity 0.35s ease;
+  }
+  .hdr[data-stuck] .bar::after {
+    height: 2px;
+    opacity: 1;
+  }
+  /* No backdrop-filter (older Firefox, or the setting disabled): go solid white
+     rather than leaving a see-through bar with unreadable text over it. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bar,
+    .hdr[data-stuck] .bar {
+      background: #fff;
+    }
+  }
+  .bar-in {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+    height: 4rem;
+  }
+  @media (min-width: 1024px) {
+    .bar-in {
+      height: 5rem;
+    }
+  }
+
+  /* ---------- nav ---------- */
+  .nav {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+  }
+  @media (min-width: 1024px) {
+    .nav {
+      display: flex;
+    }
+  }
+  .nl {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.5625rem 0.8125rem;
+    border-radius: var(--radius-btn);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-heading);
+    transition:
+      color 0.25s ease,
+      opacity 0.5s ease,
+      transform 0.5s var(--ease-out-soft);
+  }
+  /* Travelling dot: the bar draws left→right and a dot rides its trailing end.
+     The same element doubles as the current-page marker via .on. */
+  .nl::before {
+    content: '';
+    position: absolute;
+    left: 0.8125rem;
+    right: 0.8125rem;
+    bottom: 0.25rem;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-brand-500), var(--color-plum-600));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.42s var(--ease-out-soft);
+  }
+  .nl::after {
+    content: '';
+    position: absolute;
+    right: 0.8125rem;
+    bottom: 0.15625rem;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-plum-600);
+    opacity: 0;
+    transform: translateX(-14px) scale(0.4);
+    transition:
+      transform 0.42s var(--ease-out-soft),
+      opacity 0.22s ease 0.12s;
+  }
+  .nl:hover {
+    color: var(--color-plum-600);
+  }
+  .nl:hover::before,
+  .nl.on::before {
+    transform: scaleX(1);
+  }
+  .nl:hover::after,
+  .nl.on::after {
+    opacity: 1;
+    transform: translateX(3px) scale(1);
+  }
+  .nl.on {
+    color: var(--color-plum-600);
+    font-weight: 600;
+  }
+  .nl :global(.chev) {
+    width: 0.875rem;
+    height: 0.875rem;
+    transition: transform 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+  .drop.open .nl :global(.chev) {
+    transform: rotate(180deg);
+  }
+  .drop.open > .nl {
+    color: var(--color-plum-600);
+  }
+  .drop.open > .nl::before {
+    transform: scaleX(1);
+  }
+  .drop.open > .nl::after {
+    opacity: 1;
+    transform: translateX(3px) scale(1);
+  }
+
+  /* ---------- dropdown ---------- */
+  .drop {
+    position: relative;
+  }
+  .menu {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 0.625rem);
+    width: 19.5rem;
+    margin-left: -7.375rem;
+    padding: 0.5rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top center;
+    transition:
+      opacity 0.26s ease,
+      transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1.15),
+      visibility 0s 0.3s;
+  }
+  .drop:hover .menu,
+  .drop:focus-within .menu {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity 0.26s ease,
+      transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1.15),
+      visibility 0s;
+  }
+  /* Once the script is in charge, only `.open` opens it — otherwise a menu
+     dismissed with Escape would spring straight back under a pointer that
+     never moved. */
+  :global(.js-nav) .drop:hover .menu,
+  :global(.js-nav) .drop:focus-within .menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+  }
+  :global(.js-nav) .drop.open .menu {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .caret {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    width: 11px;
+    height: 11px;
+    margin-left: -5px;
+    background: #fff;
+    border-left: 1px solid var(--color-brand-100);
+    border-top: 1px solid var(--color-brand-100);
+    border-radius: 2px 0 0 0;
+    transform: rotate(45deg);
+  }
+  .menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .menu li {
+    opacity: 0;
+    transform: translateX(-8px);
+    transition:
+      opacity 0.3s ease,
+      transform 0.35s var(--ease-out-soft);
+  }
+  .drop:hover .menu li,
+  .drop:focus-within .menu li {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(60ms + var(--k) * 28ms);
+  }
+  :global(.js-nav) .drop:hover .menu li,
+  :global(.js-nav) .drop:focus-within .menu li {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  :global(.js-nav) .drop.open .menu li {
+    opacity: 1;
+    transform: none;
+    transition-delay: calc(60ms + var(--k) * 28ms);
+  }
+  .menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5625rem 0.625rem;
+    border-radius: var(--radius-btn);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-heading);
+    transition:
+      background 0.22s ease,
+      color 0.22s ease,
+      transform 0.28s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .mi {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-plum-600);
+    transition:
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      color 0.22s ease;
+  }
+  .mi :global(svg) {
+    width: 1.0625rem;
+    height: 1.0625rem;
+  }
+  .mt {
+    flex: 1;
+  }
+  .menu :global(.marw) {
+    width: 0.875rem;
+    height: 0.875rem;
+    opacity: 0;
+    color: var(--color-brand-500);
+    transform: translateX(-5px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .menu a:hover {
+    background: var(--color-brand-50);
+    color: var(--color-plum-600);
+    transform: translateX(2px);
+  }
+  .menu a:hover .mi {
+    color: var(--color-brand-500);
+    transform: scale(1.12) rotate(-8deg);
+  }
+  .menu a:hover :global(.marw) {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ---------- CTA ----------
+     Brand fill wipes in from the left, an arrow opens out of the right edge,
+     and a gloss bar sweeps over the top. */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    flex: none;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-btn);
+    background: var(--color-brand-800);
+    color: #fff;
+    font-size: 0.84375rem;
+    font-weight: 600;
+    line-height: 1;
+    --d: 300ms; /* the CTA lands last */
+    transition:
+      transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      box-shadow 0.32s ease,
+      opacity 0.5s ease;
+  }
+  @media (min-width: 640px) {
+    .cta {
+      display: inline-flex;
+    }
+  }
+  .cta-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-600));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.44s cubic-bezier(0.22, 0.9, 0.32, 1.12);
+  }
+  /* The arrow is absolute and the label slides left, so the button never
+     changes width on hover — otherwise the whole nav shifts with it. */
+  .cta-txt {
+    position: relative;
+    transition: transform 0.38s cubic-bezier(0.22, 0.9, 0.32, 1.12);
+  }
+  .cta :global(.cta-arw) {
+    position: absolute;
+    right: 0.8125rem;
+    width: 1rem;
+    height: 1rem;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition:
+      opacity 0.3s ease,
+      transform 0.38s cubic-bezier(0.34, 1.5, 0.64, 1);
+  }
+  .cta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -40%;
+    width: 26%;
+    pointer-events: none;
+    background: linear-gradient(105deg, transparent, rgb(255 255 255 / 0.45), transparent);
+    transform: skewX(-18deg);
+    opacity: 0;
+  }
+  .cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px color-mix(in srgb, var(--color-brand-500) 30%, transparent);
+  }
+  .cta:hover .cta-fill {
+    transform: scaleX(1);
+  }
+  .cta:hover .cta-txt {
+    transform: translateX(-10px);
+  }
+  .cta:hover :global(.cta-arw) {
+    opacity: 1;
+    transform: none;
+  }
+  .cta:hover::after {
+    animation: cta-sheen 0.7s ease-out 0.1s;
+  }
+  .cta:active {
+    transform: translateY(0) scale(0.98);
+  }
+  @keyframes cta-sheen {
+    from {
+      opacity: 1;
+      left: -40%;
+    }
+    to {
+      opacity: 1;
+      left: 120%;
+    }
+  }
+
+  /* ---------- burger ---------- */
+  .burger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.5rem;
+    margin-left: auto;
+    padding: 0 0.5rem;
+    cursor: pointer;
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s var(--ease-out-soft);
+  }
+  @media (min-width: 1024px) {
+    .burger {
+      display: none;
+    }
+  }
+  .burger > span[aria-hidden] {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-brand-800);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      opacity 0.25s ease,
+      width 0.3s ease;
+  }
+  .burger > span[aria-hidden]:nth-of-type(1) {
+    width: 24px;
+  }
+  .burger > span[aria-hidden]:nth-of-type(2) {
+    width: 18px;
+  }
+  .burger > span[aria-hidden]:nth-of-type(3) {
+    width: 24px;
+  }
+  .burger[aria-expanded='true'] > span[aria-hidden]:nth-of-type(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+  .burger[aria-expanded='true'] > span[aria-hidden]:nth-of-type(2) {
+    opacity: 0;
+    width: 0;
+  }
+  .burger[aria-expanded='true'] > span[aria-hidden]:nth-of-type(3) {
+    transform: translateY(-6px) rotate(-45deg);
+    width: 24px;
+  }
+
+  /* ---------- mobile drawer ----------
+     `visibility` rides along with the height so a closed drawer is out of the
+     tab order — a max-height alone leaves every link focusable behind it. */
+  .mnav {
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    background: #fff;
+    border-bottom: 1px solid var(--hdr-line);
+    transition:
+      max-height 0.45s var(--ease-out-soft),
+      visibility 0s 0.45s;
+  }
+  .mnav.open {
+    max-height: 80vh;
+    overflow: auto;
+    visibility: visible;
+    transition:
+      max-height 0.45s var(--ease-out-soft),
+      visibility 0s;
+  }
+  @media (min-width: 1024px) {
+    .mnav {
+      display: none;
+    }
+  }
+  .mnav-in {
+    padding-top: 0.625rem;
+    padding-bottom: 1.375rem;
+  }
+  .mrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 0.25rem;
+    border-bottom: 1px solid var(--color-brand-50);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--color-heading);
+    text-align: left;
+    cursor: pointer;
+  }
+  .mrow.on {
+    color: var(--color-plum-600);
+  }
+  .msvc :global(.chev) {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.35s ease;
+  }
+  .msvc[aria-expanded='true'] :global(.chev) {
+    transform: rotate(180deg);
+  }
+  .msub {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s var(--ease-out-soft);
+  }
+  .msub > div {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .msub.open {
+    grid-template-rows: 1fr;
+  }
+  .msub a {
+    display: block;
+    padding: 0.625rem 0.25rem 0.625rem 1rem;
+    font-size: 0.84375rem;
+    color: var(--color-muted);
+  }
+  .mcta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0.875rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-btn);
+    background: var(--color-brand-800);
+    color: #fff;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .mcontact {
+    display: grid;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-brand-100);
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+  .mcontact a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .mcontact a :global(svg) {
+    color: var(--color-brand-600);
+  }
+
   /* --- "Hiring !!" badge. Derived from the jobs collection, so it clears
          itself once every role is closed. --- */
   .hiring-badge {
@@ -330,38 +1002,79 @@ const isActive = (href: string) =>
     }
   }
 
-  /* The zip collapses its utility bar on scroll, but its bar lives inside the
-     sticky header. Ours sits above it and scrolls away on its own, so there is
-     nothing to collapse — the sentinel is only driving the shadow. */
+  /* ---------- entrance ----------
+     Held at the start state while the splash is up, then released. Gated on
+     `html.splash-open` rather than a class added by script, so with JS off the
+     class is never added and the header simply renders in place.
 
-  /* --- Dropdown: JS takes over from the CSS-only hover once `js-nav` is set,
-         so hover-intent and Escape apply only where they can work. The scoped
-         attribute selector gives these the specificity to win over Tailwind's
-         group-hover utilities. --- */
-  :global(.js-nav) .nav-drop-menu {
-    visibility: hidden;
+     Animations, not transitions. A transition would need its delay to survive
+     on the element for the stagger to mean anything, and that same delay then
+     lands on every hover — a nav link that only colours 220ms after the pointer
+     arrives. `backwards` fill holds the start state through the delay and lets
+     go once the entrance is over, so hover is immediate and unencumbered. */
+  :global(html.splash-open) .util {
+    transform: translateY(-100%);
+  }
+  :global(html.splash-open) .nl,
+  :global(html.splash-open) .cta,
+  :global(html.splash-open) .burger {
     opacity: 0;
+    transform: translateY(-8px);
   }
-  :global(.js-nav) .nav-drop.open .nav-drop-menu {
-    visibility: visible;
-    opacity: 1;
+  :global(html:not(.splash-open)) .util {
+    animation: hdr-drop 0.55s var(--ease-out-soft) backwards;
+  }
+  :global(html:not(.splash-open)) .nl,
+  :global(html:not(.splash-open)) .cta,
+  :global(html:not(.splash-open)) .burger {
+    animation: hdr-in 0.5s var(--ease-out-soft) calc(220ms + var(--d, 0ms)) backwards;
+  }
+  @keyframes hdr-drop {
+    from {
+      transform: translateY(-100%);
+    }
+  }
+  @keyframes hdr-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
   }
 
-  /* Items cascade in as the panel opens. */
-  @media (prefers-reduced-motion: no-preference) {
-    .nav-drop-item {
-      opacity: 0;
-      transform: translateY(-6px);
-      transition:
-        opacity 0.28s ease,
-        transform 0.28s var(--ease-out-soft);
-    }
-    .nav-drop:hover .nav-drop-item,
-    .nav-drop:focus-within .nav-drop-item,
-    .nav-drop.open .nav-drop-item {
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.splash-open) .util,
+    :global(html.splash-open) .nl,
+    :global(html.splash-open) .cta,
+    :global(html.splash-open) .burger {
       opacity: 1;
       transform: none;
-      transition-delay: calc(var(--k, 0) * 35ms);
+    }
+    :global(html:not(.splash-open)) .util,
+    :global(html:not(.splash-open)) .nl,
+    :global(html:not(.splash-open)) .cta,
+    :global(html:not(.splash-open)) .burger {
+      animation: none;
+    }
+    .hdr,
+    .util,
+    .nl,
+    .cta,
+    .burger,
+    .menu,
+    .menu li,
+    .cta-fill,
+    .nl::before,
+    .nl::after,
+    .mi,
+    .msub,
+    .burger > span[aria-hidden] {
+      transition: none;
+    }
+    .hdr[data-hidden] {
+      transform: none;
+    }
+    .cta::after {
+      display: none;
     }
   }
 </style>

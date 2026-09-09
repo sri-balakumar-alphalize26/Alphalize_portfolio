@@ -34,6 +34,9 @@ export type Office = {
   postalCode: string;
   country: string;
   countryCode: string;
+  /** Decimal degrees. Drives the footer map pin; nothing else reads them. */
+  lon: number;
+  lat: number;
 };
 
 export const offices: Office[] = [
@@ -59,16 +62,32 @@ export const offices: Office[] = [
     postalCode: '691001',
     country: 'India',
     countryCode: 'IN',
+    lon: 76.6141,
+    lat: 8.8932,
   },
 ];
 
-import type { IconName } from '@/components/icons';
+import type { socialMarks } from '@/components/social-marks';
 
-export const socials: { name: string; href: string; icon: IconName }[] = [
-  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/alphalize', icon: 'linkedin' },
-  { name: 'Facebook', href: 'https://www.facebook.com/alphalize', icon: 'facebook' },
-  { name: 'Instagram', href: 'https://www.instagram.com/alphalize', icon: 'instagram' },
-  { name: 'X', href: 'https://x.com/alphalize', icon: 'x' },
+/**
+ * Where to find us. The mark and its brand colour live in social-marks.ts;
+ * this is only the list of accounts, in the order they appear in the footer.
+ *
+ * X/Twitter was dropped: the link was a placeholder pointing at an account
+ * that does not exist, and an icon that goes nowhere is worse than no icon.
+ * These are the same four accounts the 369 site links.
+ */
+export const socials: { name: string; href: string; mark: keyof typeof socialMarks }[] = [
+  // The company page, on www rather than in.linkedin.com — the `in.` host is
+  // LinkedIn's India edition and redirects everyone else.
+  { name: 'LinkedIn', href: 'https://www.linkedin.com/company/alphalize', mark: 'linkedin' },
+  { name: 'Facebook', href: 'https://www.facebook.com/share/1EJ7TFDP6L/', mark: 'facebook' },
+  {
+    name: 'Instagram',
+    href: 'https://www.instagram.com/alphalize_technologies',
+    mark: 'instagram',
+  },
+  { name: 'YouTube', href: 'https://www.youtube.com/@shanontech4849', mark: 'youtube' },
 ];
 
 export type NavItem = { label: string; href: string; hasChildren?: boolean };

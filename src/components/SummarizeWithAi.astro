@@ -1,0 +1,127 @@
+---
+import { site } from '@/config/site';
+import { aiMarks } from './ai-marks';
+
+/**
+ * "Summarize Alphalize with AI" — each icon opens that assistant with a prompt
+ * already written, asking it to profile the company. The prompt names our
+ * services explicitly so the assistant repeats our framing rather than guessing
+ * from a crawl.
+ *
+ * Ported from the 369 SummarizeWithAi. The parts worth keeping verbatim are its
+ * findings, not its code:
+ *
+ *   - The `?q=` formats were read from habsy.ai's live HTML, not guessed, and
+ *     each link ships only where the prompt provably lands in the composer.
+ *   - Copilot is deliberately absent: Microsoft disabled `?q=` after a prompt
+ *     injection issue, and the old Bing entry points now redirect into that
+ *     same deaf composer.
+ *   - Le Chat needs the `/chat` path specifically — the bare origin 307s and
+ *     drops the query.
+ *
+ * Some assistants only pre-fill and wait for send, and a signed-out visitor may
+ * meet a login wall first. That is provider behaviour, not something to work
+ * around here.
+ *
+ * These are undocumented endpoints. They will break without warning, and the
+ * only symptom is an assistant opening with an empty composer.
+ */
+const url = new URL(Astro.url.pathname, site.url).href;
+
+const prompt =
+  `Research Alphalize (${url}) in detail. Read that site and search the web, then give a ` +
+  `thorough, well-structured profile: Alphalize is an ERP and business intelligence company ` +
+  `based in Kollam, Kerala, India. It implements customised Odoo ERP systems, builds business ` +
+  `intelligence dashboards, custom web and mobile software, IoT and automation, and a suite of ` +
+  `Android business apps. Always use these exact company and product names, and cite the ` +
+  `sources you used.`;
+
+const q = encodeURIComponent(prompt);
+
+const assistants = [
+  { name: 'ChatGPT', href: `https://chatgpt.com/?q=${q}`, mark: aiMarks.chatgpt },
+  { name: 'Claude', href: `https://claude.ai/new?q=${q}`, mark: aiMarks.claude },
+  { name: 'Google AI Mode', href: `https://www.google.com/search?udm=50&q=${q}`, mark: aiMarks.gemini },
+  { name: 'Perplexity', href: `https://www.perplexity.ai/search?q=${q}`, mark: aiMarks.perplexity },
+  { name: 'Grok', href: `https://grok.com/?q=${q}`, mark: aiMarks.grok },
+  { name: 'Le Chat', href: `https://chat.mistral.ai/chat?q=${q}`, mark: aiMarks.mistral },
+];
+---
+
+<div class="sa">
+  <p class="sa-h">Summarize Alphalize with AI</p>
+  <ul class="sa-row">
+    {
+      assistants.map((a) => (
+        <li>
+          <a
+            href={a.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Ask ${a.name} about Alphalize`}
+            aria-label={`Ask ${a.name} about Alphalize`}
+            class="sa-btn"
+          >
+            <span class="sa-mark" aria-hidden="true" set:html={a.mark} />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .sa-h {
+    margin: 0 0 0.625rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-brand-300);
+  }
+  .sa-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .sa-btn {
+    display: grid;
+    place-items: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: var(--radius-btn);
+    background: rgb(255 255 255 / 0.05);
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      transform 0.25s cubic-bezier(0.22, 0.9, 0.32, 1.2);
+  }
+  .sa-btn:hover {
+    background: rgb(255 255 255 / 0.1);
+    border-color: color-mix(in srgb, var(--color-brand-400) 40%, transparent);
+    transform: translateY(-2px);
+  }
+  /* The marks are 1em, so this sets their size. Several are monochrome and
+     inherit currentColor; the rest carry their own brand fills. */
+  .sa-mark {
+    display: inline-flex;
+    font-size: 1.0625rem;
+    color: var(--color-brand-100);
+  }
+  .sa-mark :global(svg) {
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sa-btn {
+      transition: none;
+    }
+    .sa-btn:hover {
+      transform: none;
+    }
+  }
+</style>

@@ -2,7 +2,10 @@
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import logo from '@/assets/brand/logo.png';
-import { contact, legalNav, offices, site, socials } from '@/config/site';
+import { legalNav, offices, site, socials } from '@/config/site';
+import FooterOffices from './FooterOffices.astro';
+import SummarizeWithAi from './SummarizeWithAi.astro';
+import { socialMarks } from './social-marks';
 import Icon from './Icon.astro';
 
 /**
@@ -17,8 +20,8 @@ import Icon from './Icon.astro';
  *   column     hovering a column lifts it and recedes the others
  *   spotlight  a glow follows the pointer — the only one needing JS
  *
- * Phone and email copy to the clipboard, and a back-to-top button appears once
- * the page has scrolled. Entrance comes from <AboutAnim> where it is present;
+ * A back-to-top button appears once the page has scrolled. The offices column,
+ * including its map and copy-to-clipboard rows, is FooterOffices. Entrance comes from <AboutAnim> where it is present;
  * without it the footer simply renders, since every hidden state is guarded
  * behind `html.ab-js`.
  */
@@ -30,7 +33,6 @@ const { hover = 'underline' } = Astro.props;
 
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 const year = new Date().getFullYear();
-const email = `${contact.emailUser}@${contact.emailDomain}`;
 ---
 
 <footer
@@ -54,7 +56,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         <p class="text-brand-200 mt-4 max-w-sm text-sm leading-relaxed">
           {site.description}
         </p>
-        <ul class="mt-6 flex gap-2">
+        <p class="ft-kicker mt-6">Follow us</p>
+        <ul class="ft-socials" data-ab-cascade data-base="140" data-step="70">
           {
             socials.map((s) => (
               <li>
@@ -62,14 +65,24 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
                   href={s.href}
                   rel="noopener noreferrer"
                   target="_blank"
-                  class="ft-social hover:bg-brand-600 flex size-9 items-center justify-center rounded-full bg-white/10 transition-colors"
+                  aria-label={s.name}
+                  class="ft-social"
+                  style={`--c:${socialMarks[s.mark].color}`}
                 >
-                  <Icon name={s.icon} class="size-4" label={s.name} />
+                  <span
+                    class="ft-social-mark"
+                    aria-hidden="true"
+                    set:html={socialMarks[s.mark].svg}
+                  />
                 </a>
               </li>
             ))
           }
         </ul>
+
+        <div class="mt-6">
+          <SummarizeWithAi />
+        </div>
       </div>
 
       <!-- Services -->
@@ -107,38 +120,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         </ul>
       </nav>
 
-      <!-- Offices -->
+      <!-- Offices: the map, address and copy rows live in their own component. -->
       <div class="ft-col ab lg:col-span-3" style="--d:320ms">
-        <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Offices</h2>
-        <ul class="mt-4 space-y-4 text-sm">
-          {
-            offices.map((o) => (
-              <li class="flex gap-2.5">
-                <Icon name="pin" class="text-brand-400 mt-0.5 size-4 shrink-0" />
-                <span class="text-brand-200">
-                  <span class="block font-medium text-white">{o.label}</span>
-                  {o.street}, {o.locality}, {o.region} {o.postalCode}
-                </span>
-              </li>
-            ))
-          }
-          <li class="ft-cp flex gap-2.5" data-copy={contact.phone}>
-            <Icon name="phone" class="text-brand-400 mt-0.5 size-4 shrink-0" />
-            <a href={contact.phoneHref} class="text-brand-200">{contact.phone}</a>
-            <button type="button" class="ft-copy" aria-label="Copy phone number">
-              <Icon name="copy" class="ft-ci size-3.5" />
-              <Icon name="check" draw class="ft-co size-3.5" />
-            </button>
-          </li>
-          <li class="ft-cp flex gap-2.5" data-copy={email}>
-            <Icon name="mail" class="text-brand-400 mt-0.5 size-4 shrink-0" />
-            <a href={`mailto:${email}`} class="text-brand-200">{email}</a>
-            <button type="button" class="ft-copy" aria-label="Copy email address">
-              <Icon name="copy" class="ft-ci size-3.5" />
-              <Icon name="check" draw class="ft-co size-3.5" />
-            </button>
-          </li>
-        </ul>
+        <FooterOffices />
       </div>
     </div>
 
@@ -171,32 +155,6 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
       });
     }
 
-    ft.querySelectorAll<HTMLElement>('.ft-cp').forEach((row) => {
-      const btn = row.querySelector<HTMLButtonElement>('.ft-copy');
-      const value = row.dataset.copy;
-      if (!btn || !value || row.dataset.wired) return;
-      row.dataset.wired = '1';
-      btn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(value);
-        } catch {
-          // Clipboard API needs a secure context; fall back so the button still
-          // works on http:// and in older browsers.
-          const ta = document.createElement('textarea');
-          ta.value = value;
-          ta.setAttribute('readonly', '');
-          ta.style.position = 'fixed';
-          ta.style.opacity = '0';
-          document.body.append(ta);
-          ta.select();
-          document.execCommand('copy');
-          ta.remove();
-        }
-        row.classList.add('is-copied');
-        setTimeout(() => row.classList.remove('is-copied'), 1600);
-      });
-    });
-
     const top = document.getElementById('ftTop');
     if (top && !top.dataset.wired) {
       top.dataset.wired = '1';
@@ -227,7 +185,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   }
 
   /* --- underline: plum → brand wipe, the site's existing gradient --- */
-  .h-underline .ft-col ul a::after {
+  .h-underline .ft-col ul:not(.ft-socials) a::after {
     content: '';
     position: absolute;
     left: 0;
@@ -240,24 +198,24 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     transform-origin: left;
     transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
   }
-  .h-underline .ft-col ul a:hover {
+  .h-underline .ft-col ul:not(.ft-socials) a:hover {
     color: #fff;
   }
-  .h-underline .ft-col ul a:hover::after {
+  .h-underline .ft-col ul:not(.ft-socials) a:hover::after {
     transform: scaleX(1);
   }
 
   /* --- dim --- */
-  .h-dim .ft-col ul:hover a {
+  .h-dim .ft-col ul:not(.ft-socials):hover a {
     opacity: 0.38;
   }
-  .h-dim .ft-col ul a:hover {
+  .h-dim .ft-col ul:not(.ft-socials) a:hover {
     opacity: 1;
     color: #fff;
   }
 
   /* --- arrow --- */
-  .h-arrow .ft-col ul a::before {
+  .h-arrow .ft-col ul:not(.ft-socials) a::before {
     content: '→';
     position: absolute;
     left: -15px;
@@ -269,17 +227,17 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
       opacity 0.28s ease,
       transform 0.28s ease;
   }
-  .h-arrow .ft-col ul a:hover {
+  .h-arrow .ft-col ul:not(.ft-socials) a:hover {
     color: #fff;
     transform: translateX(13px);
   }
-  .h-arrow .ft-col ul a:hover::before {
+  .h-arrow .ft-col ul:not(.ft-socials) a:hover::before {
     opacity: 1;
     transform: none;
   }
 
   /* --- dot --- */
-  .h-dot .ft-col ul a::before {
+  .h-dot .ft-col ul:not(.ft-socials) a::before {
     content: '';
     position: absolute;
     left: -13px;
@@ -292,11 +250,11 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     transform: scale(0);
     transition: transform 0.3s cubic-bezier(0.34, 1.6, 0.64, 1);
   }
-  .h-dot .ft-col ul a:hover {
+  .h-dot .ft-col ul:not(.ft-socials) a:hover {
     color: #fff;
     transform: translateX(11px);
   }
-  .h-dot .ft-col ul a:hover::before {
+  .h-dot .ft-col ul:not(.ft-socials) a:hover::before {
     transform: scale(1);
   }
 
@@ -337,60 +295,65 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   .h-spotlight:hover .ft-glow {
     opacity: 1;
   }
-  .h-spotlight .ft-col ul a:hover {
+  .h-spotlight .ft-col ul:not(.ft-socials) a:hover {
     color: #fff;
     text-shadow: 0 0 18px color-mix(in srgb, var(--color-brand-400) 55%, transparent);
   }
 
-  /* --- copy buttons --- */
-  .ft-copy {
-    position: relative;
+  /* --- social accounts ---------------------------------------------------
+     Each mark draws in currentColor and carries its own --c, so the pad takes
+     that brand colour on hover while the mark inverts to white. The name is on
+     the link as aria-label and nowhere else: the brand fill is the label.
+
+     Selectors carry .ft-col so they outrank `.ft-col a` above, which would
+     otherwise own the transition. The row is excluded from every text-link
+     hover treatment (`ul:not(.ft-socials)`) — an underline or a sliding arrow
+     under an icon pad is not the same gesture. */
+  .ft-kicker {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-brand-300);
+  }
+  .ft-socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.625rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ft-col a.ft-social {
     display: grid;
     place-items: center;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-top: 0.125rem;
-    border-radius: 4px;
-    color: var(--color-brand-300);
-    cursor: pointer;
-    opacity: 0;
+    width: 2.125rem;
+    height: 2.125rem;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: var(--radius-btn);
+    background: rgb(255 255 255 / 0.05);
+    /* On the dark footer the mark itself carries the brand colour; a solid pad
+       at rest would put four saturated blocks in the corner of the page. */
+    color: var(--c);
     transition:
-      opacity 0.25s ease,
-      color 0.25s ease;
+      background 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease,
+      transform 0.25s cubic-bezier(0.22, 0.9, 0.32, 1.2);
   }
-  .ft-cp:hover .ft-copy,
-  .ft-copy:focus-visible {
-    opacity: 1;
-  }
-  .ft-copy:hover {
+  .ft-col a.ft-social:hover,
+  .ft-col a.ft-social:focus-visible {
+    background: var(--c);
+    border-color: var(--c);
     color: #fff;
+    transform: translateY(-2px);
   }
-  .ft-copy :global(.ft-co) {
-    position: absolute;
-    color: var(--color-teal-500);
-    opacity: 0;
-    transition: opacity 0.2s ease;
+  .ft-social-mark {
+    display: inline-flex;
+    font-size: 1.0625rem;
   }
-  .ft-copy :global(.ft-co path) {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
-  .is-copied .ft-copy {
-    opacity: 1;
-  }
-  .is-copied :global(.ft-ci) {
-    opacity: 0;
-  }
-  .is-copied :global(.ft-co) {
-    opacity: 1;
-  }
-  .is-copied :global(.ft-co path) {
-    animation: ft-tick 0.4s cubic-bezier(0.55, 0, 0.35, 1) forwards;
-  }
-  @keyframes ft-tick {
-    to {
-      stroke-dashoffset: 0;
-    }
+  .ft-social-mark :global(svg) {
+    display: block;
   }
 
   /* --- back to top --- */
@@ -428,20 +391,20 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   @media (prefers-reduced-motion: reduce) {
     .ft-col a,
     .ft-col :global(a),
-    .ft-copy,
     .ft-top,
     .ft-glow {
       transition: none;
     }
-    .h-underline .ft-col ul a::after,
-    .h-arrow .ft-col ul a::before,
-    .h-dot .ft-col ul a::before,
-    .h-column .ft-col {
+    .h-underline .ft-col ul:not(.ft-socials) a::after,
+    .h-arrow .ft-col ul:not(.ft-socials) a::before,
+    .h-dot .ft-col ul:not(.ft-socials) a::before,
+    .h-column .ft-col,
+    .ft-col a.ft-social {
       transition: none;
     }
-    .is-copied :global(.ft-co path) {
-      stroke-dashoffset: 0;
-      animation: none;
+    .ft-col a.ft-social:hover,
+    .ft-col a.ft-social:focus-visible {
+      transform: none;
     }
   }
 </style>

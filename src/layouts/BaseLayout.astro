@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
+import ContactSync from '@/components/ContactSync.astro';
 import SplashScreen from '@/components/SplashScreen.astro';
 import { contact, offices, site } from '@/config/site';
 import inter400 from '@alphalize/astro-marker/fonts/inter-latin-400-normal.woff2?url';
@@ -69,6 +70,7 @@ const organization = {
 
   <body class="flex min-h-dvh flex-col">
     <SplashScreen />
+    <ContactSync />
 
     <a
       href="#main"

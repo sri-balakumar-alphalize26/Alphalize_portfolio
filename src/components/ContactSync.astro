@@ -1,0 +1,75 @@
+---
+import { contact } from '@/config/site';
+
+/**
+ * Keeps the contact details shown on every page in step with the store.
+ *
+ * Only /contact renders per request, so the header, footer and CTA button are
+ * built from the src/config/site.ts seed at build time and would otherwise hold
+ * a stale number after an edit in manage mode. Rather than make every page
+ * dynamic — a Worker invocation and a KV read on every view, for a phone
+ * number — the seed is rendered as normal and patched after load.
+ *
+ * The seed is passed down so the fetch can be skipped entirely when the store
+ * agrees with it, which is the normal case: no flash, and no work done.
+ *
+ * Progressive enhancement only. With JS off the built-in details render and
+ * every tel:/mailto: link still works.
+ */
+const seedPhone = contact.phone;
+const seedEmail = `${contact.emailUser}@${contact.emailDomain}`;
+---
+
+<span data-contact-sync data-seed-phone={seedPhone} data-seed-email={seedEmail} hidden></span>
+
+<script>
+  async function syncContact() {
+    const root = document.querySelector<HTMLElement>('[data-contact-sync]');
+    if (!root) return;
+
+    let phone: string;
+    let email: string;
+    try {
+      const body = new FormData();
+      body.set('action', 'get-contact');
+      const res = await fetch('/api/manage', { method: 'POST', body });
+      const data = (await res.json()) as {
+        contact?: { phoneDisplay?: string; email?: string };
+      };
+      phone = data.contact?.phoneDisplay ?? '';
+      email = data.contact?.email ?? '';
+    } catch {
+      return; // the built-in details are already on the page
+    }
+
+    if (phone && phone !== root.dataset.seedPhone) {
+      const digits = phone.replace(/\D/g, '');
+      document
+        .querySelectorAll<HTMLElement>('[data-contact-phone]')
+        .forEach((el) => (el.textContent = phone));
+      document
+        .querySelectorAll<HTMLAnchorElement>('[data-contact-tel]')
+        .forEach((a) => (a.href = `tel:+${digits}`));
+      // The footer copy buttons read this attribute, not the link text.
+      document
+        .querySelectorAll<HTMLElement>('[data-contact-copy="phone"]')
+        .forEach((el) => (el.dataset.copy = phone));
+    }
+
+    if (email && email !== root.dataset.seedEmail) {
+      document
+        .querySelectorAll<HTMLElement>('[data-contact-email]')
+        .forEach((el) => (el.textContent = email));
+      document
+        .querySelectorAll<HTMLAnchorElement>('[data-contact-mailto]')
+        .forEach((a) => (a.href = `mailto:${email}`));
+      document
+        .querySelectorAll<HTMLElement>('[data-contact-copy="email"]')
+        .forEach((el) => (el.dataset.copy = email));
+    }
+  }
+
+  document.addEventListener('astro:page-load', () => void syncContact());
+  if (document.readyState !== 'loading') void syncContact();
+  else document.addEventListener('DOMContentLoaded', () => void syncContact(), { once: true });
+</script>

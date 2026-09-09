@@ -1,0 +1,616 @@
+---
+import { contact, offices } from '@/config/site';
+import DirectionsQr from './DirectionsQr.astro';
+import Icon from './Icon.astro';
+import { directionsUrl } from '@/lib/maps';
+
+/**
+ * Offices block with a small India map.
+ *
+ * The outline is a hand-built SVG path (coarse national boundary, Mercator
+ * projected into a 200x220 box), so it is one path — no map library, no tiles,
+ * no network request. The pin is placed with the same projection, so moving an
+ * office only means changing its lon/lat in src/config/site.ts.
+ *
+ * On reveal the outline draws itself, then the pin drops in and pings twice.
+ */
+const KERALA =
+  'M 63.8 206.0 L 62.6 203.7 L 60.3 200.9 L 58.1 194.0 L 55.8 188.7 L 53.6 184.1 L 51.3 181.2 L 49.4 176.9 L 49.1 175.3 L 52.6 178.6 L 54.8 180.9 L 57.7 182.5 L 60.0 184.5 L 62.6 185.8 L 62.2 189.1 L 64.5 191.0 L 62.6 193.3 L 64.2 196.2 L 65.1 199.5 L 64.5 203.4 Z';
+const INDIA =
+  'M 66.4 206.1 L 62.6 203.4 L 60.4 200.9 L 58.1 193.8 L 55.0 185.5 L 49.1 174.8 L 44.4 162.0 L 42.5 157.4 L 39.1 147.3 L 36.3 133.3 L 36.1 124.2 L 34.6 118.7 L 31.7 114.8 L 24.3 122.1 L 15.3 115.7 L 11.3 111.6 L 16.0 107.0 L 19.2 106.3 L 10.8 100.0 L 6.3 100.3 L 6.0 97.1 L 18.5 90.8 L 21.7 81.5 L 30.1 72.8 L 36.5 70.6 L 43.0 58.9 L 47.5 55.9 L 46.8 48.5 L 52.0 38.7 L 45.5 30.2 L 43.6 21.7 L 50.0 13.9 L 62.2 13.9 L 70.6 20.9 L 78.3 33.3 L 75.7 44.7 L 83.4 52.2 L 88.6 55.9 L 98.2 59.6 L 107.9 66.3 L 117.5 71.4 L 127.2 75.7 L 134.9 71.4 L 139.4 76.4 L 140.0 79.3 L 149.7 79.3 L 159.3 78.6 L 163.1 73.5 L 175.4 73.5 L 183.7 68.5 L 191.4 69.2 L 194.0 76.4 L 188.2 77.9 L 186.3 85.1 L 179.2 92.2 L 174.1 99.3 L 168.3 106.3 L 163.8 113.2 L 161.2 107.0 L 155.4 101.4 L 154.2 92.9 L 146.4 90.8 L 143.9 85.1 L 138.1 82.2 L 134.2 90.8 L 138.1 97.8 L 133.6 104.9 L 139.4 113.2 L 132.9 116.0 L 126.5 120.1 L 123.9 125.6 L 115.6 130.4 L 107.9 138.6 L 96.9 147.3 L 87.9 154.0 L 83.4 160.7 L 82.8 168.0 L 81.5 177.2 L 80.2 185.1 L 77.7 191.7 L 75.1 197.5 L 70.6 200.1 L 66.1 204.0 Z';
+
+/** Same projection as the outline: x = lon, y = mercator(lat), fitted to the box. */
+const FIT = { minx: 68.15, maxx: 97.4, miny: 8.08, maxy: 35.5 };
+function project(lon: number, lat: number) {
+  const merc = (l: number) =>
+    (180 / Math.PI) * Math.log(Math.tan(Math.PI / 4 + (l * Math.PI) / 360));
+  const [W, H, pad] = [200, 220, 6];
+  const x0 = FIT.minx;
+  const x1 = FIT.maxx;
+  const y0 = merc(FIT.miny);
+  const y1 = merc(FIT.maxy);
+  const s = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (y1 - y0));
+  const ox = pad + (W - 2 * pad - (x1 - x0) * s) / 2;
+  const oy = pad + (H - 2 * pad - (y1 - y0) * s) / 2;
+  return { x: ox + (lon - x0) * s, y: oy + (y1 - merc(lat)) * s };
+}
+
+const pins = offices.map((o) => ({ ...o, ...project(o.lon, o.lat) }));
+const primary = offices[0];
+
+/**
+ * The zoom origin, derived from the same projection that places the pin, so
+ * the two can never drift apart.
+ *
+ * It has to be a PERCENTAGE. `transform-origin` on the outer <svg> resolves
+ * against the rendered CSS box, not the viewBox — writing the pin's viewBox
+ * coordinates there puts the origin far below a 130px-tall element and throws
+ * the zoom off the map entirely. Percentages are identical in both coordinate
+ * systems here, because the viewBox maps 1:1 onto the box.
+ */
+const focus = pins[0] ?? { x: 100, y: 110 };
+const originX = (focus.x / 200) * 100;
+const originY = (focus.y / 220) * 100;
+const mapVars = [
+  `--of-ox:${originX.toFixed(2)}%`,
+  `--of-oy:${originY.toFixed(2)}%`,
+  // Move the focused point to the centre of the window once scaled.
+  `--of-tx:${(50 - originX).toFixed(2)}%`,
+  `--of-ty:${(50 - originY).toFixed(2)}%`,
+  // The pin counter-scales about itself; a <g> with transform-box: view-box
+  // does take viewBox units, unlike the outer <svg> above.
+  `--of-px:${focus.x.toFixed(2)}px`,
+  `--of-py:${focus.y.toFixed(2)}px`,
+].join(';');
+const email = `${contact.emailUser}@${contact.emailDomain}`;
+---
+
+<div class="offices" data-ab>
+  <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Offices</h2>
+
+  <div class="of-map-wrap" style={mapVars}>
+    <button
+      class="of-win"
+      type="button"
+      aria-expanded="false"
+      aria-label={`Zoom the map to ${primary?.region}, where our office is`}
+    >
+      <svg
+        class="of-map"
+        viewBox="0 0 200 220"
+        role="img"
+        aria-label={`Map of India; our office is in ${primary?.locality}, ${primary?.region}`}
+      >
+        <path class="of-outline" d={INDIA} />
+        <path class="of-region" d={KERALA} />
+        {
+          pins.map((p) => (
+            <g class="of-pin">
+              <circle class="of-ping" cx={p.x} cy={p.y} r="4" />
+              <path
+                class="of-drop"
+                d={`M ${p.x} ${p.y} c -3.6 -4.4 -5.6 -7 -5.6 -9.6 a 5.6 5.6 0 1 1 11.2 0 c 0 2.6 -2 5.2 -5.6 9.6 z`}
+              />
+              <circle class="of-hole" cx={p.x} cy={p.y - 9.6} r="2" />
+            </g>
+          ))
+        }
+      </svg>
+      <span class="of-cap">
+        <span class="of-c1">{primary?.country}</span>
+        <span class="of-c2">{primary?.locality}, {primary?.region}</span>
+      </span>
+    </button>
+  </div>
+
+  {
+    offices.map((o) => (
+      <p class="of-row ab" style="--d:1150ms">
+        <Icon name="pin" class="text-brand-400 mt-0.5 size-4 shrink-0" />
+        <span class="text-brand-200">
+          <b class="block font-medium text-white">{o.label}</b>
+          {o.street},<br />
+          {o.locality}, {o.region} {o.postalCode}
+        </span>
+      </p>
+    ))
+  }
+
+  {/* Behind a chip so the column stays tidy; shown permanently on /contact.
+      The panel stays mounted and toggles `data-open`, so the unfold plays in
+      both directions rather than only on the way in. */}
+  {
+    primary && (
+      <div class="of-qr ab" style="--d:1200ms" data-qr-wrap>
+        <button type="button" class="of-qr-chip" aria-expanded="false" data-qr-chip>
+          <Icon name="copy" class="size-3.5" />
+          <span data-qr-label>Scan for directions</span>
+        </button>
+
+        <div class="of-qr-pop" data-qr-pop data-open="false" aria-hidden="true">
+          <DirectionsQr office={primary} size={112} />
+        </div>
+
+        {/* Touch fallback: a QR is for scanning with a phone, which is useless
+            on the device already in hand — and :hover does not exist there. */}
+        <a
+          href={directionsUrl(primary)}
+          target="_blank"
+          rel="noopener"
+          class="of-qr-chip"
+          hidden
+          data-qr-maps
+        >
+          <Icon name="pin" class="size-3.5" />
+          Open in Maps
+        </a>
+      </div>
+    )
+  }
+
+  <p class="of-row of-cp ab" style="--d:1250ms" data-copy={contact.phone} data-contact-copy="phone">
+    <Icon name="phone" class="text-brand-400 mt-0.5 size-4 shrink-0" />
+    <a href={contact.phoneHref} class="text-brand-200" data-contact-tel><span data-contact-phone>{contact.phone}</span></a>
+    <button type="button" class="of-copy" aria-label="Copy phone number">
+      <Icon name="copy" class="of-ci size-3.5" />
+      <Icon name="check" draw class="of-co size-3.5" />
+    </button>
+  </p>
+
+  <p class="of-row of-cp ab" style="--d:1350ms" data-copy={email} data-contact-copy="email">
+    <Icon name="mail" class="text-brand-400 mt-0.5 size-4 shrink-0" />
+    <a href={`mailto:${email}`} class="text-brand-200" data-contact-mailto>
+      <span data-contact-email>{email}</span>
+    </a>
+    <button type="button" class="of-copy" aria-label="Copy email address">
+      <Icon name="copy" class="of-ci size-3.5" />
+      <Icon name="check" draw class="of-co size-3.5" />
+    </button>
+  </p>
+</div>
+
+<script>
+  function initOffices() {
+    // No hover on touch, so tapping the map toggles the zoom.
+    document.querySelectorAll<HTMLElement>('.offices .of-win').forEach((win) => {
+      if (win.dataset.wired) return;
+      win.dataset.wired = '1';
+      win.addEventListener('click', () => {
+        const on = !win.classList.contains('zoom');
+        win.classList.toggle('zoom', on);
+        win.setAttribute('aria-expanded', String(on));
+      });
+    });
+
+    document.querySelectorAll<HTMLElement>('.offices .of-cp').forEach((row) => {
+      const btn = row.querySelector<HTMLButtonElement>('.of-copy');
+      const value = row.dataset.copy;
+      if (!btn || !value || row.dataset.wired) return;
+      row.dataset.wired = '1';
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(value);
+        } catch {
+          // Clipboard API needs a secure context; fall back so the button still
+          // works on http:// and in older browsers.
+          const ta = document.createElement('textarea');
+          ta.value = value;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.append(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        row.classList.add('is-copied');
+        setTimeout(() => row.classList.remove('is-copied'), 1600);
+      });
+    });
+  }
+
+  /**
+   * The QR chip. Hover reveals on mouse devices with the same 80/180ms intent
+   * the reference uses; Escape and outside-click dismiss. The panel stays
+   * mounted and toggles `data-open`, so the unfold plays closing as well as
+   * opening — animating an element in and out of the DOM only ever plays one
+   * direction.
+   */
+  function initQrChip() {
+    document.querySelectorAll<HTMLElement>('[data-qr-wrap]').forEach((wrap) => {
+      if (wrap.dataset.wired) return;
+      wrap.dataset.wired = '1';
+
+      const chip = wrap.querySelector<HTMLButtonElement>('[data-qr-chip]');
+      const pop = wrap.querySelector<HTMLElement>('[data-qr-pop]');
+      const maps = wrap.querySelector<HTMLElement>('[data-qr-maps]');
+      if (!chip || !pop) return;
+
+      // On touch there is no hover, and no second device to scan with: the QR
+      // is useless on the phone already in your hand. Swap in a maps link.
+      if (!matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        chip.hidden = true;
+        pop.hidden = true;
+        if (maps) maps.hidden = false;
+        return;
+      }
+
+      let timer: ReturnType<typeof setTimeout>;
+      const set = (open: boolean) => {
+        pop.dataset.open = String(open);
+        pop.setAttribute('aria-hidden', String(!open));
+        chip.setAttribute('aria-expanded', String(open));
+      };
+
+      wrap.addEventListener('pointerenter', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => set(true), 80);
+      });
+      wrap.addEventListener('pointerleave', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => set(false), 180);
+      });
+      chip.addEventListener('click', () => set(pop.dataset.open !== 'true'));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') set(false);
+      });
+      document.addEventListener('mousedown', (e) => {
+        if (!wrap.contains(e.target as Node)) set(false);
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initQrChip);
+  if (document.readyState !== 'loading') initQrChip();
+  else document.addEventListener('DOMContentLoaded', initQrChip, { once: true });
+
+  document.addEventListener('astro:page-load', initOffices);
+  if (document.readyState !== 'loading') initOffices();
+  else document.addEventListener('DOMContentLoaded', initOffices, { once: true });
+</script>
+
+<style>
+  .of-map-wrap {
+    margin: 1rem 0;
+  }
+  .of-win {
+    position: relative;
+    display: block;
+    width: 118px;
+    height: 130px;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: var(--radius-card);
+    background: rgb(255 255 255 / 0.03);
+    cursor: zoom-in;
+    transition:
+      border-color 0.35s ease,
+      background 0.35s ease;
+  }
+  .of-win:hover,
+  .of-win.zoom,
+  .of-win:focus-visible {
+    border-color: color-mix(in srgb, var(--color-brand-400) 45%, transparent);
+    background: color-mix(in srgb, var(--color-brand-500) 8%, transparent);
+  }
+  .of-win.zoom {
+    cursor: zoom-out;
+  }
+
+  .of-map {
+    display: block;
+    width: 118px;
+    /* Origin sits exactly on the pin, so the zoom pushes in on the office.
+       Percentage, not viewBox px: see the note in the frontmatter. */
+    transform-origin: var(--of-ox) var(--of-oy);
+    transition: transform 0.6s cubic-bezier(0.4, 0.05, 0.2, 1);
+  }
+  .of-win:hover .of-map,
+  .of-win.zoom .of-map,
+  .of-win:focus-visible .of-map {
+    transform: translate(var(--of-tx), var(--of-ty)) scale(3.4);
+  }
+
+  .of-outline {
+    fill: color-mix(in srgb, var(--color-brand-500) 7%, transparent);
+    stroke: color-mix(in srgb, var(--color-brand-300) 55%, transparent);
+    stroke-width: 1.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .of-region {
+    fill: color-mix(in srgb, var(--color-brand-500) 20%, transparent);
+    stroke: var(--color-brand-400);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .of-win:hover .of-region,
+  .of-win.zoom .of-region,
+  .of-win:focus-visible .of-region {
+    opacity: 1;
+  }
+
+  /* The pin rides the zoom, so counter-scale it to keep one visual size. */
+  .of-pin {
+    transform-box: view-box;
+    transform-origin: var(--of-px) var(--of-py);
+    transition: transform 0.6s cubic-bezier(0.4, 0.05, 0.2, 1);
+  }
+  .of-win:hover .of-pin,
+  .of-win.zoom .of-pin,
+  .of-win:focus-visible .of-pin {
+    transform: scale(0.295);
+  }
+  .of-drop {
+    fill: var(--color-brand-400);
+    stroke: var(--color-brand-950);
+    stroke-width: 0.8;
+  }
+  .of-hole {
+    fill: var(--color-brand-950);
+  }
+  .of-ping {
+    fill: none;
+    stroke: var(--color-brand-400);
+    stroke-width: 1.6;
+    opacity: 0;
+  }
+
+  /* Caption swaps as you zoom in. */
+  .of-cap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: block;
+    height: 22px;
+  }
+  .of-cap span {
+    position: absolute;
+    left: 9px;
+    bottom: 6px;
+    white-space: nowrap;
+    font-size: 0.625rem;
+    color: var(--color-brand-200);
+    transition:
+      opacity 0.3s ease,
+      transform 0.3s ease;
+  }
+  .of-c2 {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  .of-win:hover .of-c1,
+  .of-win.zoom .of-c1,
+  .of-win:focus-visible .of-c1 {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  .of-win:hover .of-c2,
+  .of-win.zoom .of-c2,
+  .of-win:focus-visible .of-c2 {
+    opacity: 1;
+    transform: none;
+  }
+
+  .of-row {
+    display: flex;
+    gap: 0.625rem;
+    margin: 0 0 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+  .of-cp {
+    position: relative;
+  }
+  .of-copy {
+    display: grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.125rem;
+    border-radius: 4px;
+    color: var(--color-brand-300);
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.25s ease,
+      color 0.25s ease;
+  }
+  .of-cp:hover .of-copy,
+  .of-copy:focus-visible {
+    opacity: 1;
+  }
+  .of-copy:hover {
+    color: #fff;
+  }
+  .of-copy :global(.of-co) {
+    position: absolute;
+    color: var(--color-teal-500);
+    opacity: 0;
+  }
+  .of-copy :global(.of-co path) {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .is-copied .of-copy {
+    opacity: 1;
+  }
+  .is-copied :global(.of-ci) {
+    opacity: 0;
+  }
+  .is-copied :global(.of-co) {
+    opacity: 1;
+  }
+  .is-copied :global(.of-co path) {
+    animation: of-tick 0.4s cubic-bezier(0.55, 0, 0.35, 1) forwards;
+  }
+  @keyframes of-tick {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  /* --- entrance: the outline draws, then the pin drops and pings twice --- */
+  :global(html.ab-js) .of-pin {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.4);
+  }
+  .offices.in .of-outline {
+    animation: of-draw 1.5s cubic-bezier(0.5, 0, 0.3, 1) 0.15s forwards;
+  }
+  @keyframes of-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .offices.in .of-pin {
+    animation: of-drop 0.55s cubic-bezier(0.34, 1.5, 0.64, 1) 1.05s both;
+  }
+  @keyframes of-drop {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .offices.in .of-ping {
+    animation: of-ping 1.6s ease-out 1.5s 2;
+  }
+  @keyframes of-ping {
+    0% {
+      opacity: 0.75;
+      r: 3;
+    }
+    100% {
+      opacity: 0;
+      r: 13;
+    }
+  }
+  /* Without the engine the outline must simply be drawn. */
+  :global(html:not(.ab-js)) .of-outline {
+    stroke-dashoffset: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.ab-js) .of-pin {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+    .of-outline {
+      stroke-dashoffset: 0;
+      animation: none;
+    }
+    .offices.in .of-ping {
+      animation: none;
+    }
+    .of-map,
+    .of-pin,
+    .of-region,
+    .of-cap span,
+    .of-copy {
+      transition: none;
+    }
+    .is-copied :global(.of-co path) {
+      stroke-dashoffset: 0;
+      animation: none;
+    }
+  }
+</style>
+
+<style>
+</style>
+
+<style>
+  .of-qr {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.875rem;
+  }
+  .of-qr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3125rem 0.6875rem;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    border-radius: 99px;
+    background: rgb(255 255 255 / 0.04);
+    color: var(--color-brand-200);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease,
+      color 0.25s ease;
+  }
+  .of-qr-chip:hover,
+  .of-qr-chip[aria-expanded='true'] {
+    border-color: transparent;
+    background: var(--color-brand-600);
+    color: #fff;
+  }
+  .of-qr-chip[hidden] {
+    display: none;
+  }
+
+  /* Above the chip, not below: the footer sits at the page's end, so a
+     downward popover would clip against the viewport bottom. */
+  .of-qr-pop {
+    position: absolute;
+    bottom: calc(100% + 0.7rem);
+    left: 0;
+    z-index: 40;
+    padding: 0.25rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: 0 16px 34px rgb(15 30 46 / 0.28);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px) scale(0.88);
+    transform-origin: bottom left;
+    transition:
+      opacity 0.2s ease,
+      transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1),
+      visibility 0.28s;
+  }
+  .of-qr-pop[data-open='true'] {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+  .of-qr-pop[hidden] {
+    display: none;
+  }
+
+  /* Caret welding the panel to the chip — a rotated square poking out of the
+     bottom edge, borders matching the panel ring so it reads as one shape. */
+  .of-qr-pop::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 24px;
+    width: 11px;
+    height: 11px;
+    background: #fff;
+    border-right: 1px solid var(--color-brand-100);
+    border-bottom: 1px solid var(--color-brand-100);
+    transform: rotate(45deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .of-qr-chip,
+    .of-qr-pop {
+      transition: none;
+    }
+    .of-qr-pop {
+      transform: none;
+    }
+  }
+</style>

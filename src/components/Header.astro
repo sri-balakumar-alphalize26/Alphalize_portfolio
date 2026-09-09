@@ -22,16 +22,17 @@ const isActive = (href: string) =>
   <div class="container-page flex h-9 items-center justify-between text-xs">
     <p>ERP, business intelligence and custom software — Kollam, Kerala</p>
     <div class="flex items-center gap-6">
-      <a class="flex items-center gap-1.5 hover:text-white" href={contact.phoneHref}>
+      <a class="flex items-center gap-1.5 hover:text-white" href={contact.phoneHref} data-contact-tel>
         <Icon name="phone" class="size-3.5" />
-        {contact.phone}
+        <span data-contact-phone>{contact.phone}</span>
       </a>
       <a
         class="flex items-center gap-1.5 hover:text-white"
         href={`mailto:${contact.emailUser}@${contact.emailDomain}`}
+        data-contact-mailto
       >
         <Icon name="mail" class="size-3.5" />
-        {contact.emailUser}@{contact.emailDomain}
+        <span data-contact-email>{contact.emailUser}@{contact.emailDomain}</span>
       </a>
     </div>
   </div>
@@ -200,16 +201,17 @@ const isActive = (href: string) =>
         Get a consultation
       </a>
       <div class="mt-4 space-y-2 border-t border-brand-100 pt-4 text-sm text-muted">
-        <a class="flex items-center gap-2" href={contact.phoneHref}>
+        <a class="flex items-center gap-2" href={contact.phoneHref} data-contact-tel>
           <Icon name="phone" class="size-4 text-brand-600" />
-          {contact.phone}
+          <span data-contact-phone>{contact.phone}</span>
         </a>
         <a
           class="flex items-center gap-2"
           href={`mailto:${contact.emailUser}@${contact.emailDomain}`}
+          data-contact-mailto
         >
           <Icon name="mail" class="size-4 text-brand-600" />
-          {contact.emailUser}@{contact.emailDomain}
+          <span data-contact-email>{contact.emailUser}@{contact.emailDomain}</span>
         </a>
       </div>
     </nav>

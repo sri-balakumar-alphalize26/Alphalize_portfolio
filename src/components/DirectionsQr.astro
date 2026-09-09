@@ -1,0 +1,87 @@
+---
+import QRCode from 'qrcode';
+import type { Office } from '@/config/site';
+import { directionsUrl } from '@/lib/maps';
+
+/**
+ * An office's Google Maps directions link, as a scannable QR code.
+ *
+ * The code is wrapped in the same link it encodes: a visitor on a phone scans
+ * it, a visitor on a desktop (who cannot scan their own screen) clicks it, and
+ * both land on the same route. That idea is taken from the 369 AddressQr.
+ *
+ * Two differences from that version. It points at `maps/dir/` rather than
+ * `maps/search/`, so Maps opens already routing instead of just showing a pin.
+ * And the SVG is generated in this frontmatter at build time, so `qrcode` never
+ * reaches the browser — 369 needs a client component only because it is React.
+ */
+interface Props {
+  office: Office;
+  size?: number;
+  class?: string;
+}
+
+const { office, size = 116, class: className } = Astro.props;
+
+const url = directionsUrl(office);
+const title = `Directions to Alphalize, ${office.locality}`;
+
+const svg = await QRCode.toString(url, {
+  type: 'svg',
+  // M tolerates a scuffed print or an off-angle camera without inflating the
+  // module count the way H would.
+  errorCorrectionLevel: 'M',
+  // The spec's 4-module quiet zone, halved — the padding below makes up the
+  // rest, and scanners still lock on.
+  margin: 2,
+  color: { dark: '#062f56', light: '#ffffff' },
+});
+---
+
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  title={title}
+  aria-label={title}
+  class:list={['dq', className]}
+  style={`--dq-size:${size}px`}
+>
+  <Fragment set:html={svg} />
+</a>
+
+<style>
+  .dq {
+    display: inline-flex;
+    flex: none;
+    padding: 0.5rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .dq:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-brand-400);
+    box-shadow: var(--shadow-lift);
+  }
+  /* The generated SVG carries its own viewBox; size it here so one component
+     serves the small footer code and the larger contact-page one. */
+  .dq :global(svg) {
+    display: block;
+    width: var(--dq-size);
+    height: var(--dq-size);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dq {
+      transition: none;
+    }
+    .dq:hover {
+      transform: none;
+    }
+  }
+</style>

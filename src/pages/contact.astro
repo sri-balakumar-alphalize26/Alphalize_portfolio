@@ -2,6 +2,7 @@
 import { env } from 'cloudflare:workers';
 import AboutAnim from '@/components/AboutAnim.astro';
 import ContactForm from '@/components/ContactForm.astro';
+import DirectionsQr from '@/components/DirectionsQr.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import WhatsAppManage from '@/components/WhatsAppManage.astro';
@@ -137,6 +138,21 @@ const methods = [
                   </p>
                 </div>
               ))
+            }
+
+            {/* Shown permanently here, unlike the footer where it sits behind a
+                chip: this is the page someone opens when they want to find us. */}
+            {
+              offices[0] && (
+                <div class="ct-qr">
+                  <DirectionsQr office={offices[0]} size={96} />
+                  <p class="text-muted">
+                    <b class="text-ink">Scan for directions</b>
+                    Opens Google Maps already routing to the office. On a
+                    computer, click it instead.
+                  </p>
+                </div>
+              )
             }
           </div>
         </div>
@@ -406,6 +422,25 @@ const methods = [
       opacity: 0;
       transform: translateY(-50%) translateX(6px);
     }
+  }
+
+  .ct-qr {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin-top: 0.875rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid var(--color-brand-100);
+  }
+  .ct-qr p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+  .ct-qr b {
+    display: block;
+    margin-bottom: 2px;
+    font-weight: 600;
   }
 
   /* --- plain blocks --- */

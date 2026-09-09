@@ -1,4 +1,6 @@
 ---
+import { env } from 'cloudflare:workers';
+import { readContact, waNumber } from '@/lib/contact-settings';
 import ManageBar from './ManageBar.astro';
 
 /**
@@ -13,9 +15,10 @@ import ManageBar from './ManageBar.astro';
  * is nothing for this script to rewrite. It only handles the compose button and
  * the manage panel.
  */
+const number = waNumber(await readContact(env));
 ---
 
-<div data-wa-root>
+<div data-wa-root data-number={number}>
   <ManageBar scope="Contact detail changes">
     <div class="wa-set">
       <p class="wa-set-h">Contact details</p>

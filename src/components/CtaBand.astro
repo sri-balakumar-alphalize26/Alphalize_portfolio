@@ -48,9 +48,9 @@ const {
         Start a conversation
         <Icon name="arrow-right" class="size-4" />
       </a>
-      <a href={contact.phoneHref} class="btn btn-outline cta-call text-white">
+      <a href={contact.phoneHref} class="btn btn-outline cta-call text-white" data-contact-tel>
         <Icon name="phone" class="size-4" />
-        {contact.phone}
+        <span data-contact-phone>{contact.phone}</span>
       </a>
     </div>
   </Reveal>

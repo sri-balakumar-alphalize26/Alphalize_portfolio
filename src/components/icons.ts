@@ -13,6 +13,15 @@ export const iconPaths = {
     '<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/>',
   smartphone: '<rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/>',
   megaphone: '<path d="m3 11 18-6v14l-18-6v-2Z"/><path d="M7 12.5V19a2 2 0 0 0 4 0v-5"/>',
+  // Media controls for the award clip. play/pause are filled: at 24px a
+  // stroked triangle reads as an outline rather than a button.
+  play: '<path d="M7 4.5v15l13-7.5-13-7.5Z"/>',
+  pause:
+    '<rect x="6.5" y="4.5" width="4" height="15" rx="1"/><rect x="13.5" y="4.5" width="4" height="15" rx="1"/>',
+  'volume-on':
+    '<path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>',
+  'volume-off':
+    '<path d="M11 5 6.5 9H3v6h3.5L11 19V5Z"/><path d="m16 9.5 5 5"/><path d="m21 9.5-5 5"/>',
   graduation:
     '<path d="M22 9 12 5 2 9l10 4 10-4Z"/><path d="M6 11v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>',
   award: '<circle cx="12" cy="9" r="6"/><path d="m9 14.5-1.5 7L12 19l4.5 2.5-1.5-7"/>',
@@ -81,4 +90,12 @@ export const iconPaths = {
 export type IconName = keyof typeof iconPaths;
 
 /** Brand marks are solid fills; everything else is a line icon. */
-export const filledIcons: readonly IconName[] = ['linkedin', 'facebook', 'x', 'instagram', 'whatsapp'];
+export const filledIcons: readonly IconName[] = [
+  'linkedin',
+  'facebook',
+  'x',
+  'instagram',
+  'whatsapp',
+  'play',
+  'pause',
+];

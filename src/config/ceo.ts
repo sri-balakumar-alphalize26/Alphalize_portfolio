@@ -1,6 +1,7 @@
 import portrait from '@/assets/ceo/portrait.jpg';
-import moment from '@/assets/ceo/moment.jpg';
-import trophy from '@/assets/ceo/award-trophy.jpg';
+import trophyImg from '@/assets/ceo/award-trophy.jpg';
+import handshakeImg from '@/assets/ceo/handshake.jpg';
+import stageImg from '@/assets/ceo/stage.jpg';
 
 /**
  * The Managing Director's page (/ceo).
@@ -32,25 +33,23 @@ export const ceo = {
     title: 'Robotics Service Excellence Award',
     body: 'Presented to Shan Sahib at BizConnect 2026 as part of the Insight Kerala Business Awards 2026 by Business Insight magazine — recognition for dependable robotics deployments and the long-term support that keeps them running.',
     /**
-     * Each tile carries its photo's real aspect ratio, so the frame matches the
-     * picture and neither is cropped or letterboxed. `shine` is the sweep across
-     * the trophy; the second photo is a room full of people and reads better
-     * without it.
+     * The two dealt cards, then the clip. `trophy` is the tall slot and
+     * `handshake` the wide one, which sets the row height — its 1050x693 is
+     * exactly the 350/231 the layout declares. `stage` is a 16:9 still from
+     * the presentation, so it is the clip's poster rather than a third card.
      */
-    images: [
-      {
-        src: trophy,
-        alt: 'The Robotics Service Excellence Award trophy',
-        ratio: '800 / 1200',
-        shine: true,
-      },
-      {
-        src: moment,
-        alt: 'Shan Sahib welcoming guests at a company opening',
-        ratio: '1600 / 1029',
-        shine: false,
-      },
-    ],
+    trophy: {
+      src: trophyImg,
+      alt: 'The Robotics Service Excellence Award trophy',
+    },
+    handshake: {
+      src: handshakeImg,
+      alt: 'Shan Sahib receiving the award at BizConnect 2026',
+    },
+    stage: {
+      src: stageImg,
+      alt: 'Award presentation on stage at BizConnect 2026',
+    },
     videoTitle: 'The presentation',
     videoCaption: 'Receiving the award at BizConnect 2026.',
     /** In public/ rather than src/assets: astro:assets does not process video. */

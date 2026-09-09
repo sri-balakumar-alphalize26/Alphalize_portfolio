@@ -1,0 +1,451 @@
+---
+import { Image, getImage } from 'astro:assets';
+import AmbientVideo from './AmbientVideo.astro';
+import Icon from './Icon.astro';
+import { ceo } from '@/config/ceo';
+
+/**
+ * Award block — kicker, heading, blurb, then a photo set that "deals in".
+ *
+ * Motion, once, on scroll into view via the shared [data-ab] engine:
+ *   1. the gold kicker pill and the heading unmask upward, the blurb rises
+ *   2. the two top photos are dealt onto the page — each starts rotated and
+ *      lifted with a hard shadow and settles flat, one after the other
+ *   3. a gold gleam sweeps diagonally across the trophy once it lands
+ *   4. the presentation clip unmasks left→right rather than dealing, so the big
+ *      frame reads as a reveal rather than a third card
+ *   5. the caption fades up under it
+ *
+ * Hover on a photo: it lifts, the image pushes in 3%, a gold hairline appears.
+ * Click opens it full size.
+ *
+ * Gold is a one-off here and deliberately not a site token: the palette is blue
+ * and plum, but this is an award, and gold is what an award reads as. It stays
+ * inside this component.
+ *
+ * The prototype's `stage.jpg` sits where the presentation clip goes, and is
+ * 16:9 like the clip — so it serves as the poster frame rather than as a third
+ * still, and the reveal wipes to reveal the video.
+ *
+ * Copy and photos default to src/config/ceo.ts.
+ */
+interface Props {
+  kicker?: string;
+  title?: string;
+  blurb?: string;
+  caption?: string;
+}
+
+const {
+  kicker = ceo.award.eyebrow,
+  title = ceo.award.title,
+  blurb = ceo.award.body,
+  caption = ceo.award.videoCaption,
+} = Astro.props;
+
+const { trophy, handshake, stage } = ceo.award;
+
+/**
+ * Full-size variants for the lightbox. Generated here rather than reusing the
+ * tile's `src`, which is sized for a 380px column and would open blurry.
+ */
+const [trophyFull, handshakeFull] = await Promise.all([
+  getImage({ src: trophy.src, width: 1200 }),
+  getImage({ src: handshake.src, width: 1600 }),
+]);
+
+const top = [
+  { ...trophy, cls: 'tall', full: trophyFull.src, gleam: true },
+  { ...handshake, cls: 'wide', full: handshakeFull.src, gleam: false },
+];
+---
+
+<section class="award" data-ab data-hold="120">
+  <div class="container-page aw-wrap">
+    <p class="aw-kick" style="--d:0ms"><span>{kicker}</span></p>
+    <h2 class="aw-title" style="--d:120ms"><span>{title}</span></h2>
+    <p class="aw-blurb" style="--d:260ms">{blurb}</p>
+
+    <div class="aw-row">
+      {
+        top.map((p, i) => (
+          <button
+            class:list={['aw-shot', `aw-${p.cls}`]}
+            type="button"
+            data-full={p.full}
+            data-alt={p.alt}
+            style={`--d:${420 + i * 150}ms`}
+            aria-label={`View full size: ${p.alt}`}
+          >
+            <Image
+              src={p.src}
+              alt={p.alt}
+              widths={[380, 760]}
+              sizes="(min-width: 720px) 45vw, 100vw"
+              loading="lazy"
+            />
+            {p.gleam && <span class="aw-gleam" aria-hidden="true" />}
+          </button>
+        ))
+      }
+    </div>
+
+    <p class="aw-sub" style="--d:760ms">{ceo.award.videoTitle}</p>
+
+    {/* Not a button: it holds the clip, which has its own controls. */}
+    <div class="aw-shot aw-stage" style="--d:840ms">
+      <AmbientVideo src={ceo.award.video} poster={stage.src.src} />
+    </div>
+
+    <p class="aw-cap" style="--d:1180ms">{caption}</p>
+  </div>
+</section>
+
+<dialog class="aw-lb" id="award-lb">
+  <form method="dialog" class="aw-lb-form">
+    <button class="aw-lb-x" aria-label="Close">
+      <Icon name="close" />
+    </button>
+  </form>
+  <img alt="" />
+</dialog>
+
+<script>
+  function initAwardBlock() {
+    const dlg = document.getElementById('award-lb') as HTMLDialogElement | null;
+    if (!dlg || dlg.dataset.awWired) return;
+    dlg.dataset.awWired = '1';
+    const img = dlg.querySelector('img');
+    if (!img) return;
+
+    document.querySelectorAll<HTMLButtonElement>('.award .aw-shot[data-full]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        img.src = btn.dataset.full ?? '';
+        img.alt = btn.dataset.alt ?? '';
+        dlg.showModal();
+      });
+    });
+
+    // Clicking anywhere but the picture closes it. showModal gives us Escape,
+    // the focus trap and the inert background for free.
+    dlg.addEventListener('click', (e) => {
+      const r = img.getBoundingClientRect();
+      const inside =
+        e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (!inside) dlg.close();
+    });
+  }
+
+  document.addEventListener('astro:page-load', initAwardBlock);
+  if (document.readyState !== 'loading') initAwardBlock();
+  else document.addEventListener('DOMContentLoaded', initAwardBlock, { once: true });
+</script>
+
+<style>
+  .award {
+    /* See the note in the frontmatter on why gold is local. */
+    --gold: #f5b62a;
+    --gold-ink: #9a6f05;
+    background: #fff;
+    color: var(--color-heading);
+    padding: 4.375rem 0;
+  }
+  .aw-wrap {
+    max-width: 56.25rem;
+  }
+
+  .aw-kick {
+    margin: 0 0 0.75rem;
+    overflow: hidden;
+  }
+  .aw-kick span {
+    display: inline-block;
+    padding: 5px 11px;
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--gold) 16%, transparent);
+    color: var(--gold-ink);
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .aw-title {
+    margin: 0 0 0.875rem;
+    font-size: 1.6875rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    color: var(--color-brand-800);
+    overflow: hidden;
+  }
+  .aw-title span {
+    display: inline-block;
+  }
+  .aw-blurb {
+    margin: 0 0 1.625rem;
+    max-width: 660px;
+    font-size: 0.84375rem;
+    line-height: 1.8;
+    color: var(--color-muted);
+  }
+
+  /* minmax(0,…) is required — a bare .42fr cannot shrink below the image's
+     intrinsic width, which flips the two columns. */
+  .aw-row {
+    display: grid;
+    grid-template-columns: minmax(0, 0.42fr) minmax(0, 1fr);
+    gap: 0.875rem;
+    margin-bottom: 1.875rem;
+  }
+
+  /* ---------- photos ---------- */
+  .aw-shot {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 3px 14px rgb(4 30 57 / 0.14);
+    transition:
+      transform 0.4s cubic-bezier(0.22, 0.9, 0.32, 1.15),
+      box-shadow 0.4s ease;
+  }
+  button.aw-shot {
+    cursor: zoom-in;
+  }
+  .aw-shot :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  /* The wide photo sets the row height; the trophy just fills it. */
+  .aw-wide {
+    aspect-ratio: 350 / 231;
+  }
+  /* Stretch to the row height and let the image fill it absolutely — height:100%
+     on a grid item resolves against an auto-sized area and blows up. */
+  .aw-tall {
+    align-self: stretch;
+  }
+  .aw-tall :global(img) {
+    position: absolute;
+    inset: 0;
+  }
+  .aw-stage {
+    aspect-ratio: 509 / 287;
+    margin-bottom: 0.75rem;
+  }
+  .aw-shot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 8px;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 0 rgb(245 182 42 / 0);
+    transition: box-shadow 0.35s ease;
+  }
+  button.aw-shot:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgb(4 30 57 / 0.22);
+  }
+  button.aw-shot:hover :global(img) {
+    transform: scale(1.03);
+  }
+  button.aw-shot:hover::after {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gold) 85%, transparent);
+  }
+  .aw-shot:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+  }
+
+  /* The one-off gold sweep across the trophy. */
+  .aw-gleam {
+    position: absolute;
+    top: -20%;
+    bottom: -20%;
+    left: -55%;
+    width: 38%;
+    pointer-events: none;
+    background: linear-gradient(100deg, transparent, rgb(255 236 180 / 0.85), transparent);
+    transform: skewX(-16deg);
+    opacity: 0;
+  }
+
+  .aw-sub {
+    margin: 0 0 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--color-brand-800);
+  }
+  .aw-cap {
+    margin: 0;
+    font-size: 0.71875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  /* ---------- lightbox ---------- */
+  .aw-lb {
+    /* Centred explicitly, as .mb-dialog is: Tailwind preflight zeroes margin
+       on every element, which takes away the `margin: auto` a modal <dialog>
+       centres itself with, and it pins to the top instead. `inset: 0` +
+       `margin: auto` needs `height: fit-content`, or the box stretches and
+       the centring is lost again. max-height leaves room for the close button
+       sitting above the frame. */
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    width: calc(100% - 2rem);
+    max-width: 72rem;
+    max-height: calc(100dvh - 7rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+  }
+  .aw-lb::backdrop {
+    background: rgb(8 24 44 / 0.88);
+    backdrop-filter: blur(6px);
+  }
+  .aw-lb img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    max-height: 90vh;
+    margin: 0 auto;
+    border-radius: 10px;
+    box-shadow: 0 30px 70px rgb(0 0 0 / 0.55);
+  }
+  .aw-lb-form {
+    position: absolute;
+    top: -2.75rem;
+    right: 0;
+  }
+  .aw-lb-x {
+    display: grid;
+    place-items: center;
+    width: 2.375rem;
+    height: 2.375rem;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.14);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+  .aw-lb-x:hover {
+    background: rgb(255 255 255 / 0.28);
+  }
+
+  /* ================= entrance ================= */
+  :global(html.ab-js) .aw-kick span,
+  :global(html.ab-js) .aw-title span {
+    transform: translateY(105%);
+    transition: transform 0.8s cubic-bezier(0.22, 0.9, 0.32, 1.05)
+      calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+  :global(html.ab-js) .aw-blurb,
+  :global(html.ab-js) .aw-sub,
+  :global(html.ab-js) .aw-cap {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) calc(var(--b, 0ms) + var(--d, 0ms)),
+      transform 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+
+  /* Dealt cards: lifted, rotated, hard shadow → flat. */
+  :global(html.ab-js) .aw-row .aw-shot {
+    opacity: 0;
+    transform: translateY(30px) rotate(var(--rot, -2.4deg)) scale(0.94);
+    box-shadow: 0 22px 40px rgb(4 30 57 / 0.32);
+    transition:
+      opacity 0.5s ease calc(var(--b, 0ms) + var(--d, 0ms)),
+      transform 0.8s cubic-bezier(0.22, 0.9, 0.32, 1.12) calc(var(--b, 0ms) + var(--d, 0ms)),
+      box-shadow 0.8s ease calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+  :global(html.ab-js) .aw-row .aw-shot:nth-child(2) {
+    --rot: 2.2deg;
+  }
+
+  /* The big one is a wipe, not a card. */
+  :global(html.ab-js) .aw-stage {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.95s cubic-bezier(0.55, 0, 0.25, 1) calc(var(--b, 0ms) + var(--d, 0ms));
+  }
+
+  /* --- landed --- */
+  :global(html.ab-js) .award.in .aw-kick span,
+  :global(html.ab-js) .award.in .aw-title span {
+    transform: none;
+  }
+  :global(html.ab-js) .award.in .aw-blurb,
+  :global(html.ab-js) .award.in .aw-sub,
+  :global(html.ab-js) .award.in .aw-cap {
+    opacity: 1;
+    transform: none;
+  }
+  :global(html.ab-js) .award.in .aw-row .aw-shot {
+    opacity: 1;
+    transform: none;
+    box-shadow: 0 3px 14px rgb(4 30 57 / 0.14);
+  }
+  :global(html.ab-js) .award.in .aw-stage {
+    clip-path: inset(0 0 0 0);
+  }
+  :global(html.ab-js) .award.in .aw-gleam {
+    animation: aw-gleam 1s cubic-bezier(0.4, 0, 0.3, 1) 1120ms;
+  }
+  @keyframes aw-gleam {
+    from {
+      opacity: 1;
+      left: -55%;
+    }
+    to {
+      opacity: 1;
+      left: 125%;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .aw-row {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+    .aw-tall {
+      aspect-ratio: 16 / 11;
+    }
+    .aw-tall :global(img) {
+      position: static;
+    }
+    .aw-title {
+      font-size: 1.375rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.ab-js) .aw-kick span,
+    :global(html.ab-js) .aw-title span,
+    :global(html.ab-js) .aw-blurb,
+    :global(html.ab-js) .aw-sub,
+    :global(html.ab-js) .aw-cap,
+    :global(html.ab-js) .aw-row .aw-shot {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    :global(html.ab-js) .aw-stage {
+      clip-path: none;
+      transition: none;
+    }
+    .aw-gleam {
+      display: none;
+    }
+  }
+</style>

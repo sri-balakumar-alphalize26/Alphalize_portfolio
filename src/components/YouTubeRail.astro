@@ -3,7 +3,24 @@ import type { Talk } from '@/config/ceo';
 import Icon from './Icon.astro';
 
 /**
- * A row of YouTube talks, as click-to-load facades.
+ * A row of YouTube talks that drifts right→left, as click-to-load facades.
+ *
+ * Motion is the site's existing `.marquee` / `.marquee-track` pair from
+ * global.css — the same one the partner strip uses, so there is one marquee
+ * implementation rather than two. It pauses on hover and on focus-within, which
+ * matters far more here than for logos: these are links, and a rail that kept
+ * moving would be unclickable.
+ *
+ * Hovering the rail blurs and dims every card and restores the hovered one,
+ * lifted — the 369 spotlight, and pure CSS, with no per-card state.
+ *
+ * Clicking opens a lightbox rather than playing in the card. 369's note on why
+ * is the whole argument: the cards are ~19rem and moving, which is no way to
+ * watch a talk.
+ *
+ * The list is duplicated once so the -50% translate loops seamlessly. The
+ * second copy is `aria-hidden` and out of the tab order — it is the same four
+ * videos, and a screen reader announcing eight would be wrong.
  *
  * Embedded players would pull YouTube's script and hand every visitor's IP to
  * Google before anyone pressed play. This site inlines every brand mark
@@ -15,7 +32,7 @@ import Icon from './Icon.astro';
  * URL — an image request, not a player, and the only way to show the real frame
  * without checking a file per video into the repo.
  *
- * With JS off the card stays a plain link to the video, which is why it is an
+ * With JS off each card stays a plain link to the video, which is why it is an
  * <a> to youtube.com rather than a button.
  */
 interface Props {
@@ -24,40 +41,53 @@ interface Props {
 }
 
 const { talks, channel } = Astro.props;
+
+/** Duplicated once so the -50% translate loops seamlessly. */
+const track = [...talks, ...talks];
 ---
 
-<ul class="yt-rail">
-  {
-    talks.map((t, i) => (
-      <li class="ab ab-pop" style={`--d:${i * 90}ms`}>
-        <a
-          class="yt-card"
-          href={`https://www.youtube.com/watch?v=${t.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          data-yt={t.id}
-          data-yt-title={t.title}
-        >
-          <span class="yt-thumb">
-            <img
-              src={`https://i.ytimg.com/vi/${t.id}/hqdefault.jpg`}
-              alt=""
-              width="480"
-              height="360"
-              loading="lazy"
-              decoding="async"
-            />
-            <span class="yt-play" aria-hidden="true" />
-          </span>
-          <span class="yt-meta">
-            <span class="yt-title">{t.title}</span>
-            <span class="yt-note">{t.note}</span>
-          </span>
-        </a>
-      </li>
-    ))
-  }
-</ul>
+<div
+  class="marquee yt-marquee relative overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]"
+>
+  <ul class="marquee-track yt-rail">
+    {
+      track.map((t, i) => {
+        const clone = i >= talks.length;
+        return (
+          <li class="yt-item" aria-hidden={clone ? 'true' : undefined}>
+            <a
+              class="yt-card"
+              href={`https://www.youtube.com/watch?v=${t.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              tabindex={clone ? -1 : undefined}
+              data-yt={t.id}
+              data-yt-title={t.title}
+              data-yt-note={t.note}
+            >
+              <span class="yt-thumb">
+                <img
+                  src={`https://i.ytimg.com/vi/${t.id}/hqdefault.jpg`}
+                  alt=""
+                  width="480"
+                  height="360"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <span class="yt-scrim" aria-hidden="true" />
+                <span class="yt-play" aria-hidden="true" />
+              </span>
+              <span class="yt-meta">
+                <span class="yt-title">{t.title}</span>
+                <span class="yt-note">{t.note}</span>
+              </span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ul>
+</div>
 
 <p class="yt-channel">
   <a href={channel} target="_blank" rel="noopener noreferrer">
@@ -66,29 +96,57 @@ const { talks, channel } = Astro.props;
   </a>
 </p>
 
+<dialog class="yt-lb" id="yt-lb" aria-label="Video">
+  <form method="dialog" class="yt-lb-form">
+    <button class="yt-lb-x" aria-label="Close">
+      <Icon name="close" />
+    </button>
+  </form>
+  <div class="yt-lb-frame" data-yt-frame></div>
+  <p class="yt-lb-title" data-yt-lb-title></p>
+  <p class="yt-lb-note" data-yt-lb-note></p>
+</dialog>
+
 <script>
   function initYouTubeRail() {
-    document.querySelectorAll<HTMLAnchorElement>('[data-yt]').forEach((card) => {
-      if (card.dataset.ytWired) return;
-      card.dataset.ytWired = '1';
+    const dlg = document.getElementById('yt-lb') as HTMLDialogElement | null;
+    if (!dlg || dlg.dataset.ytWired) return;
+    dlg.dataset.ytWired = '1';
 
+    const frame = dlg.querySelector<HTMLElement>('[data-yt-frame]');
+    const title = dlg.querySelector<HTMLElement>('[data-yt-lb-title]');
+    const note = dlg.querySelector<HTMLElement>('[data-yt-lb-note]');
+    if (!frame || !title || !note) return;
+
+    document.querySelectorAll<HTMLAnchorElement>('[data-yt]').forEach((card) => {
       card.addEventListener('click', (e) => {
         // Let modified clicks and middle-clicks open YouTube as a normal link.
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         e.preventDefault();
 
-        const thumb = card.querySelector('.yt-thumb');
-        if (!thumb || thumb.querySelector('iframe')) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://www.youtube-nocookie.com/embed/${card.dataset.yt}?autoplay=1&rel=0`;
+        iframe.title = card.dataset.ytTitle ?? 'Video';
+        iframe.allow =
+          'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        frame.replaceChildren(iframe);
 
-        const frame = document.createElement('iframe');
-        frame.src = `https://www.youtube-nocookie.com/embed/${card.dataset.yt}?autoplay=1&rel=0`;
-        frame.title = card.dataset.ytTitle ?? 'Video';
-        frame.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
-        frame.allowFullscreen = true;
-        frame.loading = 'lazy';
-        // appendChild, not append: the Workers types shadow the DOM append().
-        thumb.appendChild(frame);
+        title.textContent = card.dataset.ytTitle ?? '';
+        note.textContent = card.dataset.ytNote ?? '';
+        dlg.setAttribute('aria-label', card.dataset.ytTitle ?? 'Video');
+        dlg.showModal();
       });
+    });
+
+    // The player must be DESTROYED, not hidden: a closed dialog holding a live
+    // iframe keeps playing, and the audio carries on with nothing on screen.
+    dlg.addEventListener('close', () => frame.replaceChildren());
+
+    // Clicking the backdrop closes it. showModal gives us Escape, the focus
+    // trap and the inert background for free.
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) dlg.close();
     });
   }
 
@@ -99,29 +157,41 @@ const { talks, channel } = Astro.props;
 
 <style>
   .yt-rail {
-    display: grid;
+    align-items: flex-start;
     gap: 1.5rem;
     margin: 0;
-    padding: 0;
+    /* Vertical room for the hover scale: .marquee is overflow:hidden, and a
+       card at 1.08 is clipped top and bottom without it. */
+    padding: 1rem 0.75rem;
     list-style: none;
+    /* Slower than the logo strip's 38s: these carry titles to read, and the
+       track is a third of the length. */
+    animation-duration: 46s;
   }
-  @media (min-width: 640px) {
-    .yt-rail {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+
+  .yt-item {
+    flex: none;
+    width: 19rem;
+    transition:
+      transform 0.35s var(--ease-out-soft),
+      filter 0.35s ease,
+      opacity 0.35s ease;
   }
-  @media (min-width: 1024px) {
-    .yt-rail {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+  /* Spotlight: the rail dims and blurs, the hovered card is restored. */
+  .yt-rail:hover .yt-item {
+    filter: blur(3px);
+    opacity: 0.55;
+  }
+  .yt-rail:hover .yt-item:hover {
+    filter: none;
+    opacity: 1;
+    transform: scale(1.08);
+    z-index: 2;
   }
 
   .yt-card {
     display: block;
-    transition: transform 0.3s cubic-bezier(0.22, 0.9, 0.32, 1.2);
-  }
-  .yt-card:hover {
-    transform: translateY(-3px);
+    cursor: pointer;
   }
 
   .yt-thumb {
@@ -132,37 +202,39 @@ const { talks, channel } = Astro.props;
     border: 1px solid var(--color-brand-100);
     border-radius: var(--radius-card);
     background: var(--color-brand-950);
+    transition: box-shadow 0.35s var(--ease-out-soft);
+  }
+  .yt-item:hover .yt-thumb {
+    box-shadow: 0 22px 48px -20px color-mix(in srgb, var(--color-brand-600) 55%, transparent);
   }
   /* hqdefault is 4:3 with letterbox bars; cropping to 16:9 removes them. */
   .yt-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s var(--ease-out-soft);
   }
-  .yt-card:hover .yt-thumb img {
-    transform: scale(1.04);
-  }
-  .yt-thumb :global(iframe) {
+  /* The scrim lifts on hover, so the frame brightens as the card comes forward. */
+  .yt-scrim {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
+    background: rgb(4 30 57 / 0.25);
+    transition: background 0.3s ease;
+  }
+  .yt-item:hover .yt-scrim {
+    background: rgb(4 30 57 / 0.05);
   }
 
   .yt-play {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 3rem;
-    height: 2.125rem;
-    margin: -1.0625rem 0 0 -1.5rem;
-    border-radius: 0.5rem;
-    background: rgb(224 47 47 / 0.92);
-    transition:
-      transform 0.3s cubic-bezier(0.34, 1.5, 0.64, 1),
-      background 0.25s ease;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: -1.75rem 0 0 -1.75rem;
+    border-radius: 50%;
+    background: #e02f2f;
+    box-shadow: 0 10px 24px rgb(224 47 47 / 0.35);
+    transition: transform 0.3s ease;
   }
   /* The triangle, drawn with borders so it needs no second element. */
   .yt-play::after {
@@ -170,14 +242,13 @@ const { talks, channel } = Astro.props;
     position: absolute;
     left: 50%;
     top: 50%;
-    margin: -0.4375rem 0 0 -0.25rem;
+    margin: -0.5rem 0 0 -0.28125rem;
     border-style: solid;
-    border-width: 0.4375rem 0 0.4375rem 0.75rem;
+    border-width: 0.5rem 0 0.5rem 0.875rem;
     border-color: transparent transparent transparent #fff;
   }
-  .yt-card:hover .yt-play {
-    background: #e02f2f;
-    transform: scale(1.12);
+  .yt-item:hover .yt-play {
+    transform: scale(1.1);
   }
 
   .yt-meta {
@@ -217,16 +288,114 @@ const { talks, channel } = Astro.props;
     color: var(--color-brand-600);
   }
 
+  /* ---------- lightbox ---------- */
+  .yt-lb {
+    /* Centred explicitly, as .mb-dialog is: Tailwind preflight zeroes margin
+       on every element, which takes away the `margin: auto` a modal <dialog>
+       centres itself with, and it pins to the top instead. `inset: 0` +
+       `margin: auto` needs `height: fit-content`, or the box stretches and
+       the centring is lost again. max-height leaves room for the close button
+       sitting above the frame. */
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+    width: calc(100% - 2rem);
+    max-width: 56rem;
+    max-height: calc(100dvh - 7rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    color: #fff;
+  }
+  .yt-lb::backdrop {
+    background: rgb(4 30 57 / 0.7);
+    backdrop-filter: blur(12px);
+  }
+  .yt-lb-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: #000;
+    box-shadow: 0 30px 70px rgb(0 0 0 / 0.55);
+  }
+  .yt-lb-frame :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .yt-lb-title {
+    margin: 1rem 0 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-align: center;
+  }
+  .yt-lb-note {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: var(--color-brand-200);
+    text-align: center;
+  }
+  .yt-lb-form {
+    position: absolute;
+    top: -2.75rem;
+    right: 0;
+  }
+  .yt-lb-x {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.15);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.25s ease;
+  }
+  .yt-lb-x:hover {
+    background: rgb(255 255 255 / 0.25);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .yt-lb[open] {
+      animation: yt-lb-in 0.4s var(--ease-out-soft) both;
+    }
+    @keyframes yt-lb-in {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .yt-card,
-    .yt-thumb img,
+    .yt-item,
+    .yt-thumb,
+    .yt-scrim,
     .yt-play {
       transition: none;
     }
-    .yt-card:hover,
-    .yt-card:hover .yt-thumb img,
-    .yt-card:hover .yt-play {
+    /* The rail is already stopped and wrapped by global.css here, so a
+       spotlight would dim cards that are simply sitting in a grid. */
+    .yt-rail:hover .yt-item {
+      filter: none;
+      opacity: 1;
+    }
+    .yt-rail:hover .yt-item:hover,
+    .yt-item:hover .yt-play {
       transform: none;
+    }
+    /* global.css wraps the track; the duplicate copy would then just repeat the
+       four videos on screen. */
+    .yt-item[aria-hidden] {
+      display: none;
+    }
+    .yt-marquee {
+      mask-image: none;
     }
   }
 </style>

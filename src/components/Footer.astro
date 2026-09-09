@@ -2,7 +2,8 @@
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import logo from '@/assets/brand/logo.png';
-import { legalNav, offices, site, socials } from '@/config/site';
+import wordmark from '@/assets/brand/wordmark.png';
+import { legalNav, site, socials } from '@/config/site';
 import FooterOffices from './FooterOffices.astro';
 import SummarizeWithAi from './SummarizeWithAi.astro';
 import { socialMarks } from './social-marks';
@@ -131,7 +132,34 @@ const year = new Date().getFullYear();
       style="--d:440ms"
     >
       <p>&copy; {year} {site.legalName}. All rights reserved.</p>
-      <p>{offices[0]?.locality}, {offices[0]?.region}</p>
+      {
+        /*
+        As 369's footer does it: the sentence stops at "by" and the wordmark
+        finishes it, so the name is never set twice. The alt text is what gives
+        this link its accessible name.
+        The absolute URL, as 369 uses, rather than "/" — it is the canonical
+        home whichever host the page is served from. It comes from site.url so
+        a domain change moves it too.
+        `{' '}` because Astro trims the space before an inline element.
+      */
+      }
+      <p>
+        Site developed and maintained by{' '}
+        <a href={`${site.url}/`} class="ft-credit">
+          {
+            /* densities, not widths: `widths` also emits a full-resolution
+              fallback for `src`, which was a 46KB image behind an 18px logo. */
+          }
+          <Image
+            src={wordmark}
+            alt="Alphalize"
+            width={73}
+            height={18}
+            densities={[1, 2]}
+            loading="lazy"
+          />
+        </a>
+      </p>
     </div>
   </div>
 
@@ -369,9 +397,31 @@ const year = new Date().getFullYear();
     background: var(--color-brand-600);
   }
 
+  /* --- credit ---
+     The bottom row sits outside .ft-col, so none of the six hover treatments
+     above reach this link and it would otherwise be indistinguishable from the
+     text around it. */
+  .ft-credit {
+    display: inline-flex;
+    vertical-align: middle;
+    transition: opacity 0.28s ease;
+  }
+  .ft-credit:hover {
+    opacity: 0.75;
+  }
+  /* The wordmark is a child component, so the scoped selector needs :global.
+     Height set here rather than on the <Image>, which would otherwise fix the
+     width in the wrong place. */
+  .ft-credit :global(img) {
+    display: block;
+    height: 1.125rem;
+    width: auto;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .ft-col a,
     .ft-col :global(a),
+    .ft-credit,
     .ft-top,
     .ft-glow {
       transition: none;

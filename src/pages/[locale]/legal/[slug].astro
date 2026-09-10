@@ -1,0 +1,79 @@
+---
+import type { GetStaticPaths } from 'astro';
+import LegalLayout from '@/layouts/LegalLayout.astro';
+import { contact, offices, site } from '@/config/site';
+import { liveLocales } from '@/i18n/locales';
+import { getLocalized } from '@/i18n/collections';
+
+/**
+ * The three legal pages, from markdown.
+ *
+ * They used to be three .astro files with ~1,900 words of prose inline. That
+ * was fine while the site was English-only and impossible afterwards: nobody
+ * should translate a privacy policy inside a component, and nobody should have
+ * to read JSX to check what a policy says.
+ *
+ * One route replaces the three. The URLs are unchanged.
+ */
+export const getStaticPaths = (async () => {
+  const perLocale = await Promise.all(
+    liveLocales.map(async (locale) => {
+      const pages = await getLocalized('legal', locale);
+      return pages.map(({ slug, entry, translated }) => ({
+        params: { locale, slug },
+        props: { entry, translated },
+      }));
+    })
+  );
+  return perLocale.flat();
+}) satisfies GetStaticPaths;
+
+const { entry, translated } = Astro.props;
+
+/**
+ * Values the prose interpolates, as {placeholders}.
+ *
+ * They stay in config/site.ts rather than being written into nine translations
+ * — a registered address that appears in three documents across nine locales
+ * is 27 chances to leave one stale after a move.
+ */
+const india = offices.find((o) => o.id === 'kollam');
+const values: Record<string, string> = {
+  company: site.legalName,
+  email: `${contact.emailUser}@${contact.emailDomain}`,
+  emailUser: contact.emailUser,
+  emailDomain: contact.emailDomain,
+  phone: contact.phone,
+  street: india?.street ?? '',
+  locality: india?.locality ?? '',
+  region: india?.region ?? '',
+  postalCode: india?.postalCode ?? '',
+  country: india?.country ?? '',
+};
+
+const body = (entry.rendered?.html ?? '').replace(
+  /\{(\w+)\}/g,
+  (whole, name) => values[name] ?? whole
+);
+---
+
+<LegalLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  updated={entry.data.updated}
+  lang={translated ? undefined : 'en'}
+>
+  {
+    /*
+    Rendered HTML rather than the <Content /> component, because the
+    {placeholders} have to be substituted and only a string can be. Swapping
+    them here rather than in the source keeps the registered address in one
+    file instead of nine translations of three documents.
+
+    set:html is safe here: the input is markdown from this repository, not
+    anything a visitor can supply. An unknown {placeholder} is left as written
+    so it shows up in review rather than vanishing.
+  */
+  }
+  <Fragment set:html={body} />
+</LegalLayout>

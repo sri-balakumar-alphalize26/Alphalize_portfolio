@@ -1,0 +1,91 @@
+---
+title: "Terms & [[Conditions]]"
+description: "The terms you agree to when you use alphalize.com."
+updated: "8 September 2026"
+order: 2
+---
+
+<p>
+  These terms govern your use of <strong>alphalize.com</strong>. By using the site you accept
+  them. If you do not, please stop using the site.
+</p>
+
+<h2>Use of this website</h2>
+<p>
+  You may view, download and print pages from this site for your own reference or to evaluate our
+  services. You may not:
+</p>
+<ul>
+  <li>Republish material from this site as your own, or resell it.</li>
+  <li>Use the site or its forms to send unsolicited, abusive or unlawful content.</li>
+  <li>Attempt to gain unauthorised access to the site, its infrastructure or its data.</li>
+  <li>Use automated means to scrape, overload or disrupt the site.</li>
+</ul>
+
+<h2>Submissions</h2>
+<p>
+  When you send us a job application, or an enquiry through WhatsApp, you confirm that the
+  information is accurate and that you have the right to share it. Do not send us confidential
+  material this way — if you need to share something sensitive, contact us first and we will
+  arrange an appropriate channel.
+</p>
+
+<h2>Intellectual property</h2>
+<p>
+  The content, design, code and brand marks on this site are owned by {company} or its licensors,
+  except where a third-party mark is displayed with permission. Nothing on this site grants you a licence
+  to use those marks.
+</p>
+
+<h2>Services are described, not offered</h2>
+<p>
+  The service descriptions on this site are informational. They are not an offer, a quote, or a
+  commitment to deliver. Any engagement between us is governed by a separate written agreement
+  covering scope, timelines, fees and liability — and that agreement prevails over anything stated
+  here.
+</p>
+
+<h2>Availability</h2>
+<p>
+  We aim to keep the site available and current but do not guarantee uninterrupted access. We may
+  change, suspend or withdraw any part of the site without notice.
+</p>
+
+<h2>Third-party links</h2>
+<p>
+  Where we link to other sites, we do so for convenience. We do not control them and are not
+  responsible for their content or practices.
+</p>
+
+<h2>Limitation of liability</h2>
+<p>
+  To the extent permitted by law, {company} is not liable for indirect or consequential loss
+  arising from your use of this website, including loss of profit, revenue or data. Nothing in these
+  terms excludes liability that cannot lawfully be excluded.
+</p>
+
+<h2>Enquiries sent through WhatsApp</h2>
+<p>
+  The contact form does not submit anything to us. It opens WhatsApp with your details already
+  written so you can send the message yourself. Once sent, that message is carried by WhatsApp
+  under their terms, and we have no control over their service or its availability.
+</p>
+
+<h2>Governing law</h2>
+<p>
+  These terms are governed by the laws of India. Any dispute arising from them is subject to the
+  exclusive jurisdiction of the courts at <strong
+    >TODO: seat to be confirmed (Kollam, Kerala?)</strong
+  >.
+</p>
+
+<h2>Changes</h2>
+<p>
+  We may update these terms. The version published on this page at the time you use the site is
+  the version that applies.
+</p>
+
+<h2>Contact</h2>
+<p>
+  Questions about these terms: <a href="mailto:{email}">{email}</a> or {phone}.
+</p>

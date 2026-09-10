@@ -96,6 +96,35 @@ const jobs = defineCollection({
   }),
 });
 
+/**
+ * Privacy policy, terms, disclaimer.
+ *
+ * Was ~1,900 words of prose sitting inline in three .astro pages. Markdown is
+ * the right shape for text a translator or a lawyer edits, and it keeps that
+ * text out of a file full of component internals.
+ *
+ * The body may contain {placeholders} — {company}, {email}, {phone},
+ * {street}, {locality}, {region}, {postalCode}, {country} — filled at render
+ * time from config/site.ts, so the registered address and contact details stay
+ * defined in exactly one place across nine locales.
+ */
+const legal = defineCollection({
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/legal',
+    generateId: ({ entry }) => entry.replace(/\.mdx?$/, ''),
+  }),
+  schema: z.object({
+    /** May carry [[marker brackets]] — see components/marks.ts. */
+    title: z.string(),
+    description: z.string(),
+    /** Shown as "Last updated"; a plain string so each locale can format it. */
+    updated: z.string(),
+    /** Order in the sidebar. Matches legalNav in config/site.ts. */
+    order: z.number().int(),
+  }),
+});
+
 /** Mobile apps shown on /services/mobile-app-development and the homepage strip. */
 const apps = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/apps' }),
@@ -137,4 +166,4 @@ const testimonials = defineCollection({
   }),
 });
 
-export const collections = { services, jobs, apps, modules, testimonials };
+export const collections = { services, jobs, legal, apps, modules, testimonials };

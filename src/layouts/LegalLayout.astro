@@ -10,9 +10,11 @@ interface Props {
   title: string;
   description: string;
   updated: string;
+  /** 'en' when this locale has no translation — marks the prose, not the page. */
+  lang?: string;
 }
 
-const { title, description, updated } = Astro.props;
+const { title, description, updated, lang } = Astro.props;
 // The hero draws the strokes; <title> and og:title want the words only.
 const plainTitle = stripMarks(title);
 // Locale-free and extension-free, so it can be compared against the plain
@@ -31,7 +33,7 @@ const loc = (to: string) => localeHref(locale, to);
   <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
     <article class="lg:col-span-8">
       <p class="text-muted text-xs">Last updated: {updated}</p>
-      <div class="prose-content mt-4">
+      <div class="prose-content mt-4" lang={lang} dir={lang ? 'ltr' : undefined}>
         <slot />
       </div>
     </article>

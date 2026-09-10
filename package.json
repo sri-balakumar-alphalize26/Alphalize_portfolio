@@ -10,7 +10,8 @@
     "deploy": "astro build && wrangler deploy",
     "check": "astro check && node scripts/check-i18n.mjs",
     "format": "prettier --write .",
-    "check:i18n": "node scripts/check-i18n.mjs"
+    "check:i18n": "node scripts/check-i18n.mjs",
+    "check:redirects": "node scripts/check-redirects.mjs"
   },
   "dependencies": {
     "@alphalize/astro-marker": "file:./packages/astro-marker",

@@ -16,7 +16,7 @@ import { defaultLocale, type Locale } from './locales';
  * built from the English set — a locale that simply omitted an untranslated
  * entry would leave the site linking to its own 404.
  */
-type Localizable = 'services' | 'jobs';
+type Localizable = 'services' | 'jobs' | 'legal';
 
 export type Localized<C extends Localizable> = {
   /** The slug with the locale prefix removed — what the URL uses. */

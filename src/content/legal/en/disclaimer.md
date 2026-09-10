@@ -1,0 +1,55 @@
+---
+title: "Disclaimer"
+description: "The limits of what this website tells you, and what it does not promise."
+updated: "8 September 2026"
+order: 3
+---
+
+<h2>General information only</h2>
+<p>
+  The information on <strong>alphalize.com</strong> is provided for general information about
+  {company} and the services we offer. It is not professional, technical, financial or legal
+  advice, and you should not act on it as though it were advice about your specific situation.
+</p>
+
+<h2>No guarantee of outcomes</h2>
+<p>
+  Descriptions of ERP implementations, business intelligence work, integrations and custom
+  development explain our approach in general terms. Results depend on your data, processes,
+  systems and the scope actually agreed. Nothing on this site is a promise of a particular
+  outcome, timeline or return.
+</p>
+
+<h2>Accuracy</h2>
+<p>
+  We make reasonable efforts to keep the site accurate and current, but we do not warrant that
+  every page is complete or up to date. Technology descriptions in particular change over time. If
+  something here matters to a decision you are making, confirm it with us directly.
+</p>
+
+<h2>External links and third-party marks</h2>
+<p>
+  Links to third-party sites are provided for convenience only and do not imply endorsement. We
+  have no control over their content or availability. Any third-party names or logos shown remain
+  the property of their respective owners and are used to indicate a working relationship or
+  technology, not to claim ownership or endorsement.
+</p>
+
+<h2>Careers information</h2>
+<p>
+  Job listings describe roles as they are open at the time of publication. Availability,
+  requirements and location may change, and a listing is not an offer of employment. The route by
+  which applications are accepted may also change without notice.
+</p>
+
+<h2>Where this site is operated from</h2>
+<p>
+  This website is operated from India. We make no representation that its content is appropriate
+  or available for use in other locations, and access from elsewhere is at your own initiative.
+</p>
+
+<h2>Contact</h2>
+<p>
+  If anything on this site appears inaccurate, tell us at 
+  <a href="mailto:{email}">{email}</a> or {phone} and we will review it.
+</p>

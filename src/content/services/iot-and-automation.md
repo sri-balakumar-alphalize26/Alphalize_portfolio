@@ -1,5 +1,5 @@
 ---
-title: "IoT & Automation"
+title: "IoT & [[Automation]]"
 summary: Smart locks, vending machines and robotics that report into the same ERP core as the rest of your operation.
 seoDescription: IoT and automation from Alphalize — ERP-integrated smart locks, AI-powered smart vending machines and robotics for warehouses, retail and manufacturing.
 icon: cpu

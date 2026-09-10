@@ -1,6 +1,8 @@
 ---
-import { Heading, Marker } from '@alphalize/astro-marker';
+import { Heading } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
+import MarkedTitle from './MarkedTitle.astro';
+import { stripMarks } from './marks';
 
 interface Props {
   eyebrow?: string;
@@ -17,11 +19,18 @@ interface Props {
 
 const { eyebrow, title, lead, crumbs = [], anim = false } = Astro.props;
 
-// Odoo underlines the last word of a heading; do the same when the title has
-// more than one word, so interior pages carry the same signature as the home hero.
-const words = title.trim().split(/\s+/);
-const head = words.length > 1 ? words.slice(0, -1).join(' ') : title;
-const tail = words.length > 1 ? words[words.length - 1] : '';
+/**
+ * The breadcrumb repeats the title as plain text, so it needs the words without
+ * the strokes.
+ *
+ * This used to underline the last space-delimited word automatically, which is
+ * where the Odoo signature came from. That was replaced by an explicit [[mark]]
+ * in the title (see marks.ts) because the split had no answer for a language
+ * without spaces: in Chinese the whole heading is one "word", the
+ * `words.length > 1` test fails, and every interior hero silently loses its
+ * underline.
+ */
+const plainTitle = stripMarks(title);
 ---
 
 <section
@@ -35,13 +44,19 @@ const tail = words.length > 1 ? words[words.length - 1] : '';
   </div>
 
   <div class="container-page py-12 lg:py-16">
-    <nav aria-label="Breadcrumb" class:list={[anim && 'ab ab-fade']} style={anim ? '--d:0ms' : undefined}>
+    <nav
+      aria-label="Breadcrumb"
+      class:list={[anim && 'ab ab-fade']}
+      style={anim ? '--d:0ms' : undefined}
+    >
       <ol class="text-muted flex flex-wrap items-center gap-1.5 text-xs">
         <li><a href="/" class="hover:text-plum-600">Home</a></li>
         {
           crumbs.map((c) => (
             <>
-              <li aria-hidden="true"><Icon name="chevron-right" class="size-3" /></li>
+              <li aria-hidden="true">
+                <Icon name="chevron-right" class="size-3" />
+              </li>
               <li>
                 <a href={c.href} class="hover:text-plum-600">
                   {c.label}
@@ -51,31 +66,22 @@ const tail = words.length > 1 ? words[words.length - 1] : '';
           ))
         }
         <li aria-hidden="true"><Icon name="chevron-right" class="size-3" /></li>
-        <li aria-current="page" class="text-heading">{title}</li>
+        <li aria-current="page" class="text-heading">{plainTitle}</li>
       </ol>
     </nav>
 
     {eyebrow && <p class:list={['eyebrow mt-7', anim && 'ab-track']}>{eyebrow}</p>}
 
-    {/* Under `anim` the wrapper is the clip box the heading rises out of. One
+    {
+      /* Under `anim` the wrapper is the clip box the heading rises out of. One
         mask for the whole heading, not one per line: the title is a string that
         wraps wherever the viewport puts it, so there are no line boxes to split
         on. The extra bottom padding keeps the mask clear of the <Marker> stroke,
-        which is drawn below the text box. */}
+        which is drawn below the text box. */
+    }
     <div class:list={['mt-2 max-w-3xl', anim && 'ab-ln']}>
       <Heading as="h1" size="lg" class:list={[anim && 'ab-lni']}>
-        {
-          tail ? (
-            <>
-              {head}{' '}
-              <Marker type="underline" color="blue" delay={anim ? 950 : 0}>
-                {tail}
-              </Marker>
-            </>
-          ) : (
-            title
-          )
-        }
+        <MarkedTitle title={title} marker="underline" color="blue" delay={anim ? 950 : 0} />
       </Heading>
     </div>
 

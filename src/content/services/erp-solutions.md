@@ -1,5 +1,5 @@
 ---
-title: ERP Solutions
+title: ERP [[Solutions]]
 summary: Customised ERP systems that unify finance, HR, supply chain and inventory into one source of truth.
 seoDescription: Customised ERP solutions from Alphalize — integrating finance, HR, supply chain management and inventory control so your team decides on real numbers.
 icon: layers

@@ -1,5 +1,5 @@
 ---
-title: Mobile App Development
+title: Mobile App [[Development]]
 summary: React Native apps for Android and iOS that hold up across real devices, networks and app-store review.
 seoDescription: Mobile app development from Alphalize — React Native applications for Android and iOS, built with security and device compatibility in mind.
 icon: smartphone

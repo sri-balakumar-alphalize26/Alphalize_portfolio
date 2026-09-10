@@ -1,5 +1,5 @@
 ---
-title: Training and Internship Program
+title: Training and Internship [[Program]]
 summary: Hands-on software and web development training for students and freshers, taught on real project work.
 seoDescription: Alphalize Training and Internship Program — hands-on software and web development training that prepares students and freshers for the tech industry.
 icon: graduation

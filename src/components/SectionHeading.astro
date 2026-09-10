@@ -6,9 +6,8 @@ import Reveal from './Reveal.astro';
 
 interface Props {
   eyebrow?: string;
+  /** Phrases to wrap in a marker stroke are marked inline — see marks.ts. */
   title: string;
-  /** Phrase inside `title` to wrap in a marker stroke. */
-  highlight?: string;
   marker?: MarkerType;
   color?: string;
   lead?: string;
@@ -30,7 +29,6 @@ interface Props {
 const {
   eyebrow,
   title,
-  highlight,
   marker,
   color,
   lead,
@@ -45,18 +43,19 @@ const Wrapper = anim ? 'div' : Reveal;
 
 <Wrapper class:list={['max-w-3xl', align === 'center' && 'mx-auto text-center', className]}>
   {eyebrow && <p class:list={['eyebrow', anim && 'ab-track']}>{eyebrow}</p>}
-  {/* Under `anim` the wrapper is the clip box the heading rises out of. One
+  {
+    /* Under `anim` the wrapper is the clip box the heading rises out of. One
       mask for the whole heading, not one per line: `title` is a string that
-      wraps wherever the viewport puts it, so there are no line boxes to split. */}
+      wraps wherever the viewport puts it, so there are no line boxes to split. */
+  }
   <div class:list={['mt-2', anim && 'ab-ln']}>
-    <Heading as="h2" size="lg" align={align} class:list={[invert && 'text-white', anim && 'ab-lni']}>
-      <MarkedTitle
-        title={title}
-        highlight={highlight}
-        marker={marker}
-        color={color}
-        delay={anim ? 1000 : 0}
-      />
+    <Heading
+      as="h2"
+      size="lg"
+      align={align}
+      class:list={[invert && 'text-white', anim && 'ab-lni']}
+    >
+      <MarkedTitle title={title} marker={marker} color={color} delay={anim ? 1000 : 0} />
     </Heading>
   </div>
   {

@@ -1,5 +1,5 @@
 ---
-title: Business Intelligence
+title: Business [[Intelligence]]
 summary: Analytics and dashboards that turn the data you already collect into decisions you can defend.
 seoDescription: Business intelligence services from Alphalize — analytics tools and dashboards that surface trends and support data-driven decisions.
 icon: chart

@@ -23,8 +23,8 @@ import smartLocks from '@/assets/solutions/smart-locks.jpg';
  */
 interface Row {
   kicker: string;
+  /** Phrases to wrap in a marker stroke are marked inline — see marks.ts. */
   title: string;
-  highlight: string;
   marker?: MarkerType;
   color?: string;
   body: string;
@@ -43,8 +43,7 @@ const FAN = ['-2.4deg', '2deg'];
 const rows: Row[] = [
   {
     kicker: 'Odoo ERP',
-    title: 'The back office, unified',
-    highlight: 'unified',
+    title: 'The back office, [[unified]]',
     body: 'Customised ERP that integrates finance, HR, supply chain and inventory into one source of truth, with approval workflows that run without someone chasing a spreadsheet.',
     points: [
       'Fifteen ready-made modules, from POS weighing scales to offline sync',
@@ -59,8 +58,7 @@ const rows: Row[] = [
   },
   {
     kicker: 'Connected devices',
-    title: 'Hardware that reports to your ERP',
-    highlight: 'reports to your ERP',
+    title: 'Hardware that [[reports to your ERP]]',
     color: 'blue',
     body: 'The 369ai.Biz device range, wired into the same core as everything else — smart locks, unmanned retail and robotics, each one writing back to the ERP as it runs rather than at the end of the day.',
     points: [
@@ -81,8 +79,7 @@ const rows: Row[] = [
 <Section variant="white" space="lg">
   <SectionHeading
     eyebrow="What we do"
-    title="One platform. Every department."
-    highlight="One platform."
+    title="[[One platform.]] Every department."
     marker="highlight"
     color="yellow"
     lead="Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers."
@@ -96,12 +93,7 @@ const rows: Row[] = [
             <div>
               <p class="eyebrow">{row.kicker}</p>
               <Heading as="h3" size="md" class="mt-2">
-                <MarkedTitle
-                  title={row.title}
-                  highlight={row.highlight}
-                  marker={row.marker}
-                  color={row.color}
-                />
+                <MarkedTitle title={row.title} marker={row.marker} color={row.color} />
               </Heading>
               <p class="text-muted mt-4 leading-relaxed">{row.body}</p>
 

@@ -1,27 +1,42 @@
 ---
 import { Marker } from '@alphalize/astro-marker';
-import type { MarkerType } from './marks';
+import { splitMarks, type MarkerType } from './marks';
 
 /**
- * A plain-string title with one phrase wrapped in a hand-drawn marker stroke.
- * Used inside <Heading> by SectionHeading and FeatureRow, whose titles arrive
- * as strings from props rather than as markup.
+ * A plain-string title with zero or more phrases wrapped in a hand-drawn marker
+ * stroke, marked inline with [[double brackets]] — see marks.ts for why the
+ * mark lives in the string rather than in a prop.
+ *
+ * Used inside <Heading> by SectionHeading, FeatureRow and PageHero, whose
+ * titles arrive as strings from props rather than as markup.
  */
 interface Props {
   title: string;
-  /** Substring of `title` to mark; the title renders plain when absent. */
-  highlight?: string;
   marker?: MarkerType;
   color?: string;
   /** ms to hold the stroke back, so it can land after a heading entrance. */
   delay?: number;
 }
 
-const { title, highlight = '', marker = 'underline', color = 'blue', delay = 0 } = Astro.props;
+const { title, marker = 'underline', color = 'blue', delay = 0 } = Astro.props;
 
-const at = highlight ? title.indexOf(highlight) : -1;
-const hit = at >= 0 ? highlight : '';
+// Odd indices are the marked phrases.
+const parts = splitMarks(title);
 ---
 
-{/* Kept on one line: whitespace here would render as a stray space before punctuation. */}
-{hit ? <>{title.slice(0, at)}<Marker type={marker} color={color} delay={delay}>{hit}</Marker>{title.slice(at + hit.length)}</> : title}
+{/* The old version built a fragment from title.slice() calls either side of a
+    <Marker>, and had to stay on one line — the segments were adjacent literal
+    expressions, so a newline between them rendered as a stray space before
+    punctuation. A single .map() has no adjacent literals, so this is safe to
+    wrap and prettier may format it freely. Verified against the built HTML. */}
+{
+  parts.map((part, i) =>
+    i % 2 ? (
+      <Marker type={marker} color={color} delay={delay}>
+        {part}
+      </Marker>
+    ) : (
+      part
+    )
+  )
+}

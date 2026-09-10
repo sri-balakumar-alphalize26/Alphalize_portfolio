@@ -1,5 +1,5 @@
 ---
-title: Digital Marketing
+title: Digital [[Marketing]]
 summary: Targeted campaigns across search, social and email — measured against leads, not impressions.
 seoDescription: Digital marketing from Alphalize — SEO, social advertising, content and email campaigns with precise audience targeting and measurable results.
 icon: megaphone

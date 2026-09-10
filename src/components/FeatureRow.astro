@@ -12,9 +12,8 @@ import Reveal from './Reveal.astro';
  */
 interface Props {
   eyebrow?: string;
+  /** Phrases to wrap in a marker stroke are marked inline — see marks.ts. */
   title: string;
-  /** Phrase inside `title` to wrap in a marker stroke. */
-  highlight?: string;
   marker?: MarkerType;
   color?: string;
   body: string;
@@ -32,7 +31,6 @@ interface Props {
 const {
   eyebrow,
   title,
-  highlight,
   marker,
   color,
   body,
@@ -50,16 +48,16 @@ const {
   <Reveal direction={flip ? 'right' : 'left'} class={flip ? 'lg:order-2' : undefined}>
     {eyebrow && <p class="eyebrow">{eyebrow}</p>}
     <Heading as="h3" size="md" class="mt-2">
-      <MarkedTitle title={title} highlight={highlight} marker={marker} color={color} />
+      <MarkedTitle title={title} marker={marker} color={color} />
     </Heading>
-    <p class="mt-4 leading-relaxed text-muted">{body}</p>
+    <p class="text-muted mt-4 leading-relaxed">{body}</p>
 
     {
       points.length > 0 && (
         <ul class="mt-5 space-y-2.5">
           {points.map((p) => (
-            <li class="flex gap-2.5 text-sm leading-relaxed text-muted">
-              <Icon name="check" class="mt-0.5 size-4 shrink-0 text-plum-600" />
+            <li class="text-muted flex gap-2.5 text-sm leading-relaxed">
+              <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
               <span>{p}</span>
             </li>
           ))}
@@ -71,7 +69,7 @@ const {
       href && (
         <a
           href={href}
-          class="mt-7 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-plum-600"
+          class="text-brand-700 hover:text-plum-600 mt-7 inline-flex items-center gap-1.5 text-sm font-semibold"
         >
           {cta}
           <Icon name="arrow-right" class="size-4" />
@@ -83,8 +81,8 @@ const {
   <Reveal direction={flip ? 'left' : 'right'} class={flip ? 'lg:order-1' : undefined}>
     <div
       class:list={[
-        'overflow-hidden rounded-card border border-brand-100',
-        fit === 'contain' ? 'flex h-64 items-center justify-center bg-surface p-10' : '',
+        'rounded-card border-brand-100 overflow-hidden border',
+        fit === 'contain' ? 'bg-surface flex h-64 items-center justify-center p-10' : '',
       ]}
     >
       <Image
@@ -93,7 +91,9 @@ const {
         widths={[560, 1120]}
         sizes="(min-width: 1024px) 560px, 92vw"
         loading="lazy"
-        class={fit === 'cover' ? 'aspect-[4/3] w-full object-cover' : 'max-h-full w-auto object-contain'}
+        class={fit === 'cover'
+          ? 'aspect-[4/3] w-full object-cover'
+          : 'max-h-full w-auto object-contain'}
       />
     </div>
   </Reveal>

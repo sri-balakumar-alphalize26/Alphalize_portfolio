@@ -21,7 +21,8 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { service } = Astro.props;
-const { title, summary, seoDescription, icon, highlights, showcase, solutions } = service.data;
+const { title, titleMarked, summary, seoDescription, icon, highlights, showcase, solutions } =
+  service.data;
 const { Content } = await render(service);
 
 // The mobile page lists the apps as SoftwareApplication entries for search engines.
@@ -68,25 +69,22 @@ if (apps.length) {
 }
 ---
 
-<BaseLayout
-  title={title}
-  description={seoDescription ?? summary}
-  ogType="article"
-  jsonLd={jsonLd}
->
+<BaseLayout title={title} description={seoDescription ?? summary} ogType="article" jsonLd={jsonLd}>
   <AboutAnim />
 
   <PageHero
     anim
     eyebrow="Service"
-    title={title}
+    title={titleMarked}
     lead={summary}
     crumbs={[{ label: 'Services', href: '/services' }]}
   />
 
   <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:gap-16 lg:py-20">
-    {/* Body. One [data-ab] unit with an auto-assigned stagger: the blocks come
-        from rendered markdown, so there is no template to annotate them in. */}
+    {
+      /* Body. One [data-ab] unit with an auto-assigned stagger: the blocks come
+        from rendered markdown, so there is no template to annotate them in. */
+    }
     <article
       class="prose-content lg:col-span-8"
       data-ab
@@ -111,7 +109,11 @@ if (apps.length) {
       </>
     )
   }
-  {showcase === 'iot' && solutions && solutions.length > 0 && <SolutionCards solutions={solutions} />}
+  {
+    showcase === 'iot' && solutions && solutions.length > 0 && (
+      <SolutionCards solutions={solutions} />
+    )
+  }
 
   <CtaBand />
 </BaseLayout>

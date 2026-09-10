@@ -2,21 +2,25 @@
 import PageHero from '@/components/PageHero.astro';
 import BaseLayout from './BaseLayout.astro';
 import { legalNav } from '@/config/site';
+import { stripMarks } from '@/components/marks';
 import { cleanPathname } from '@/i18n/paths';
 
 interface Props {
+  /** Phrases to wrap in a marker stroke are marked inline — see marks.ts. */
   title: string;
   description: string;
   updated: string;
 }
 
 const { title, description, updated } = Astro.props;
+// The hero draws the strokes; <title> and og:title want the words only.
+const plainTitle = stripMarks(title);
 // Normalised, or the comparison below is '/legal/privacy-policy.html' against
 // '/legal/privacy-policy' and no sidebar link is ever marked current.
 const path = cleanPathname(Astro.url.pathname);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={plainTitle} description={description}>
   <PageHero title={title} eyebrow="Legal" />
 
   <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:py-20">

@@ -1,5 +1,5 @@
 ---
-title: Custom Web Development
+title: Custom Web [[Development]]
 summary: Bespoke software and web applications built around workflows that off-the-shelf tools cannot cover.
 seoDescription: Custom software and web development from Alphalize — tailored applications that optimise workflows, improve productivity and drive innovation.
 icon: code

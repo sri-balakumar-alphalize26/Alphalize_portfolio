@@ -15,6 +15,31 @@ export default defineConfig({
   // old .html URLs to a single hop and the canonical/sitemap URLs slash-free.
   build: { format: 'file' },
   trailingSlash: 'never',
+
+  /**
+   * The bare root, redirected by Astro rather than by public/_redirects.
+   *
+   * Every page now lives under a locale prefix, so `/` matches no route at all.
+   * public/_redirects covers that in production — but it is a Cloudflare
+   * feature that the dev server never reads, so locally the site's own front
+   * door was a dead URL that fell through to the 404 page. Declaring it here
+   * makes dev behave the same as production.
+   *
+   * 302, not 301: this is the entry point for all nine languages and must not
+   * be pinned to English in every visitor's cache — including after locale
+   * negotiation is added.
+   *
+   * The division of labour with public/_redirects is deliberate:
+   *   here          — live routing that must behave identically in dev and prod
+   *   _redirects    — preserving URLs from earlier generations of the site
+   *                   (the old .html pages, the retired blog, and the
+   *                   unprefixed URLs this site served before the locale move).
+   *                   None of those is a URL a developer types locally.
+   */
+  redirects: {
+    '/': { status: 302, destination: `/${defaultLocale}` },
+  },
+
   i18n: {
     locales: [...locales],
     defaultLocale,

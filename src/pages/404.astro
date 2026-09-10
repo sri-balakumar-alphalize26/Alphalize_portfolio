@@ -1,12 +1,26 @@
 ---
 import { getLocalized } from '@/i18n/collections';
 import { localeHref } from '@/i18n/paths';
+import { defaultLocale } from '@/i18n/locales';
+import { getTranslations } from '@/i18n/messages';
 import { Heading } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import Icon from '@/components/Icon.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
-const { locale, t } = Astro.locals;
+/**
+ * Falls back rather than destructuring straight from locals.
+ *
+ * This is the page that renders when nothing else matched, which is exactly
+ * when the request is least normal — an unmatched path, no [locale] param, and
+ * in some dev and adapter paths no middleware run at all. Everywhere else it is
+ * right to assume `t` exists, because a missing one is a bug worth surfacing.
+ * Here it is not: a 404 that throws turns a wrong URL into a 500, which is a
+ * worse answer to the same mistake.
+ */
+const locale = Astro.locals.locale ?? defaultLocale;
+const t = Astro.locals.t ?? (await getTranslations(locale));
+
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(locale, to);
 

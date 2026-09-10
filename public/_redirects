@@ -7,11 +7,10 @@
 # on-demand pages live. Nothing here touches /api/*.
 
 # ---------------------------------------------------------------------------
-# Root. 302, not 301: this is the entry point for every language, and a 301
-# would pin it to English in every visitor's cache permanently — including
-# after locale negotiation is added.
+# The bare root is NOT here — it is declared in astro.config.mjs, because this
+# file is a Cloudflare feature the dev server never reads, and `/` is the one
+# URL a developer hits constantly. See the note on `redirects` there.
 # ---------------------------------------------------------------------------
-/                                     /en                          302
 /index.html                           /en                          301
 
 # ---------------------------------------------------------------------------

@@ -3,6 +3,7 @@ import LegalLayout from '@/layouts/LegalLayout.astro';
 import { contact, site } from '@/config/site';
 
 const email = `${contact.emailUser}@${contact.emailDomain}`;
+export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <LegalLayout
@@ -37,17 +38,17 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
   <h2>Intellectual property</h2>
   <p>
-    The content, design, code and brand marks on this site are owned by {site.legalName} or its
-    licensors, except where a third-party mark is displayed with permission. Nothing on this site
-    grants you a licence to use those marks.
+    The content, design, code and brand marks on this site are owned by {site.legalName} or its licensors,
+    except where a third-party mark is displayed with permission. Nothing on this site grants you a licence
+    to use those marks.
   </p>
 
   <h2>Services are described, not offered</h2>
   <p>
     The service descriptions on this site are informational. They are not an offer, a quote, or a
     commitment to deliver. Any engagement between us is governed by a separate written agreement
-    covering scope, timelines, fees and liability — and that agreement prevails over anything
-    stated here.
+    covering scope, timelines, fees and liability — and that agreement prevails over anything stated
+    here.
   </p>
 
   <h2>Availability</h2>
@@ -64,9 +65,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
   <h2>Limitation of liability</h2>
   <p>
-    To the extent permitted by law, {site.legalName} is not liable for indirect or consequential
-    loss arising from your use of this website, including loss of profit, revenue or data. Nothing
-    in these terms excludes liability that cannot lawfully be excluded.
+    To the extent permitted by law, {site.legalName} is not liable for indirect or consequential loss
+    arising from your use of this website, including loss of profit, revenue or data. Nothing in these
+    terms excludes liability that cannot lawfully be excluded.
   </p>
 
   <h2>Enquiries sent through WhatsApp</h2>
@@ -79,7 +80,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   <h2>Governing law</h2>
   <p>
     These terms are governed by the laws of India. Any dispute arising from them is subject to the
-    exclusive jurisdiction of the courts at <strong>TODO: seat to be confirmed (Kollam, Kerala?)</strong>.
+    exclusive jurisdiction of the courts at <strong
+      >TODO: seat to be confirmed (Kollam, Kerala?)</strong
+    >.
   </p>
 
   <h2>Changes</h2>

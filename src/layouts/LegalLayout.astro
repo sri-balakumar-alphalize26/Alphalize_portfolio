@@ -3,7 +3,7 @@ import PageHero from '@/components/PageHero.astro';
 import BaseLayout from './BaseLayout.astro';
 import { legalNav } from '@/config/site';
 import { stripMarks } from '@/components/marks';
-import { cleanPathname } from '@/i18n/paths';
+import { localeHref, splitLocale } from '@/i18n/paths';
 
 interface Props {
   /** Phrases to wrap in a marker stroke are marked inline — see marks.ts. */
@@ -15,9 +15,13 @@ interface Props {
 const { title, description, updated } = Astro.props;
 // The hero draws the strokes; <title> and og:title want the words only.
 const plainTitle = stripMarks(title);
-// Normalised, or the comparison below is '/legal/privacy-policy.html' against
-// '/legal/privacy-policy' and no sidebar link is ever marked current.
-const path = cleanPathname(Astro.url.pathname);
+// Locale-free and extension-free, so it can be compared against the plain
+// hrefs in legalNav. Without either step no sidebar link is ever marked
+// current: the pathname here is "/en/legal/privacy-policy.html".
+const { path } = splitLocale(Astro.url.pathname);
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <BaseLayout title={plainTitle} description={description}>
@@ -39,7 +43,7 @@ const path = cleanPathname(Astro.url.pathname);
             legalNav.map((l) => (
               <li>
                 <a
-                  href={l.href}
+                  href={loc(l.href)}
                   aria-current={path === l.href ? 'page' : undefined}
                   class:list={[
                     'block py-2.5 text-sm transition-colors',

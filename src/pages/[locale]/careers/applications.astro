@@ -1,8 +1,10 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { env } from 'cloudflare:workers';
 import Icon from '@/components/Icon.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { isUnlocked } from '@/lib/manage-auth';
+import { isLocale } from '@/i18n/locales';
 
 /**
  * Who applied, for what, and their CV. Owner-only.
@@ -12,6 +14,8 @@ import { isUnlocked } from '@/lib/manage-auth';
  * redirect, so the page's existence is not advertised.
  */
 export const prerender = false;
+
+if (!isLocale(Astro.params.locale)) return new Response('Not found', { status: 404 });
 
 if (!(await isUnlocked(Astro.request, env))) {
   return new Response('Not found', { status: 404 });
@@ -54,11 +58,17 @@ try {
 }
 
 const fmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <BaseLayout title="Applications" description="Received job applications." noindex>
   <section class="container-page py-12 lg:py-16">
-    <a href="/careers?manage=1" class="text-brand-700 inline-flex items-center gap-1.5 text-sm">
+    <a
+      href={loc('/careers?manage=1')}
+      class="text-brand-700 inline-flex items-center gap-1.5 text-sm"
+    >
       <Icon name="chevron-right" class="size-4 rotate-180" />
       Back to careers
     </a>
@@ -66,9 +76,9 @@ const fmt = new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: '
     <h1 class="text-heading mt-5 text-3xl font-semibold">Applications</h1>
     <p class="text-muted mt-2 max-w-2xl text-sm leading-relaxed">
       {rows.length}
-      {rows.length === 1 ? ' application' : ' applications'} stored. Every application is also
-      emailed to {'hr@alphalize.com'} with the CV attached — if storage ever fails the email still
-      goes out, so <strong>the mailbox is the record of truth</strong>, not this list.
+      {rows.length === 1 ? ' application' : ' applications'} stored. Every application is also emailed
+      to {'hr@alphalize.com'} with the CV attached — if storage ever fails the email still goes out, so
+      <strong>the mailbox is the record of truth</strong>, not this list.
     </p>
 
     {

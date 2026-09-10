@@ -53,8 +53,16 @@ async function load(locale: Locale): Promise<Messages> {
   const hit = cache.get(locale);
   if (hit) return hit;
 
-  const loader = loaders[`./messages/${locale}.json`];
-  if (!loader) throw new Error(`[i18n] no catalogue for "${locale}"`);
+  /**
+   * A locale can be listed before its catalogue is written — that is the whole
+   * middle of this project. Fall back to English rather than throwing: the
+   * alternative kills the build for a page that would have rendered English
+   * anyway, and an on-demand route can be hit with any locale in the URL.
+   * check-i18n.mjs is what reports a catalogue that should exist and does not.
+   */
+  const loader =
+    loaders[`./messages/${locale}.json`] ?? loaders[`./messages/${defaultLocale}.json`];
+  if (!loader) throw new Error(`[i18n] no catalogue for "${locale}", and none for the default`);
 
   const { default: messages } = await loader();
   cache.set(locale, messages);

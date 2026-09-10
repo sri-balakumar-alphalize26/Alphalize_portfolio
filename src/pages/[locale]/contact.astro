@@ -9,6 +9,7 @@ import WhatsAppManage from '@/components/WhatsAppManage.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { offices } from '@/config/site';
 import { readContact, telHref, waNumber } from '@/lib/contact-settings';
+import { isLocale } from '@/i18n/locales';
 
 /**
  * Rendered per-request so an edit made in manage mode reaches every visitor —
@@ -19,6 +20,12 @@ import { readContact, telHref, waNumber } from '@/lib/contact-settings';
  * dynamic, which is not worth it for a phone number.
  */
 export const prerender = false;
+
+/* The segment is whatever the URL carried, so it has to be checked. Anything
+   that is not a locale 404s rather than rendering English under a nonsense
+   prefix. No getStaticPaths here: Astro ignores it on an on-demand route and
+   warns, so the guard is the whole mechanism. */
+if (!isLocale(Astro.params.locale)) return new Response('Not found', { status: 404 });
 
 const details = await readContact(env);
 const { email, phoneDisplay: phone } = details;
@@ -78,11 +85,7 @@ const methods = [
 
         {
           methods.map((m, i) => (
-            <div
-              class="ct-card"
-              style={`--d:${180 + i * 220}ms`}
-              data-copy={m.copy || undefined}
-            >
+            <div class="ct-card" style={`--d:${180 + i * 220}ms`} data-copy={m.copy || undefined}>
               <span class="ct-node" aria-hidden="true" />
               <a
                 class="ct-row rounded-card border-brand-100 border bg-white"
@@ -101,19 +104,15 @@ const methods = [
                 </span>
                 <span class="ct-txt">
                   <b class="text-ink">{m.label}</b>
-                  <span class="text-muted">
-                    {m.value}
-                  </span>
+                  <span class="text-muted">{m.value}</span>
                 </span>
               </a>
-              {
-                m.copy && (
-                  <button class="ct-copy" type="button" aria-label={`Copy ${m.label}`}>
-                    <Icon name="copy" class="ct-ci size-3.5" />
-                    <Icon name="check" draw class="ct-co size-3.5" />
-                  </button>
-                )
-              }
+              {m.copy && (
+                <button class="ct-copy" type="button" aria-label={`Copy ${m.label}`}>
+                  <Icon name="copy" class="ct-ci size-3.5" />
+                  <Icon name="check" draw class="ct-co size-3.5" />
+                </button>
+              )}
             </div>
           ))
         }
@@ -140,16 +139,18 @@ const methods = [
               ))
             }
 
-            {/* Shown permanently here, unlike the footer where it sits behind a
-                chip: this is the page someone opens when they want to find us. */}
+            {
+              /* Shown permanently here, unlike the footer where it sits behind a
+                chip: this is the page someone opens when they want to find us. */
+            }
             {
               offices[0] && (
                 <div class="ct-qr">
                   <DirectionsQr office={offices[0]} size={96} />
                   <p class="text-muted">
                     <b class="text-ink">Scan for directions</b>
-                    Opens Google Maps already routing to the office. On a
-                    computer, click it instead.
+                    Opens Google Maps already routing to the office. On a computer, click it
+                    instead.
                   </p>
                 </div>
               )
@@ -166,8 +167,7 @@ const methods = [
               </span>
               <p class="text-muted">
                 <b class="text-ink">Response time</b>
-                We aim to reply within one business day, and support runs around the clock from
-                Kollam.
+                We aim to reply within one business day, and support runs around the clock from Kollam.
               </p>
             </div>
           </div>

@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { Heading, Marker } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
 
@@ -15,6 +16,9 @@ const points = [
   'Keeps working through a dropped connection and syncs back to the ERP once you are online again.',
   'Installed and updated by our team, with 24/7 support behind it.',
 ];
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <section id="desktop" class="dp scroll-mt-24 py-16 lg:py-20" data-ab>
@@ -36,15 +40,11 @@ const points = [
             Desktop <Marker type="underline" color="sky" delay={950}>software</Marker>
           </Heading>
         </div>
-        <p
-          class="lead text-brand-100 ab-words mt-4 max-w-lg"
-          data-base="520"
-          data-step="26"
-        >
+        <p class="lead text-brand-100 ab-words mt-4 max-w-lg" data-base="520" data-step="26">
           Installable Windows .exe applications for billing counters and back-office machines, built
           for speed on local hardware.
         </p>
-        <a href="/contact" class="btn btn-light dp-cta ab mt-7" style="--d:900ms">
+        <a href={loc('/contact')} class="btn btn-light dp-cta ab mt-7" style="--d:900ms">
           Ask about desktop billing
           <Icon name="arrow-right" class="size-4" />
           <span class="dp-shine" aria-hidden="true"></span>

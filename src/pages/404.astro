@@ -1,10 +1,14 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { Heading } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import Icon from '@/components/Icon.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <BaseLayout
@@ -21,8 +25,8 @@ const services = (await getCollection('services')).sort((a, b) => a.data.order -
     </p>
 
     <div class="mt-8 flex flex-wrap justify-center gap-3">
-      <a href="/" class="btn btn-primary"> Back to home </a>
-      <a href="/contact" class="btn btn-outline text-brand-700"> Contact us </a>
+      <a href={loc('/')} class="btn btn-primary"> Back to home </a>
+      <a href={loc('/contact')} class="btn btn-outline text-brand-700"> Contact us </a>
     </div>
 
     <div class="mx-auto mt-14 max-w-2xl text-left">
@@ -34,7 +38,7 @@ const services = (await getCollection('services')).sort((a, b) => a.data.order -
           services.map((s) => (
             <li>
               <a
-                href={`/services/${s.id}`}
+                href={loc(`/services/${s.id}`)}
                 class="flex items-center gap-2.5 rounded-lg border border-brand-100 px-4 py-3 text-sm text-muted transition-colors hover:border-brand-200 hover:bg-brand-50/50 hover:text-brand-700"
               >
                 <Icon name={s.data.icon} class="size-4 shrink-0 text-brand-500" />

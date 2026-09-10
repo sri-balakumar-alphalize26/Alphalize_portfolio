@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { Heading, Sparkle } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
@@ -21,6 +22,9 @@ const {
   title = 'Ready to see what automation would change?',
   body = 'Tell us how your operation runs today. We will come back with a straight assessment of what an ERP or BI rollout would actually move — and what it would not.',
 } = Astro.props;
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <section class="container-page py-16 lg:py-20">
@@ -44,7 +48,7 @@ const {
     <p class="lead text-plum-100 mx-auto mt-4 max-w-2xl">{body}</p>
 
     <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
-      <a href="/contact" class="btn btn-light cta-go">
+      <a href={loc('/contact')} class="btn btn-light cta-go">
         Start a conversation
         <Icon name="arrow-right" class="size-4" />
       </a>

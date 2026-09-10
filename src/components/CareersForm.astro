@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import Field from './Field.astro';
 import PhoneField from './PhoneField.astro';
 import Icon from './Icon.astro';
@@ -20,6 +21,9 @@ interface Props {
 }
 
 const { positions } = Astro.props;
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <form
@@ -58,14 +62,25 @@ const { positions } = Astro.props;
       class="ab apply-f"
     />
     <PhoneField name="phone" label="Phone" required placeholder="70252 05503" class="ab apply-f" />
-    <Field name="position" label="Position" type="select" required options={positions} class="ab apply-f" />
+    <Field
+      name="position"
+      label="Position"
+      type="select"
+      required
+      options={positions}
+      class="ab apply-f"
+    />
   </div>
 
-  {/* Custom markup rather than <Field type="file">: the drop zone needs its
+  {
+    /* Custom markup rather than <Field type="file">: the drop zone needs its
       own states. The error slot keeps the [data-error-for] name the server
-      uses, so a server-side rejection lands in the same place. */}
+      uses, so a server-side rejection lands in the same place. */
+  }
   <div class="ab apply-f mt-5" style="--d:400ms">
-    <span class="text-ink block text-sm font-medium">CV / Résumé <span class="text-red-600">*</span></span>
+    <span class="text-ink block text-sm font-medium"
+      >CV / Résumé <span class="text-red-600">*</span></span
+    >
     <span class="text-muted mt-1 block text-xs">PDF, DOC or DOCX. Maximum 5MB.</span>
 
     <label class="apply-drop mt-2" data-drop>
@@ -99,8 +114,10 @@ const { positions } = Astro.props;
     />
   </div>
 
-  {/* No wrapper margin, and no .ab entrance: interaction-only means this is
-      usually zero-height. See ContactForm for the reasoning. */}
+  {
+    /* No wrapper margin, and no .ab entrance: interaction-only means this is
+      usually zero-height. See ContactForm for the reasoning. */
+  }
   <Turnstile />
 
   <button
@@ -116,7 +133,7 @@ const { positions } = Astro.props;
 
   <p class="text-muted ab mt-3 text-xs" style="--d:640ms">
     Your CV is used only to assess this application. See our{' '}
-    <a href="/legal/privacy-policy" class="text-brand-700 underline">privacy policy</a>.
+    <a href={loc('/legal/privacy-policy')} class="text-brand-700 underline">privacy policy</a>.
   </p>
 </form>
 

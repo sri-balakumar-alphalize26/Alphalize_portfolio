@@ -39,6 +39,7 @@ const jsonLd = jobs.map((job) => ({
   directApply: true,
   url: `${site.url}/careers#apply`,
 }));
+export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <BaseLayout
@@ -61,8 +62,10 @@ const jsonLd = jobs.map((job) => ({
 
   <JobList />
 
-  {/* Application form. On <AboutAnim> rather than <Reveal>, like the rest of
-      the page — the two engines cannot drive the same element. */}
+  {
+    /* Application form. On <AboutAnim> rather than <Reveal>, like the rest of
+      the page — the two engines cannot drive the same element. */
+  }
   <section class="cc-surface border-brand-100 border-t py-16 lg:py-20" data-ab>
     <div class="container-page">
       <div class="mx-auto max-w-3xl">

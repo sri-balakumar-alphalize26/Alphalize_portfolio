@@ -4,6 +4,7 @@ import { contact, offices, site } from '@/config/site';
 
 const email = `${contact.emailUser}@${contact.emailDomain}`;
 const india = offices.find((o) => o.id === 'kollam');
+export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <LegalLayout
@@ -25,36 +26,38 @@ const india = offices.find((o) => o.id === 'kollam');
   <h2>Who we are</h2>
   <p>
     <strong>TODO:</strong> registered legal entity name and, if applicable, CIN. Trading as
-    {site.legalName}, {india?.street}, {india?.locality}, {india?.region} {india?.postalCode},
+    {site.legalName}, {india?.street}, {india?.locality}, {india?.region}
+    {india?.postalCode},
     {india?.country}. We are the data fiduciary for the information described here.
   </p>
 
   <h2>What this policy covers</h2>
   <p>
-    This policy covers this website and the forms on it. <strong>It does not cover the systems we
-    build and install for our clients.</strong> When we implement an ERP, a POS counter or a mobile
-    app inside another company, that company controls the data held in it and its own privacy policy
-    applies, not this one.
+    This policy covers this website and the forms on it. <strong
+      >It does not cover the systems we build and install for our clients.</strong
+    > When we implement an ERP, a POS counter or a mobile app inside another company, that company controls
+    the data held in it and its own privacy policy applies, not this one.
   </p>
 
   <h2>What we collect</h2>
-  <p>Very little, and only where you hand it to us on purpose. There is no visitor account on this site and nothing to sign up for.</p>
+  <p>
+    Very little, and only where you hand it to us on purpose. There is no visitor account on this
+    site and nothing to sign up for.
+  </p>
   <ul>
     <li>
-      <strong>Job applications.</strong> When you apply through the careers form we receive and
-      store your name, email address, phone number, the role you applied for, your CV, its original
-      filename, any message you add, and the date and time you sent it. This is the only form on the
-      site that submits data to us.
+      <strong>Job applications.</strong> When you apply through the careers form we receive and store
+      your name, email address, phone number, the role you applied for, your CV, its original filename,
+      any message you add, and the date and time you sent it. This is the only form on the site that submits
+      data to us.
     </li>
     <li>
-      <strong>Enquiries.</strong> The contact form sends nothing to our servers. It composes a
-      message from what you typed and opens WhatsApp with it ready to send — see “How enquiries
-      reach us” below.
+      <strong>Enquiries.</strong> The contact form sends nothing to our servers. It composes a message
+      from what you typed and opens WhatsApp with it ready to send — see “How enquiries reach us” below.
     </li>
     <li>
-      <strong>Your IP address.</strong> When you submit the careers form our server reads the IP
-      address it arrived from, so it can limit how often the same source submits and turn away
-      automated abuse.
+      <strong>Your IP address.</strong> When you submit the careers form our server reads the IP address
+      it arrived from, so it can limit how often the same source submits and turn away automated abuse.
     </li>
   </ul>
 
@@ -75,8 +78,8 @@ const india = offices.find((o) => o.id === 'kollam');
 
   <h2>Our lawful basis</h2>
   <p>
-    We rely on your <strong>consent</strong> when you send us an application or an enquiry — you
-    choose to fill in the form and press send. We rely on our <strong>legitimate interest</strong>
+    We rely on your <strong>consent</strong> when you send us an application or an enquiry — you choose
+    to fill in the form and press send. We rely on our <strong>legitimate interest</strong>
     in keeping the site secure for the rate limiting and spam checks on the careers form.
   </p>
   <p>
@@ -134,29 +137,30 @@ const india = offices.find((o) => o.id === 'kollam');
   <ul>
     <li>Applications are readable only through a passcode-protected page on this site.</li>
     <li>The passcode is checked on our server; access is refused without a valid session.</li>
-    <li>CVs are never published as static files and are sent with instructions not to cache them.</li>
+    <li>
+      CVs are never published as static files and are sent with instructions not to cache them.
+    </li>
     <li>No password of yours is involved, because the site has no visitor accounts to hold one.</li>
   </ul>
 
   <h2>How long we keep it</h2>
   <ul>
     <li>
-      <strong>Applications and CVs</strong> are kept while they are still of use to us, so we can
-      consider you for future openings. We do not remove them on a fixed schedule — ask us and we
-      will delete yours.
+      <strong>Applications and CVs</strong> are kept while they are still of use to us, so we can consider
+      you for future openings. We do not remove them on a fixed schedule — ask us and we will delete yours.
     </li>
     <li>
-      <strong>Rate-limiting records</strong> hold a request counter against your IP address, stored
-      as plain text, and expire automatically within about an hour. They are not linked to your
-      application or used for any other purpose.
+      <strong>Rate-limiting records</strong> hold a request counter against your IP address, stored as
+      plain text, and expire automatically within about an hour. They are not linked to your application
+      or used for any other purpose.
     </li>
     <li>
-      <strong>Enquiries sent over WhatsApp</strong> are held in that conversation, subject to
-      WhatsApp's retention rules as well as our own.
+      <strong>Enquiries sent over WhatsApp</strong> are held in that conversation, subject to WhatsApp's
+      retention rules as well as our own.
     </li>
     <li>
-      <strong>Storage in your browser</strong> remains until you clear your browsing data. The staff
-      session cookie expires on its own.
+      <strong>Storage in your browser</strong> remains until you clear your browsing data. The staff session
+      cookie expires on its own.
     </li>
   </ul>
 
@@ -167,8 +171,8 @@ const india = offices.find((o) => o.id === 'kollam');
   </p>
   <ul>
     <li>
-      <strong>Cloudflare Turnstile</strong> may set a short-lived token on the careers page, solely
-      to confirm the submission is not automated.
+      <strong>Cloudflare Turnstile</strong> may set a short-lived token on the careers page, solely to
+      confirm the submission is not automated.
     </li>
     <li>
       <strong>A staff session cookie</strong> (<code>alphalize_manage</code>) is set only when a
@@ -194,9 +198,9 @@ const india = offices.find((o) => o.id === 'kollam');
     <li>Receive what you sent us in a portable form.</li>
   </ul>
   <p>
-    Write to <a href={`mailto:${email}`}>{email}</a> and tell us what you would like done. We answer
-    within 30 days. If you are in the European Economic Area or the United Kingdom you may also
-    complain to your national data protection authority.
+    Write to <a href={`mailto:${email}`}>{email}</a> and tell us what you would like done. We answer within
+    30 days. If you are in the European Economic Area or the United Kingdom you may also complain to your
+    national data protection authority.
   </p>
 
   <h2>Grievance officer</h2>
@@ -208,7 +212,8 @@ const india = offices.find((o) => o.id === 'kollam');
     <li><strong>Name: TODO</strong> — to be confirmed by the business before launch.</li>
     <li>Email: <a href={`mailto:${email}`}>{email}</a></li>
     <li>
-      Address: {india?.street}, {india?.locality}, {india?.region} {india?.postalCode},
+      Address: {india?.street}, {india?.locality}, {india?.region}
+      {india?.postalCode},
       {india?.country}
     </li>
     <li>We aim to acknowledge complaints within 30 days.</li>

@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 /**
  * The `?manage=1` control bar and its passcode dialog. Renders nothing without
  * that query string — a plain URL stays a visitor page.
@@ -17,10 +18,15 @@ interface Props {
 }
 
 const { scope = 'Edits', keys = [], applications = false } = Astro.props;
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
-{/* Native <dialog>: real focus trapping, Escape handling and an inert page
-    behind it, none of which is worth hand-rolling. */}
+{
+  /* Native <dialog>: real focus trapping, Escape handling and an inert page
+    behind it, none of which is worth hand-rolling. */
+}
 <dialog class="mb-dialog" data-manage-dialog>
   <form class="mb-dialog-in" data-manage-lock>
     <h2 class="mb-dialog-h">Manage mode</h2>
@@ -59,7 +65,7 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
     <div class="mb-row mb-actions">
       {
         applications && (
-          <a href="/careers/applications" class="btn btn-primary mb-btn">
+          <a href={loc('/careers/applications')} class="btn btn-primary mb-btn">
             Applications
           </a>
         )
@@ -74,9 +80,21 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
     <div class="mb-settings" data-manage-settings-panel hidden>
       <form class="mb-set" data-manage-passcode-form>
         <p class="mb-set-h">Change passcode</p>
-        <input type="password" name="current" placeholder="Current" autocomplete="current-password" required />
+        <input
+          type="password"
+          name="current"
+          placeholder="Current"
+          autocomplete="current-password"
+          required
+        />
         <input type="password" name="next" placeholder="New" autocomplete="new-password" required />
-        <input type="password" name="confirm" placeholder="Confirm" autocomplete="new-password" required />
+        <input
+          type="password"
+          name="confirm"
+          placeholder="Confirm"
+          autocomplete="new-password"
+          required
+        />
         <button type="submit" class="btn btn-primary mb-btn">Save</button>
       </form>
 
@@ -92,9 +110,11 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
   </div>
 
   <p class="mb-warn">
-    {scope} are saved in <strong>this browser only</strong> and shown only while <code>?manage=1</code>
-    is in the address. Visitors, Google Jobs and the application form all still use the published
-    content from the repository — publishing a change still means editing the source and redeploying.
+    {scope} are saved in <strong>this browser only</strong> and shown only while <code
+      >?manage=1</code
+    >
+    is in the address. Visitors, Google Jobs and the application form all still use the published content
+    from the repository — publishing a change still means editing the source and redeploying.
   </p>
 </div>
 
@@ -180,7 +200,8 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
         const passcode = new FormData(lockForm).get('passcode')?.toString() ?? '';
         const result = await manageAction('unlock', { passcode });
         if (result.ok !== true) {
-          if (error) error.textContent = UNLOCK_MESSAGES[String(result.outcome)] ?? 'Unlock failed.';
+          if (error)
+            error.textContent = UNLOCK_MESSAGES[String(result.outcome)] ?? 'Unlock failed.';
           lockForm.querySelector('input')?.select();
           return;
         }
@@ -237,23 +258,21 @@ const { scope = 'Edits', keys = [], applications = false } = Astro.props;
         }
       });
 
-      bar.querySelector<HTMLButtonElement>('[data-manage-lockout]')?.addEventListener(
-        'click',
-        async () => {
+      bar
+        .querySelector<HTMLButtonElement>('[data-manage-lockout]')
+        ?.addEventListener('click', async () => {
           await manageAction('lock');
           leaveManageMode();
-        }
-      );
+        });
 
-      bar.querySelector<HTMLButtonElement>('[data-manage-discard]')?.addEventListener(
-        'click',
-        () => {
+      bar
+        .querySelector<HTMLButtonElement>('[data-manage-discard]')
+        ?.addEventListener('click', () => {
           for (const key of (bar.dataset.keys ?? '').split(',').filter(Boolean)) {
             writeRaw(key, null);
           }
           location.reload();
-        }
-      );
+        });
     }
 
     await render();

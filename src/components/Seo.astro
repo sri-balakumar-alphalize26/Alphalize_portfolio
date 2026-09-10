@@ -1,6 +1,6 @@
 ---
 import { site } from '@/config/site';
-import { cleanPathname } from '@/i18n/paths';
+import { localeHref, splitLocale } from '@/i18n/paths';
 
 interface Props {
   title: string;
@@ -22,12 +22,19 @@ const {
   jsonLd = [],
 } = Astro.props;
 
-// With `build.format: 'file'` the build-time pathname is `/about.html`, but
-// Cloudflare serves it at `/about` and the sitemap lists `/about`. Normalise so
-// every signal agrees. See cleanPathname, shared with Header, LegalLayout and
-// SummarizeWithAi.
-const cleanPath = cleanPathname(canonicalPath ?? Astro.url.pathname);
-const canonical = new URL(cleanPath, site.url).href;
+/**
+ * `cleanPath` is locale-free: the prefix comes off here and goes back on below.
+ * That is what lets one page emit an alternate for each locale from the same
+ * path, and it is why `canonicalPath`, when a caller passes one, must also be
+ * locale-free.
+ *
+ * It is extension-free too — `build.format: 'file'` makes the build-time
+ * pathname `/en/about.html` while Cloudflare serves it at `/en/about` and the
+ * sitemap lists that, so every signal has to agree.
+ */
+const { path: cleanPath } = splitLocale(canonicalPath ?? Astro.url.pathname);
+const { locale } = Astro.locals;
+const canonical = new URL(localeHref(locale, cleanPath), site.url).href;
 const isHome = cleanPath === '/';
 // Home keeps the bare brand name; every other page is suffixed.
 const fullTitle = isHome ? title : `${title} | ${site.name}`;

@@ -7,6 +7,7 @@ import TrustedPartners from '@/components/TrustedPartners.astro';
 import WhyChooseUs from '@/components/WhyChooseUs.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { offices } from '@/config/site';
+export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <BaseLayout
@@ -22,11 +23,13 @@ import { offices } from '@/config/site';
     lead="We understand the power of automation in streamlining business processes and unlocking operational efficiency — and we are more interested in what it changes for you than in the technology itself."
   />
 
-  {/*
+  {
+    /*
     Narrative. Driven by <AboutAnim> rather than <Reveal>: the two cannot share
     an element, because [data-reveal]'s `animation-timeline: view()` animation
     would override the .ab transition on opacity/transform.
-  */}
+  */
+  }
   <section class="container-page py-16 lg:py-20" data-ab data-hold="1000">
     <div class="grid gap-12 lg:grid-cols-12 lg:gap-16">
       <div class="lg:col-span-7">
@@ -73,7 +76,10 @@ import { offices } from '@/config/site';
                   >
                     <Icon name="pin" class="size-4" />
                   </span>
-                  <span class="text-muted ab text-sm leading-relaxed" style={`--d:${740 + i * 190}ms`}>
+                  <span
+                    class="text-muted ab text-sm leading-relaxed"
+                    style={`--d:${740 + i * 190}ms`}
+                  >
                     <span class="text-ink block font-semibold">{o.label}</span>
                     {o.street}
                     <br />

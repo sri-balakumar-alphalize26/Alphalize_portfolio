@@ -1,15 +1,21 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import Field from './Field.astro';
 import PhoneField from './PhoneField.astro';
 import Icon from './Icon.astro';
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
-{/* No action and no data-enhance: submitting composes a WhatsApp message and
+{
+  /* No action and no data-enhance: submitting composes a WhatsApp message and
     opens it, exactly as the 369 enquiry form does. Nothing is posted, so the
-    enquiry only reaches us once the visitor presses send in WhatsApp. */}
+    enquiry only reaches us once the visitor presses send in WhatsApp. */
+}
 <form class="rounded-card border-brand-100 border bg-white p-6 sm:p-8">
-  <h2 class="text-xl font-semibold text-ink">Get in touch</h2>
-  <p class="mt-1.5 text-sm text-muted">
+  <h2 class="text-ink text-xl font-semibold">Get in touch</h2>
+  <p class="text-muted mt-1.5 text-sm">
     Tell us what you are trying to change. We reply to every enquiry.
   </p>
 
@@ -41,8 +47,10 @@ import Icon from './Icon.astro';
       <Icon name="whatsapp" class="size-4" />
     </button>
 
-    {/* WhatsApp opens in a new tab; if a popup blocker ate it, say so rather
-        than leaving the visitor wondering whether anything happened. */}
+    {
+      /* WhatsApp opens in a new tab; if a popup blocker ate it, say so rather
+        than leaving the visitor wondering whether anything happened. */
+    }
     <p class="text-muted text-sm" role="status" aria-live="polite" data-wa-hint></p>
   </div>
 
@@ -58,7 +66,6 @@ import Icon from './Icon.astro';
 
   <p class="text-muted mt-3 text-xs">
     We use your details only to respond to this enquiry. See our{' '}
-    <a href="/legal/privacy-policy" class="text-brand-700 underline">privacy policy</a>.
+    <a href={loc('/legal/privacy-policy')} class="text-brand-700 underline">privacy policy</a>.
   </p>
 </form>
-

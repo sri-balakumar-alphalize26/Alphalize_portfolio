@@ -6,6 +6,7 @@ import Seo from '@/components/Seo.astro';
 import ContactSync from '@/components/ContactSync.astro';
 import SplashScreen from '@/components/SplashScreen.astro';
 import { contact, offices, site } from '@/config/site';
+import { localeLabels } from '@/i18n/locales';
 import inter400 from '@alphalize/astro-marker/fonts/inter-latin-400-normal.woff2?url';
 import caveat700 from '@alphalize/astro-marker/fonts/caveat-latin-700-normal.woff2?url';
 import '@/styles/global.css';
@@ -41,9 +42,11 @@ const organization = {
     addressCountry: o.countryCode,
   })),
 };
+/* Set by src/middleware.ts, from the [locale] route segment. */
+const { locale } = Astro.locals;
 ---
 
-<html lang="en">
+<html lang={locale} dir={localeLabels[locale].dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -74,7 +77,7 @@ const organization = {
 
     <a
       href="#main"
-      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-brand-700 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
+      class="focus:bg-brand-700 sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
     >
       Skip to content
     </a>

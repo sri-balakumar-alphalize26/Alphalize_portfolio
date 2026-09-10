@@ -11,13 +11,24 @@ import ServiceSidebar from '@/components/ServiceSidebar.astro';
 import SolutionCards from '@/components/SolutionCards.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/config/site';
+import { liveLocales } from '@/i18n/locales';
 
+/**
+ * Every live locale gets every slug.
+ *
+ * Content is not per-locale yet, so each locale renders the same entry. Once it
+ * is, a locale missing a translation must still resolve the URL rather than
+ * 404: the header dropdown and the footer list are built from the English set,
+ * so the site links every slug in every locale whether or not it is translated.
+ */
 export const getStaticPaths = (async () => {
   const services = await getCollection('services');
-  return services.map((service) => ({
-    params: { slug: service.id },
-    props: { service },
-  }));
+  return liveLocales.flatMap((locale) =>
+    services.map((service) => ({
+      params: { locale, slug: service.id },
+      props: { service },
+    }))
+  );
 }) satisfies GetStaticPaths;
 
 const { service } = Astro.props;

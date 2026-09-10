@@ -20,6 +20,7 @@ import { ceo, talks } from '@/config/ceo';
  * reveal as they are scrolled to rather than all at once. The engine is
  * about-anim.ts: html.ab-js arms the hidden states, .in releases them.
  */
+export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <BaseLayout title={`${ceo.name} — ${ceo.role}`} description={ceo.intro[0].slice(0, 155)}>

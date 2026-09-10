@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import logo from '@/assets/brand/logo.png';
@@ -34,6 +35,9 @@ const { hover = 'underline' } = Astro.props;
 
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 const year = new Date().getFullYear();
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <footer
@@ -93,7 +97,7 @@ const year = new Date().getFullYear();
           {
             services.map((s) => (
               <li>
-                <a href={`/services/${s.id}`} class="text-brand-200">
+                <a href={loc(`/services/${s.id}`)} class="text-brand-200">
                   {s.data.title}
                 </a>
               </li>
@@ -106,14 +110,14 @@ const year = new Date().getFullYear();
       <nav class="ft-col ab lg:col-span-2" style="--d:220ms" aria-label="Company">
         <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Company</h2>
         <ul class="mt-4 space-y-2.5 text-sm">
-          <li><a href="/about" class="text-brand-200">About</a></li>
-          <li><a href="/ceo" class="text-brand-200">Leadership</a></li>
-          <li><a href="/careers" class="text-brand-200">Careers</a></li>
-          <li><a href="/contact" class="text-brand-200">Contact</a></li>
+          <li><a href={loc('/about')} class="text-brand-200">About</a></li>
+          <li><a href={loc('/ceo')} class="text-brand-200">Leadership</a></li>
+          <li><a href={loc('/careers')} class="text-brand-200">Careers</a></li>
+          <li><a href={loc('/contact')} class="text-brand-200">Contact</a></li>
           {
             legalNav.map((l) => (
               <li>
-                <a href={l.href} class="text-brand-200">
+                <a href={loc(l.href)} class="text-brand-200">
                   {l.label}
                 </a>
               </li>

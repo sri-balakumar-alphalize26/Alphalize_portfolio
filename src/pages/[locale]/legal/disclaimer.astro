@@ -3,6 +3,7 @@ import LegalLayout from '@/layouts/LegalLayout.astro';
 import { contact, site } from '@/config/site';
 
 const email = `${contact.emailUser}@${contact.emailDomain}`;
+export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <LegalLayout
@@ -13,9 +14,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   <h2>General information only</h2>
   <p>
     The information on <strong>alphalize.com</strong> is provided for general information about
-    {site.legalName} and the services we offer. It is not professional, technical, financial or
-    legal advice, and you should not act on it as though it were advice about your specific
-    situation.
+    {site.legalName} and the services we offer. It is not professional, technical, financial or legal
+    advice, and you should not act on it as though it were advice about your specific situation.
   </p>
 
   <h2>No guarantee of outcomes</h2>
@@ -29,8 +29,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   <h2>Accuracy</h2>
   <p>
     We make reasonable efforts to keep the site accurate and current, but we do not warrant that
-    every page is complete or up to date. Technology descriptions in particular change over time.
-    If something here matters to a decision you are making, confirm it with us directly.
+    every page is complete or up to date. Technology descriptions in particular change over time. If
+    something here matters to a decision you are making, confirm it with us directly.
   </p>
 
   <h2>External links and third-party marks</h2>

@@ -1,36 +1,63 @@
-# 301s from the old hand-written .html site.
-# Losing these loses the search position the old URLs already hold.
+# Every page now lives under a locale prefix. Two generations of URL have to
+# keep working: the unprefixed ones this site published until now, and the .html
+# ones from the hand-written site before it.
+#
+# Rules are enumerated rather than splatted. A bare `/*` on Workers Assets would
+# also swallow requests meant for the Worker, which is where /api/* and the two
+# on-demand pages live. Nothing here touches /api/*.
 
-/index.html                                                      /                                          301
+# ---------------------------------------------------------------------------
+# Root. 302, not 301: this is the entry point for every language, and a 301
+# would pin it to English in every visitor's cache permanently — including
+# after locale negotiation is added.
+# ---------------------------------------------------------------------------
+/                                     /en                          302
+/index.html                           /en                          301
 
-# Core pages
-/about.html                                                      /about                                     301
-/services.html                                                   /services                                  301
-/careers.html                                                    /careers                                   301
-/contact.html                                                    /contact                                   301
+# ---------------------------------------------------------------------------
+# The unprefixed URLs this site served until the locale move. These are the
+# ones with live search positions, so they matter most.
+# ---------------------------------------------------------------------------
+/about                                /en/about                    301
+/ceo                                  /en/ceo                      301
+/careers                              /en/careers                  301
+/contact                              /en/contact                  301
+/services                             /en/services                 301
+/services/*                           /en/services/:splat          301
+/legal/*                              /en/legal/:splat             301
+/careers/applications                 /en/careers/applications     301
 
-# Legal
-/privacy-policy.html                                             /legal/privacy-policy                      301
-/privacy.html                                                    /legal/privacy-policy                      301
-/terms-conditions.html                                           /legal/terms-conditions                    301
-/terms.html                                                      /legal/terms-conditions                    301
-/disclaimer.html                                                 /legal/disclaimer                          301
+# ---------------------------------------------------------------------------
+# 301s from the old hand-written .html site, retargeted to land in ONE hop.
+# Chaining these through the unprefixed rules above would cost a second
+# redirect and halve the signal each one passes.
+# ---------------------------------------------------------------------------
+/about.html                           /en/about                    301
+/services.html                        /en/services                 301
+/careers.html                         /en/careers                  301
+/contact.html                         /en/contact                  301
+
+/privacy-policy.html                  /en/legal/privacy-policy     301
+/privacy.html                         /en/legal/privacy-policy     301
+/terms-conditions.html                /en/legal/terms-conditions   301
+/terms.html                           /en/legal/terms-conditions   301
+/disclaimer.html                      /en/legal/disclaimer         301
 
 # Old PHP form handlers -> the pages that now carry the forms.
-/contact_mail.php                                                /contact                                   301
-/mail_contact.php                                                /careers                                   301
+/contact_mail.php                     /en/contact                  301
+/mail_contact.php                     /en/careers                  301
 
-# Retired blog. The blog is out of scope for the rebuild, but these URLs are
-# indexed, so they must land on a real page rather than 404. The old site
-# linked posts both with and without the .html suffix.
-/blog.html                                                       /services                                  301
-/blog                                                            /services                                  301
+# Retired blog. Out of scope for the rebuild, but these URLs are indexed, so
+# they must land on a real page rather than 404. The old site linked posts both
+# with and without the .html suffix.
+/blog.html                            /en/services                 301
+/blog                                 /en/services                 301
 
-/the-power-auto-auditing-erp-streamlining-compliance-efforts.html   /services   301
-/the-power-auto-auditing-erp-streamlining-compliance-efforts        /services   301
-/social-media-business.html                                         /services   301
-/social-media-business                                              /services   301
-/transforming-businesses-erp-ai-dynamic-duo.html                    /services   301
-/transforming-businesses-erp-ai-dynamic-duo                         /services   301
-/unveiling-latest-mobile-erp-trends-empowering-businesses.html      /services   301
-/unveiling-latest-mobile-erp-trends-empowering-businesses           /services   301
+/the-power-auto-auditing-erp-streamlining-compliance-efforts.html   /en/services   301
+/the-power-auto-auditing-erp-streamlining-compliance-efforts        /en/services   301
+/social-media-business.html                                         /en/services   301
+/social-media-business                                              /en/services   301
+/transforming-businesses-erp-ai-dynamic-duo.html                    /en/services   301
+/transforming-businesses-erp-ai-dynamic-duo                         /en/services   301
+/unveiling-latest-mobile-erp-trends-empowering-businesses.html      /en/services   301
+/unveiling-latest-mobile-erp-trends-empowering-businesses           /en/services   301

@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import type { CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
@@ -27,10 +28,13 @@ interface Props {
 
 const { service, delay = 0, featured = false } = Astro.props;
 const { title, summary, icon } = service.data;
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <Reveal as="article" delay={delay} class="h-full [perspective:1200px]">
-  <a href={`/services/${service.id}`} class:list={['sc-card', featured && 'is-featured']}>
+  <a href={loc(`/services/${service.id}`)} class:list={['sc-card', featured && 'is-featured']}>
     <span class="sc-tile">
       <Icon name={icon} class="size-6" />
     </span>

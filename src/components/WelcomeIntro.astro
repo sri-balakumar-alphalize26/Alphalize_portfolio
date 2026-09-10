@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { Heading, Marker } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import Icon from './Icon.astro';
@@ -15,6 +16,9 @@ import Section from './Section.astro';
  */
 const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
 const chips = services.slice(0, 6);
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <Section variant="white" space="lg">
@@ -39,7 +43,7 @@ const chips = services.slice(0, 6);
         around the world — and a commitment to software that fits the organisation it serves.
       </p>
 
-      <a href="/about" class="btn btn-primary wi-cta mt-8">
+      <a href={loc('/about')} class="btn btn-primary wi-cta mt-8">
         Discover more
         <Icon name="arrow-right" class="size-4" />
       </a>
@@ -50,7 +54,7 @@ const chips = services.slice(0, 6);
         {
           chips.map((s) => (
             <li>
-              <a href={`/services/${s.id}`} class="wi-chip">
+              <a href={loc(`/services/${s.id}`)} class="wi-chip">
                 <span class="wi-bar" aria-hidden="true" />
                 <span class="wi-ico">
                   <Icon name={s.data.icon} class="size-5" />

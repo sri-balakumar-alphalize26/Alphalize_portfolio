@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { contact, nav } from '@/config/site';
-import { cleanPathname } from '@/i18n/paths';
+import { localeHref, splitLocale } from '@/i18n/paths';
 import Icon from './Icon.astro';
 import LocaleSwitcher from './LocaleSwitcher.astro';
 import Logo from './Logo.astro';
@@ -34,12 +34,14 @@ const services = (await getCollection('services')).sort((a, b) => a.data.order -
 const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
 
 /**
- * `build.format: "file"` means a prerendered page sees its own pathname as
- * "/about.html", while every href here is "/about" — so an unnormalised
- * comparison never matches and no nav item is ever marked current. See
- * cleanPathname, which is shared with Seo, LegalLayout and SummarizeWithAi.
+ * `path` is locale-free and extension-free, so it can be compared against the
+ * plain hrefs in config/site.ts. Two things would otherwise break the active
+ * state: `build.format: "file"` makes a prerendered page see itself as
+ * "/en/about.html", and the locale prefix is not part of any nav href.
  */
-const path = cleanPathname(Astro.url.pathname);
+const { locale, path } = splitLocale(Astro.url.pathname);
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(locale, to);
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
 
@@ -83,7 +85,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
                 <div class="drop" data-drop>
                   <a
                     class:list={['nl', { on: isActive(item.href) }]}
-                    href={item.href}
+                    href={loc(item.href)}
                     aria-current={isActive(item.href) ? 'page' : undefined}
                     aria-expanded="false"
                     aria-controls="svc-menu"
@@ -102,7 +104,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
                     <ul>
                       {services.map((s, k) => (
                         <li style={`--k:${k}`}>
-                          <a href={`/services/${s.id}`}>
+                          <a href={loc(`/services/${s.id}`)}>
                             <span class="mi">
                               <Icon name={s.data.icon} />
                             </span>
@@ -117,7 +119,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
               ) : (
                 <a
                   class:list={['nl', { on: isActive(item.href) }]}
-                  href={item.href}
+                  href={loc(item.href)}
                   aria-current={isActive(item.href) ? 'page' : undefined}
                   style={`--d:${i * 60}ms`}
                 >
@@ -138,7 +140,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
         <LocaleSwitcher class="hdr-ls" />
 
-        <a class="cta" href="/contact">
+        <a class="cta" href={loc('/contact')}>
           <span class="cta-fill" aria-hidden="true"></span>
           <span class="cta-txt">Get a consultation</span>
           <Icon name="arrow-right" class="cta-arw" />
@@ -174,7 +176,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
               <div class="msub">
                 <div>
                   {services.map((s) => (
-                    <a href={`/services/${s.id}`}>{s.data.title}</a>
+                    <a href={loc(`/services/${s.id}`)}>{s.data.title}</a>
                   ))}
                 </div>
               </div>
@@ -182,7 +184,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
           ) : (
             <a
               class:list={['mrow', { on: isActive(item.href) }]}
-              href={item.href}
+              href={loc(item.href)}
               aria-current={isActive(item.href) ? 'page' : undefined}
             >
               {item.label}
@@ -199,7 +201,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         )
       }
 
-      <a class="mcta" href="/contact">Get a consultation</a>
+      <a class="mcta" href={loc('/contact')}>Get a consultation</a>
 
       <div class="mls">
         <LocaleSwitcher />

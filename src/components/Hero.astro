@@ -1,4 +1,5 @@
 ---
+import { localeHref } from '@/i18n/paths';
 import { Arrow, Heading, Marker, Note } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import AppOrbit from './AppOrbit.astro';
@@ -13,6 +14,9 @@ import Icon from './Icon.astro';
  * marker's IntersectionObserver; the orbit is pure CSS.
  */
 const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
+
+/** Prefix an internal path with this page's locale. */
+const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <section class="cc-white relative isolate overflow-hidden">
@@ -39,11 +43,11 @@ const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.
         </p>
 
         <div class="mt-9 flex flex-wrap items-start gap-3">
-          <a href="/contact" class="btn btn-primary">
+          <a href={loc('/contact')} class="btn btn-primary">
             Talk to us
             <Icon name="arrow-right" class="size-4" />
           </a>
-          <a href="/services" class="btn btn-outline text-heading"> Explore services </a>
+          <a href={loc('/services')} class="btn btn-outline text-heading"> Explore services </a>
 
           <!-- Odoo's handwritten aside beside the CTAs ("… / month for ALL apps"). -->
           <span class="ml-1 hidden items-start sm:flex">
@@ -62,7 +66,7 @@ const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.
         <AppOrbit apps={apps} class="mx-auto max-w-[36rem]" />
         <p class="mt-3 text-center">
           <a
-            href="/services/mobile-app-development#apps"
+            href={loc('/services/mobile-app-development#apps')}
             class="text-brand-700 hover:text-plum-600 inline-flex items-center gap-1.5 text-sm font-medium"
           >
             All {apps.length} apps

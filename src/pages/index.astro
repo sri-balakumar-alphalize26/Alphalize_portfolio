@@ -1,0 +1,32 @@
+---
+import { defaultLocale } from '@/i18n/locales';
+
+/**
+ * The bare root. Sends every visitor to a locale.
+ *
+ * A REAL ROUTE rather than a `redirects` entry in astro.config, and that is not
+ * a style preference — Astro's redirect handling resolves the *destination's*
+ * component and looks it up in `manifest.pageMap`, which only contains
+ * on-demand routes. The destination here is `/[locale]`, which is prerendered
+ * and therefore absent from that map, so the lookup threw
+ * "Unexpectedly unable to find a component instance for route /[locale]" and
+ * the dev server returned a 500 on the site's own front door.
+ *
+ * `prerender = false` so this is a Worker route issuing a genuine 302 with a
+ * Location header. Prerendering it would emit a meta-refresh HTML page, which
+ * is slower, invisible to crawlers as a redirect, and leaves a real document at
+ * `/` competing with `/en` for the same content.
+ *
+ * 302 rather than 301: this is the entry point for all nine languages and must
+ * not be pinned to English in every visitor's cache — including later, when
+ * this is the natural place to negotiate a locale from Accept-Language.
+ *
+ * public/_redirects deliberately has no `/` rule. Workers Assets consults it
+ * before the Worker, so a rule there would shadow this route and the behaviour
+ * would once again differ between dev and production — which is the bug this
+ * file exists to fix.
+ */
+export const prerender = false;
+
+return Astro.redirect(`/${defaultLocale}`, 302);
+---

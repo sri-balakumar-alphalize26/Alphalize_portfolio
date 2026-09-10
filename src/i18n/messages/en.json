@@ -242,5 +242,51 @@
     "submit": "Submit application",
     "positionTraining": "Training / Internship Program",
     "positionOther": "Other"
+  },
+  "welcomeIntro": {
+    "eyebrow": "Welcome to Alphalize",
+    "title": "We take your business to the [[next level]]",
+    "para1": "Alphalize is a software company specialising in innovative and comprehensive ERP (Enterprise Resource Planning) and business solutions for a wide range of clients. With our expertise and current technology, we help businesses streamline their operations, improve efficiency and drive growth.",
+    "para2": "Years of experience across ERP, business intelligence and IT solutions, working with clients around the world — and a commitment to software that fits the organisation it serves.",
+    "cta": "Discover more"
+  },
+  "jobList": {
+    "heading": "Current openings",
+    "lead": "All roles are based in our Kollam, Kerala office.",
+    "openRole": "{count} open role",
+    "openRoles": "{count} open roles",
+    "whatYouWillDo": "What you will do",
+    "whatWeLookFor": "What we are looking for",
+    "apply": "Apply for this role"
+  },
+  "serviceSidebar": {
+    "cta": "Discuss this service",
+    "others": "Other services"
+  },
+  "desktopSoftware": {
+    "title": "Desktop [[software]]",
+    "lead": "Installable Windows .exe applications for billing counters and back-office machines, built for speed on local hardware.",
+    "cta": "Ask about desktop billing"
+  },
+  "partners": {
+    "eyebrow": "Our trusted partners",
+    "trustedTitle": "Companies we build and deliver with"
+  },
+  "misc": {
+    "seeModules": "See what each module does",
+    "seeRange": "See the range on 369ai.Biz",
+    "tellUsHowItWent": "Tell us how it went",
+    "summarizeWithAi": "Summarize Alphalize with AI",
+    "youtubeChannel": "Shan on Tech on YouTube",
+    "officeAddresses": "Office addresses",
+    "scanForDirections": "Scan for directions",
+    "scanHint": "Opens Google Maps already routing to the office. On a computer, click it instead.",
+    "responseTime": "Response time",
+    "responseBody": "We aim to reply within one business day, and support runs around the clock from Kollam."
+  },
+  "contactMethods": {
+    "call": "Call us",
+    "whatsapp": "Chat on WhatsApp",
+    "email": "Email us"
   }
 }

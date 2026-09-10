@@ -36,11 +36,13 @@ const wa = waNumber(details);
  * bare `.done` and `.in` classes globally, and `.rail`, `.node` and `.tile` are
  * generic enough to collide with a future component.
  */
+const { t } = Astro.locals;
+
 const methods = [
   {
     key: 'call',
     icon: 'phone' as const,
-    label: 'Call us',
+    label: t('contactMethods.call'),
     value: phone,
     href: telHref(details),
     copy: phone,
@@ -48,7 +50,7 @@ const methods = [
   {
     key: 'wa',
     icon: 'whatsapp' as const,
-    label: 'Chat on WhatsApp',
+    label: t('contactMethods.whatsapp'),
     value: phone,
     href: `https://wa.me/${wa}`,
     copy: '',
@@ -56,13 +58,12 @@ const methods = [
   {
     key: 'mail',
     icon: 'mail' as const,
-    label: 'Email us',
+    label: t('contactMethods.email'),
     value: email,
     href: `mailto:${email}`,
     copy: email,
   },
 ];
-const { t } = Astro.locals;
 ---
 
 <BaseLayout title={t('contactPage.metaTitle')} description={t('contactPage.metaDescription')}>
@@ -118,7 +119,7 @@ const { t } = Astro.locals;
         <div class="ct-card" style="--d:840ms">
           <span class="ct-node" aria-hidden="true"></span>
           <div class="ct-block rounded-card border-brand-100 border">
-            <p class="text-ink ct-bh">Office addresses</p>
+            <p class="text-ink ct-bh">{t('misc.officeAddresses')}</p>
             {
               offices.map((o) => (
                 <div class="ct-office">
@@ -146,9 +147,8 @@ const { t } = Astro.locals;
                 <div class="ct-qr">
                   <DirectionsQr office={offices[0]} size={96} />
                   <p class="text-muted">
-                    <b class="text-ink">Scan for directions</b>
-                    Opens Google Maps already routing to the office. On a computer, click it
-                    instead.
+                    <b class="text-ink">{t('misc.scanForDirections')}</b>
+                    {t('misc.scanHint')}
                   </p>
                 </div>
               )
@@ -164,8 +164,8 @@ const { t } = Astro.locals;
                 <Icon name="clock" class="size-4" />
               </span>
               <p class="text-muted">
-                <b class="text-ink">Response time</b>
-                We aim to reply within one business day, and support runs around the clock from Kollam.
+                <b class="text-ink">{t('misc.responseTime')}</b>
+                {t('misc.responseBody')}
               </p>
             </div>
           </div>

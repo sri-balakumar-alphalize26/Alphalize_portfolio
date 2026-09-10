@@ -242,5 +242,51 @@
     "submit": "Envoyer ma candidature",
     "positionTraining": "Programme de formation / stage",
     "positionOther": "Autre"
+  },
+  "welcomeIntro": {
+    "eyebrow": "Bienvenue chez Alphalize",
+    "title": "Nous faisons passer votre entreprise [[au niveau supérieur]]",
+    "para1": "Alphalize est une société de logiciels spécialisée dans les solutions ERP (planification des ressources de l'entreprise) et les solutions métier innovantes et complètes, pour une clientèle très variée. Grâce à notre expertise et aux technologies actuelles, nous aidons les entreprises à fluidifier leurs opérations, à gagner en efficacité et à croître.",
+    "para2": "Des années d'expérience en ERP, business intelligence et solutions informatiques, auprès de clients partout dans le monde — et l'engagement de livrer un logiciel adapté à l'organisation qu'il sert.",
+    "cta": "En savoir plus"
+  },
+  "jobList": {
+    "heading": "Postes à pourvoir",
+    "lead": "Tous les postes sont basés dans notre bureau de Kollam, Kerala.",
+    "openRole": "{count} poste ouvert",
+    "openRoles": "{count} postes ouverts",
+    "whatYouWillDo": "Vos missions",
+    "whatWeLookFor": "Ce que nous recherchons",
+    "apply": "Postuler à cette offre"
+  },
+  "serviceSidebar": {
+    "cta": "Parler de ce service",
+    "others": "Autres services"
+  },
+  "desktopSoftware": {
+    "title": "Logiciels [[bureau]]",
+    "lead": "Applications Windows .exe installables pour les postes de caisse et les machines du back-office, conçues pour être rapides sur du matériel local.",
+    "cta": "Nous interroger sur la caisse bureau"
+  },
+  "partners": {
+    "eyebrow": "Nos partenaires de confiance",
+    "trustedTitle": "Les entreprises avec lesquelles nous construisons et livrons"
+  },
+  "misc": {
+    "seeModules": "Voir ce que fait chaque module",
+    "seeRange": "Voir la gamme sur 369ai.Biz",
+    "tellUsHowItWent": "Racontez-nous",
+    "summarizeWithAi": "Résumer Alphalize avec une IA",
+    "youtubeChannel": "Shan on Tech sur YouTube",
+    "officeAddresses": "Adresses des bureaux",
+    "scanForDirections": "Scanner pour l'itinéraire",
+    "scanHint": "Ouvre Google Maps avec l'itinéraire vers le bureau déjà tracé. Sur ordinateur, cliquez plutôt.",
+    "responseTime": "Délai de réponse",
+    "responseBody": "Nous répondons sous un jour ouvré, et le support fonctionne en continu depuis Kollam."
+  },
+  "contactMethods": {
+    "call": "Appelez-nous",
+    "whatsapp": "Discuter sur WhatsApp",
+    "email": "Écrivez-nous"
   }
 }

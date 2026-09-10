@@ -22,6 +22,7 @@ const { icon, highlights, others } = Astro.props;
 
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const { t } = Astro.locals;
 ---
 
 <div class="lg:sticky lg:top-28 lg:space-y-6">
@@ -53,7 +54,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
           ))}
         </ul>
         <a href={loc('/contact')} class="btn btn-primary sd-cta ab mt-6 w-full" style="--d:900ms">
-          Discuss this service
+          {t('serviceSidebar.cta')}
           <Icon name="arrow-right" class="size-4" />
           <span class="sd-shine" aria-hidden="true" />
         </a>
@@ -67,7 +68,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
     data-hold="1400"
   >
     <h2 class="text-ink ab text-sm font-semibold tracking-wider uppercase" style="--d:0ms">
-      Other services
+      {t('serviceSidebar.others')}
     </h2>
     <ul class="sd-others mt-3">
       {

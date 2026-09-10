@@ -29,12 +29,13 @@ const partners = [
   { src: danat, name: 'Danat Group', h: 96 },
   { src: nexgenn, name: 'Nex Genn POS', h: 56 },
 ];
+const { t } = Astro.locals;
 ---
 
 <section class="p-sec">
   <p class="p-eyebrow">Trusted Partners</p>
   <div class="p-title">
-    <Heading as="h2" size="lg" align="center">Companies we build and deliver with</Heading>
+    <Heading as="h2" size="lg" align="center">{t('partners.trustedTitle')}</Heading>
   </div>
 
   <div class="p-row">

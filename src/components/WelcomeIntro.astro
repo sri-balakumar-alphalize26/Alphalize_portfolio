@@ -1,4 +1,5 @@
 ---
+import MarkedTitle from './MarkedTitle.astro';
 import { getLocalized } from '@/i18n/collections';
 import { localeHref } from '@/i18n/paths';
 import { Heading, Marker } from '@alphalize/astro-marker';
@@ -20,32 +21,29 @@ const chips = services.slice(0, 6);
 
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const { t } = Astro.locals;
 ---
 
 <Section variant="white" space="lg">
   <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
     <Reveal direction="left">
-      <p class="wi-eyebrow eyebrow">Welcome to Alphalize</p>
+      <p class="wi-eyebrow eyebrow">{t('welcomeIntro.eyebrow')}</p>
 
       <span class="wi-mask">
         <Heading as="h2" size="lg" class="wi-line mt-2">
-          We take your business to the <Marker type="highlight" color="yellow">next level</Marker>
+          <MarkedTitle title={t('welcomeIntro.title')} marker="highlight" color="yellow" />
         </Heading>
       </span>
 
       <p class="text-muted mt-5 leading-relaxed">
-        Alphalize is a software company specialising in innovative and comprehensive ERP (Enterprise
-        Resource Planning) and business solutions for a wide range of clients. With our expertise
-        and current technology, we help businesses streamline their operations, improve efficiency
-        and drive growth.
+        {t('welcomeIntro.para1')}
       </p>
       <p class="text-muted mt-4 leading-relaxed">
-        Years of experience across ERP, business intelligence and IT solutions, working with clients
-        around the world — and a commitment to software that fits the organisation it serves.
+        {t('welcomeIntro.para2')}
       </p>
 
       <a href={loc('/about')} class="btn btn-primary wi-cta mt-8">
-        Discover more
+        {t('welcomeIntro.cta')}
         <Icon name="arrow-right" class="size-4" />
       </a>
     </Reveal>

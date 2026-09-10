@@ -19,6 +19,7 @@ const points = [
 
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const { t } = Astro.locals;
 ---
 
 <section id="desktop" class="dp scroll-mt-24 py-16 lg:py-20" data-ab>
@@ -44,9 +45,8 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
           Installable Windows .exe applications for billing counters and back-office machines, built
           for speed on local hardware.
         </p>
-        <a href={loc('/contact')} class="btn btn-light dp-cta ab mt-7" style="--d:900ms">
-          Ask about desktop billing
-          <Icon name="arrow-right" class="size-4" />
+        <a href={loc('/contact')} class="btn btn-light dp-cta ab mt-7" style="--d:900ms"
+          >{t('desktopSoftware.cta')}<Icon name="arrow-right" class="size-4" />
           <span class="dp-shine" aria-hidden="true"></span>
         </a>
       </div>

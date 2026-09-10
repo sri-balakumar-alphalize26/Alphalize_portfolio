@@ -80,10 +80,18 @@
   },
   "stats": {
     "items": [
-      { "label": "服务领域" },
-      { "label": "ERP 模块" },
-      { "label": "定制开发" },
-      { "label": "支持覆盖" }
+      {
+        "label": "服务领域"
+      },
+      {
+        "label": "ERP 模块"
+      },
+      {
+        "label": "定制开发"
+      },
+      {
+        "label": "支持覆盖"
+      }
     ]
   },
   "hero": {
@@ -234,5 +242,51 @@
     "submit": "提交申请",
     "positionTraining": "培训 / 实习项目",
     "positionOther": "其他"
+  },
+  "welcomeIntro": {
+    "eyebrow": "欢迎来到 Alphalize",
+    "title": "我们让您的企业[[更上一层楼]]",
+    "para1": "Alphalize 是一家软件公司，专注于为各类客户提供创新而完整的 ERP（企业资源计划）与业务解决方案。凭借我们的经验与当前技术，我们帮助企业理顺运营、提升效率、实现增长。",
+    "para2": "在 ERP、商业智能与 IT 解决方案领域积累多年经验，服务全球客户 — 并始终坚持交付贴合组织实际的软件。",
+    "cta": "了解更多"
+  },
+  "jobList": {
+    "heading": "当前空缺",
+    "lead": "所有职位均在我们位于喀拉拉邦科拉姆的办公室。",
+    "openRole": "{count} 个职位空缺",
+    "openRoles": "{count} 个职位空缺",
+    "whatYouWillDo": "你将负责",
+    "whatWeLookFor": "我们期待",
+    "apply": "申请该职位"
+  },
+  "serviceSidebar": {
+    "cta": "就这项服务沟通",
+    "others": "其他服务"
+  },
+  "desktopSoftware": {
+    "title": "桌面[[软件]]",
+    "lead": "面向收银台与后台电脑的可安装 Windows .exe 应用，针对本地硬件的运行速度而构建。",
+    "cta": "咨询桌面收银"
+  },
+  "partners": {
+    "eyebrow": "我们信赖的伙伴",
+    "trustedTitle": "与我们共同构建和交付的企业"
+  },
+  "misc": {
+    "seeModules": "查看每个模块的功能",
+    "seeRange": "在 369ai.Biz 查看产品线",
+    "tellUsHowItWent": "说说您的体验",
+    "summarizeWithAi": "用 AI 了解 Alphalize",
+    "youtubeChannel": "YouTube 上的 Shan on Tech",
+    "officeAddresses": "办公地址",
+    "scanForDirections": "扫码获取路线",
+    "scanHint": "打开 Google Maps 并已规划到办公室的路线。在电脑上请直接点击。",
+    "responseTime": "响应时间",
+    "responseBody": "我们力争在一个工作日内回复，支持团队在科拉姆全天候待命。"
+  },
+  "contactMethods": {
+    "call": "致电我们",
+    "whatsapp": "在 WhatsApp 上联系",
+    "email": "给我们发邮件"
   }
 }

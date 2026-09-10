@@ -17,6 +17,8 @@ import SectionHeading from './SectionHeading.astro';
  * candidates search for "Angular" or "PostgreSQL" in. `name` gives the
  * one-open-at-a-time behaviour natively.
  */
+const { t } = Astro.locals;
+
 /* Newest first. getLocalized orders by `order`, which jobs do not carry. */
 const jobs = (await getLocalized('jobs', Astro.locals.locale, (j) => j.data.open)).sort(
   (a, b) => b.entry.data.postedAt.getTime() - a.entry.data.postedAt.getTime()
@@ -35,9 +37,11 @@ const rendered = await Promise.all(
   <SectionHeading
     anim
     align="left"
-    eyebrow={`${jobs.length} open ${jobs.length === 1 ? 'role' : 'roles'}`}
-    title="Current openings"
-    lead="All roles are based in our Kollam, Kerala office."
+    eyebrow={t(jobs.length === 1 ? 'jobList.openRole' : 'jobList.openRoles', {
+      count: jobs.length,
+    })}
+    title={t('jobList.heading')}
+    lead={t('jobList.lead')}
   />
 
   <ul class="job-list mt-10">
@@ -107,7 +111,7 @@ const rendered = await Promise.all(
                   {job.data.responsibilities.length > 0 && (
                     <div>
                       <h3 class="text-ink job-line text-sm font-semibold" style="--k:1">
-                        What you will do
+                        {t('jobList.whatYouWillDo')}
                       </h3>
                       <ul class="mt-2.5 space-y-2">
                         {job.data.responsibilities.map((r, k) => (
@@ -131,7 +135,7 @@ const rendered = await Promise.all(
                   {job.data.requirements.length > 0 && (
                     <div>
                       <h3 class="text-ink job-line text-sm font-semibold" style="--k:1">
-                        What we are looking for
+                        {t('jobList.whatWeLookFor')}
                       </h3>
                       <ul class="mt-2.5 space-y-2">
                         {job.data.requirements.map((r, k) => (
@@ -155,7 +159,7 @@ const rendered = await Promise.all(
                 </div>
 
                 <a href="#apply" class="btn btn-primary job-line mt-7" style="--k:6">
-                  Apply for this role
+                  {t('jobList.apply')}
                   <Icon name="arrow-right" class="size-4" />
                 </a>
               </div>

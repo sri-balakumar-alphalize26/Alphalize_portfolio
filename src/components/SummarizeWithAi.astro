@@ -52,10 +52,11 @@ const assistants = [
   { name: 'Grok', href: `https://grok.com/?q=${q}`, mark: aiMarks.grok },
   { name: 'Le Chat', href: `https://chat.mistral.ai/chat?q=${q}`, mark: aiMarks.mistral },
 ];
+const { t } = Astro.locals;
 ---
 
 <div class="sa">
-  <p class="sa-h">Summarize Alphalize with AI</p>
+  <p class="sa-h">{t('misc.summarizeWithAi')}</p>
   <ul class="icon-dock sa-row">
     {
       assistants.map((a) => (

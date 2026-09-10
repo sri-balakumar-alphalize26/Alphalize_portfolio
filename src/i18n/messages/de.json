@@ -80,10 +80,18 @@
   },
   "stats": {
     "items": [
-      { "label": "Leistungsbereiche" },
-      { "label": "ERP-Module" },
-      { "label": "Maßgeschneiderte Umsetzungen" },
-      { "label": "Support-Abdeckung" }
+      {
+        "label": "Leistungsbereiche"
+      },
+      {
+        "label": "ERP-Module"
+      },
+      {
+        "label": "Maßgeschneiderte Umsetzungen"
+      },
+      {
+        "label": "Support-Abdeckung"
+      }
     ]
   },
   "hero": {
@@ -234,5 +242,51 @@
     "submit": "Bewerbung absenden",
     "positionTraining": "Schulungs- / Praktikumsprogramm",
     "positionOther": "Sonstiges"
+  },
+  "welcomeIntro": {
+    "eyebrow": "Willkommen bei Alphalize",
+    "title": "Wir bringen Ihr Unternehmen auf [[die nächste Stufe]]",
+    "para1": "Alphalize ist ein Softwareunternehmen, spezialisiert auf innovative und umfassende ERP- und Business-Lösungen für sehr unterschiedliche Kunden. Mit unserer Erfahrung und aktueller Technik helfen wir Unternehmen, Abläufe zu verschlanken, effizienter zu werden und zu wachsen.",
+    "para2": "Jahrelange Erfahrung in ERP, Business Intelligence und IT-Lösungen, mit Kunden auf der ganzen Welt — und der Anspruch, Software zu liefern, die zur Organisation passt.",
+    "cta": "Mehr erfahren"
+  },
+  "jobList": {
+    "heading": "Aktuelle Stellen",
+    "lead": "Alle Stellen sind in unserem Büro in Kollam, Kerala.",
+    "openRole": "{count} offene Stelle",
+    "openRoles": "{count} offene Stellen",
+    "whatYouWillDo": "Ihre Aufgaben",
+    "whatWeLookFor": "Was wir suchen",
+    "apply": "Auf diese Stelle bewerben"
+  },
+  "serviceSidebar": {
+    "cta": "Über diese Leistung sprechen",
+    "others": "Weitere Leistungen"
+  },
+  "desktopSoftware": {
+    "title": "Desktop-[[Software]]",
+    "lead": "Installierbare Windows-.exe-Anwendungen für Kassenplätze und Backoffice-Rechner, auf Geschwindigkeit auf lokaler Hardware ausgelegt.",
+    "cta": "Nach Desktop-Kasse fragen"
+  },
+  "partners": {
+    "eyebrow": "Unsere Partner",
+    "trustedTitle": "Unternehmen, mit denen wir bauen und liefern"
+  },
+  "misc": {
+    "seeModules": "Sehen, was jedes Modul kann",
+    "seeRange": "Das Sortiment auf 369ai.Biz ansehen",
+    "tellUsHowItWent": "Erzählen Sie uns davon",
+    "summarizeWithAi": "Alphalize per KI zusammenfassen",
+    "youtubeChannel": "Shan on Tech auf YouTube",
+    "officeAddresses": "Büroadressen",
+    "scanForDirections": "Für die Route scannen",
+    "scanHint": "Öffnet Google Maps mit der Route zum Büro. Am Rechner stattdessen klicken.",
+    "responseTime": "Antwortzeit",
+    "responseBody": "Wir antworten in der Regel innerhalb eines Werktags, und der Support läuft rund um die Uhr aus Kollam."
+  },
+  "contactMethods": {
+    "call": "Rufen Sie uns an",
+    "whatsapp": "Auf WhatsApp schreiben",
+    "email": "Schreiben Sie uns"
   }
 }

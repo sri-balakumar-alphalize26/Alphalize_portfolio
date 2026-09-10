@@ -74,9 +74,7 @@ order: 2
 <h2>Governing law</h2>
 <p>
   These terms are governed by the laws of India. Any dispute arising from them is subject to the
-  exclusive jurisdiction of the courts at <strong
-    >TODO: seat to be confirmed (Kollam, Kerala?)</strong
-  >.
+  exclusive jurisdiction of the courts at {locality}, {region}.
 </p>
 
 <h2>Changes</h2>

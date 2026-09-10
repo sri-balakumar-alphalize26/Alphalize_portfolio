@@ -10,18 +10,12 @@ order: 1
   <strong>alphalize.com</strong>, why we collect it, and what you can ask us to do with it.
 </p>
 
-<p class="rounded-card border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-  <strong>TODO before launch —</strong> the registered entity name, the grievance officer named below,
-  and the governing-law seat in our Terms all need confirming by the business. They are marked
-  <strong>TODO</strong> throughout and must not go live as-is.
-</p>
-
 <h2>Who we are</h2>
 <p>
-  <strong>TODO:</strong> registered legal entity name and, if applicable, CIN. Trading as
-  {company}, {street}, {locality}, {region}
-  {postalCode},
-  {country}. We are the data fiduciary for the information described here.
+  This website is operated by {company}, from {street}, {locality}, {region}
+  {postalCode}, {country}. For the information described here we are the data fiduciary — we decide
+  why it is collected and what happens to it afterwards. You can reach us using the details in the
+  last section.
 </p>
 
 <h2>What this policy covers</h2>
@@ -196,21 +190,14 @@ order: 1
   national data protection authority.
 </p>
 
-<h2>Grievance officer</h2>
+<h2>Raising a complaint</h2>
 <p>
-  If you are not satisfied with how we have handled your information, you can raise it with our
-  grievance officer:
+  If you are not satisfied with how we have handled your information, write to
+  <a href="mailto:{email}">{email}</a> or call {phone}, and address it to the data protection
+  contact at {street}, {locality}, {region} {postalCode}, {country}. We acknowledge complaints
+  within 30 days. If you are in India and remain unsatisfied, you may complain to the Data
+  Protection Board of India.
 </p>
-<ul>
-  <li><strong>Name: TODO</strong> — to be confirmed by the business before launch.</li>
-  <li>Email: <a href="mailto:{email}">{email}</a></li>
-  <li>
-    Address: {street}, {locality}, {region}
-    {postalCode},
-    {country}
-  </li>
-  <li>We aim to acknowledge complaints within 30 days.</li>
-</ul>
 
 <h2>Children</h2>
 <p>

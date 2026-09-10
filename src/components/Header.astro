@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import { contact, nav } from '@/config/site';
 import { cleanPathname } from '@/i18n/paths';
 import Icon from './Icon.astro';
+import LocaleSwitcher from './LocaleSwitcher.astro';
 import Logo from './Logo.astro';
 
 /**
@@ -135,6 +136,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
           }
         </nav>
 
+        <LocaleSwitcher class="hdr-ls" />
+
         <a class="cta" href="/contact">
           <span class="cta-fill" aria-hidden="true"></span>
           <span class="cta-txt">Get a consultation</span>
@@ -197,6 +200,10 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
       }
 
       <a class="mcta" href="/contact">Get a consultation</a>
+
+      <div class="mls">
+        <LocaleSwitcher />
+      </div>
 
       <div class="mcontact">
         <a href={contact.phoneHref} data-contact-tel>
@@ -500,6 +507,42 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     .nav {
       display: flex;
     }
+  }
+
+  /* ---------- locale switcher ---------- */
+  /* Desktop only, same breakpoint as .nav and .cta. Below it the drawer
+     carries its own copy, so the bar keeps the logo and the burger alone. */
+  .hdr-ls {
+    display: none;
+    margin-inline-start: 0.375rem;
+    margin-inline-end: 0.125rem;
+    /* Lands between the last nav item and the CTA in the entrance stagger. */
+    --d: 380ms;
+  }
+  @media (min-width: 1024px) {
+    .hdr-ls {
+      display: block;
+    }
+  }
+  /* The bar loses height on scroll; the region/language label is the first
+     thing that can go, and the flag alone still says which language you are in. */
+  @media (min-width: 1024px) and (max-width: 1160px) {
+    .hdr-ls :global(.ls-label) {
+      display: none;
+    }
+  }
+
+  .mls {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-brand-100);
+  }
+  /* The drawer is full-width, so the panel has room to sit under the trigger
+     rather than being pinned to the end of a bar. */
+  .mls :global(.ls-panel) {
+    inset-inline-end: auto;
+    inset-inline-start: 0;
+    --ls-origin: left;
   }
   .nl {
     position: relative;
@@ -1024,6 +1067,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   }
   :global(html.splash-open) .nl,
   :global(html.splash-open) .cta,
+  :global(html.splash-open) .hdr-ls,
   :global(html.splash-open) .burger {
     opacity: 0;
     transform: translateY(-8px);
@@ -1033,6 +1077,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   }
   :global(html:not(.splash-open)) .nl,
   :global(html:not(.splash-open)) .cta,
+  :global(html:not(.splash-open)) .hdr-ls,
   :global(html:not(.splash-open)) .burger {
     animation: hdr-in 0.5s var(--ease-out-soft) calc(220ms + var(--d, 0ms)) backwards;
   }
@@ -1052,6 +1097,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     :global(html.splash-open) .util,
     :global(html.splash-open) .nl,
     :global(html.splash-open) .cta,
+    :global(html.splash-open) .hdr-ls,
     :global(html.splash-open) .burger {
       opacity: 1;
       transform: none;
@@ -1059,6 +1105,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     :global(html:not(.splash-open)) .util,
     :global(html:not(.splash-open)) .nl,
     :global(html:not(.splash-open)) .cta,
+    :global(html:not(.splash-open)) .hdr-ls,
     :global(html:not(.splash-open)) .burger {
       animation: none;
     }

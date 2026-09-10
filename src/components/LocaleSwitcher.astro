@@ -1,0 +1,397 @@
+---
+import Flag from './Flag.astro';
+import Icon from './Icon.astro';
+import { cleanPathname } from '@/i18n/paths';
+import { defaultLocale, isLive, localeLabels, localeRegions, type Locale } from '@/i18n/locales';
+
+/**
+ * Region–language picker, following the pattern the 369 site uses: a visitor
+ * picks "Oman & UAE — العربية", not a bare two-letter code.
+ *
+ * Ported from 369ai_portfolio/components/layout/LocaleSwitcher.tsx, minus its
+ * router. That one had to rebuild the target path in the browser, because a
+ * client component cannot know which route it is inside. This renders on the
+ * page it is on, so every href is resolved at build time — which also means
+ * none of the .html handling that `build.format: 'file'` would otherwise force
+ * into a client script. It works with JavaScript off, and it is crawlable.
+ *
+ * Also not ported: the pending spinner. next-intl switches locale with a
+ * streaming client navigation that needs one; here it is an ordinary document
+ * load, and the browser draws its own progress.
+ *
+ * NOT YET WIRED. Only the locales in `liveLocales` have pages behind them, and
+ * today that is English alone. The other eight render greyed with a "Soon" tag
+ * rather than as links, because eight guaranteed 404s in a menu is worse than
+ * saying "not yet" — and it would hand dead URLs to anything crawling the page.
+ * They become links as each locale's content lands; see liveLocales.
+ */
+interface Props {
+  /** Flag and chevron only — the names move into the panel. For narrow bars. */
+  compact?: boolean;
+  class?: string;
+}
+
+const { compact = false, class: className } = Astro.props;
+
+// Once pages move under /[locale] this reads the segment off the URL. Until
+// then every page is English, served unprefixed.
+const current: Locale = defaultLocale;
+const meta = localeLabels[current];
+
+// The path a switched-to locale should land on, once the prefixed routes exist.
+const here = cleanPathname(Astro.url.pathname);
+
+const regions = localeRegions();
+---
+
+<div class:list={['ls', className]} data-locale-switcher>
+  <button
+    type="button"
+    class:list={['ls-btn', compact && 'ls-btn-compact']}
+    aria-expanded="false"
+    aria-haspopup="listbox"
+    aria-controls="ls-panel"
+    data-locale-trigger
+  >
+    <Flag locale={current} class="ls-flag" />
+    {
+      !compact && (
+        <span class="ls-label">
+          {meta.region} — {meta.language}
+        </span>
+      )
+    }
+    <Icon name="chevron-down" class="ls-chev" />
+    <span class="sr-only">Change language</span>
+  </button>
+
+  {
+    /*
+    Stays in the DOM and toggles a class rather than using [hidden], so the
+    panel plays its close as well as its open — same as the Services dropdown
+    above it. Scrolls rather than clipping: nine locales are taller than the
+    gap between the header and the bottom of a phone, and a clipped absolute
+    panel cannot be scrolled to.
+  */
+  }
+  <ul class="ls-panel" id="ls-panel" role="listbox" aria-label="Language">
+    {
+      regions.map((group) => (
+        <li role="group" aria-label={group.region}>
+          <p class="ls-region">
+            <Flag locale={group.flag} class="ls-flag-lg" />
+            {group.region}
+          </p>
+          <ul role="none">
+            {group.items.map((locale) => {
+              const label = localeLabels[locale];
+              const active = locale === current;
+
+              // Not a link until the locale has pages. An <a> here would be a
+              // 404 the site itself published.
+              if (!isLive(locale)) {
+                return (
+                  <li role="none">
+                    <span class="ls-item ls-item-soon" aria-disabled="true">
+                      <span lang={locale} dir={label.dir}>
+                        {label.language}
+                      </span>
+                      <span class="ls-soon">Soon</span>
+                    </span>
+                  </li>
+                );
+              }
+
+              return (
+                <li role="none">
+                  <a
+                    role="option"
+                    aria-selected={active ? 'true' : 'false'}
+                    href={here}
+                    hreflang={label.hreflang}
+                    lang={locale}
+                    dir={label.dir}
+                    class:list={['ls-item', active && 'ls-item-on']}
+                    data-astro-prefetch="false"
+                    data-astro-reload
+                  >
+                    {label.language}
+                    {active && <Icon name="check" class="ls-check" />}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  /**
+   * Open and close. Every href is already correct in the HTML, so there is
+   * nothing here about paths or locales.
+   *
+   * One set of delegated document listeners, registered once for the life of
+   * the document and never removed, because none of them closes over an
+   * element — they re-query on each event. A switcher swapped in by
+   * <ClientRouter> is picked up with no rebinding and nothing to tear down.
+   *
+   * Contrast FooterOffices.astro, which registers its document-level keydown
+   * and mousedown handlers INSIDE a per-element forEach, from a function bound
+   * to astro:page-load. Its dataset.wired guard covers the per-element wiring
+   * but not the document ones: every navigation swaps in a fresh element with
+   * no data-wired, so by the fifth page of a session there are five copies of
+   * each handler, each holding an element detached two navigations ago.
+   */
+  const FLAG = '__localeSwitcherWired';
+
+  if (!(FLAG in window)) {
+    (window as unknown as Record<string, boolean>)[FLAG] = true;
+
+    const roots = () => document.querySelectorAll<HTMLElement>('[data-locale-switcher]');
+    const triggerOf = (root: Element) =>
+      root.querySelector<HTMLButtonElement>('[data-locale-trigger]');
+
+    function setOpen(root: HTMLElement, open: boolean) {
+      root.classList.toggle('open', open);
+      triggerOf(root)?.setAttribute('aria-expanded', String(open));
+    }
+
+    const closeAll = () => roots().forEach((root) => setOpen(root, false));
+
+    /* Hand over from the CSS-only :hover baseline. Until this class lands the
+       panel opens on hover alone, so it still works with JS off; after it, only
+       .open opens it, so a panel dismissed with Escape does not spring back
+       under a pointer that never moved. Same contract as the Services menu. */
+    const claim = () => roots().forEach((root) => root.classList.add('js-ls'));
+    claim();
+    document.addEventListener('astro:page-load', claim);
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element | null;
+      const trigger = target?.closest<HTMLElement>('[data-locale-trigger]');
+
+      if (trigger) {
+        const root = trigger.closest<HTMLElement>('[data-locale-switcher]');
+        if (!root) return;
+        const wasOpen = root.classList.contains('open');
+        closeAll();
+        setOpen(root, !wasOpen);
+        return;
+      }
+
+      // A click on a locale link falls through to a real navigation; closing
+      // first would fight the outgoing page for nothing.
+      if (!target?.closest('[data-locale-switcher]')) closeAll();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const open = document.querySelector<HTMLElement>('[data-locale-switcher].open');
+      if (!open) return;
+      setOpen(open, false);
+      triggerOf(open)?.focus();
+    });
+
+    /* Hover intent, the same 80/180ms as the mega-menu and the QR chip: quick
+       to open, slow to close so the pointer can travel down into the list
+       without it snapping shut. pointerover/pointerout rather than
+       enter/leave, because only the former bubble to document. */
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const after = (ms: number, fn: () => void) => {
+      clearTimeout(timer);
+      timer = setTimeout(fn, ms);
+    };
+    const finePointer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    document.addEventListener('pointerover', (event) => {
+      if (!finePointer()) return;
+      const root = (event.target as Element | null)?.closest<HTMLElement>('[data-locale-switcher]');
+      if (root) after(80, () => setOpen(root, true));
+    });
+
+    document.addEventListener('pointerout', (event) => {
+      const root = (event.target as Element | null)?.closest<HTMLElement>('[data-locale-switcher]');
+      if (!root || root.contains(event.relatedTarget as Node)) return;
+      after(180, () => setOpen(root, false));
+    });
+
+    // Never let a pending open fire against a page you have already left.
+    document.addEventListener('astro:before-swap', () => clearTimeout(timer));
+  }
+</script>
+
+<style>
+  .ls {
+    position: relative;
+    flex: none;
+  }
+
+  .ls-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--radius-btn);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    white-space: nowrap;
+    transition:
+      color 0.25s ease,
+      background 0.25s ease;
+  }
+  .ls-btn:hover {
+    color: var(--color-plum-600);
+    background: var(--color-brand-50);
+  }
+  .ls-btn-compact {
+    padding: 0.5rem;
+  }
+
+  .ls-flag {
+    width: 1.15rem;
+    height: 0.7667rem;
+  }
+  .ls-flag-lg {
+    width: 1.5rem;
+    height: 1rem;
+  }
+
+  .ls-chev {
+    width: 0.75rem;
+    height: 0.75rem;
+    transition: transform 0.35s ease;
+  }
+  .ls.open .ls-chev {
+    transform: rotate(180deg);
+  }
+
+  /* Matches the Services dropdown: same border, radius, shadow and easing, so
+     the two panels under one bar read as the same object. */
+  .ls-panel {
+    position: absolute;
+    /* Logical, not `right`: under dir="rtl" the end of the bar is the left
+       edge, and this panel is anchored to the end of it. */
+    inset-inline-end: 0;
+    top: calc(100% + 0.625rem);
+    z-index: 50;
+    width: 15rem;
+    max-height: 21rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.375rem 0;
+    list-style: none;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transform-origin: top var(--ls-origin, right);
+    transition:
+      opacity 0.26s ease,
+      transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1.15),
+      visibility 0s 0.3s;
+  }
+  .ls-panel ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* No-JS baseline. */
+  .ls:hover .ls-panel,
+  .ls:focus-within .ls-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+  /* Once .js-ls lands the script owns it, so Escape sticks. */
+  .ls.js-ls:hover .ls-panel,
+  .ls.js-ls:focus-within .ls-panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+  }
+  .ls.js-ls.open .ls-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  .ls-region {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    margin: 0;
+    padding: 0.5rem 0.875rem 0.1875rem;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .ls-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    /* Start padding = the region row's 0.875rem + the flag's 1.5rem + its
+       0.625rem gap, so a language lines up under the region name above it.
+       Logical, so it flips with dir. */
+    padding-block: 0.375rem;
+    padding-inline: 3rem 0.875rem;
+    font-size: 0.875rem;
+    text-align: start;
+    color: var(--color-ink);
+    transition:
+      background 0.2s ease,
+      color 0.2s ease;
+  }
+  a.ls-item:hover {
+    background: var(--color-brand-50);
+    color: var(--color-plum-600);
+  }
+  .ls-item-on {
+    font-weight: 600;
+    color: var(--color-brand-700);
+  }
+
+  /* Not yet available: readable, clearly inert, not a link. */
+  .ls-item-soon {
+    color: color-mix(in srgb, var(--color-muted) 55%, transparent);
+    cursor: default;
+  }
+  .ls-soon {
+    flex: none;
+    padding: 0.0625rem 0.375rem;
+    border-radius: 999px;
+    background: var(--color-brand-50);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-brand-700);
+  }
+
+  .ls-check {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ls-panel,
+    .ls-chev,
+    .ls-item {
+      transition: none;
+    }
+  }
+</style>

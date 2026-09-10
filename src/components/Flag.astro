@@ -1,0 +1,39 @@
+---
+import { flags, isIconFlag } from './flags';
+import type { Locale } from '@/i18n/locales';
+
+/**
+ * One locale's flag. Markup lives in flags.ts — same split as Icon/social-marks.
+ */
+interface Props {
+  locale: Locale;
+  class?: string;
+}
+
+const { locale, class: className } = Astro.props;
+const icon = isIconFlag(locale);
+---
+
+<svg
+  viewBox="0 0 24 16"
+  aria-hidden="true"
+  class:list={['fl', icon && 'fl-icon', className]}
+  set:html={flags[locale]}
+/>
+
+<style>
+  .fl {
+    display: block;
+    flex: none;
+    /* A hairline ring so a white-edged flag (Oman, France) still reads as an
+       object against the white panel rather than bleeding into it. */
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.1);
+  }
+  /* The globe is line art in currentColor: a ring around it would frame it as
+     a flag, which is the opposite of the point. */
+  .fl-icon {
+    border-radius: 0;
+    box-shadow: none;
+  }
+</style>

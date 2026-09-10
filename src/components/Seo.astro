@@ -1,5 +1,6 @@
 ---
 import { site } from '@/config/site';
+import { cleanPathname } from '@/i18n/paths';
 
 interface Props {
   title: string;
@@ -22,10 +23,10 @@ const {
 } = Astro.props;
 
 // With `build.format: 'file'` the build-time pathname is `/about.html`, but
-// Cloudflare Pages serves it at `/about` and the sitemap lists `/about`. Strip
-// the extension (and a trailing `/index`) so every signal agrees.
-const cleanPath =
-  (canonicalPath ?? Astro.url.pathname).replace(/\.html$/, '').replace(/\/index$/, '/') || '/';
+// Cloudflare serves it at `/about` and the sitemap lists `/about`. Normalise so
+// every signal agrees. See cleanPathname, shared with Header, LegalLayout and
+// SummarizeWithAi.
+const cleanPath = cleanPathname(canonicalPath ?? Astro.url.pathname);
 const canonical = new URL(cleanPath, site.url).href;
 const isHome = cleanPath === '/';
 // Home keeps the bare brand name; every other page is suffixed.

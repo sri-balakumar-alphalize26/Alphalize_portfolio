@@ -1,6 +1,7 @@
 ---
 import { site } from '@/config/site';
 import { aiMarks } from './ai-marks';
+import { cleanPathname } from '@/i18n/paths';
 
 /**
  * "Summarize Alphalize with AI" — each icon opens that assistant with a prompt
@@ -26,7 +27,8 @@ import { aiMarks } from './ai-marks';
  * These are undocumented endpoints. They will break without warning, and the
  * only symptom is an assistant opening with an empty composer.
  */
-const url = new URL(Astro.url.pathname, site.url).href;
+// Normalised: unclean, this hands the assistant "/about.html", which 301s.
+const url = new URL(cleanPathname(Astro.url.pathname), site.url).href;
 
 const prompt =
   `Research Alphalize (${url}) in detail. Read that site and search the web, then give a ` +

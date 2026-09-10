@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { contact, nav } from '@/config/site';
+import { cleanPathname } from '@/i18n/paths';
 import Icon from './Icon.astro';
 import Logo from './Logo.astro';
 
@@ -34,14 +35,10 @@ const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
 /**
  * `build.format: "file"` means a prerendered page sees its own pathname as
  * "/about.html", while every href here is "/about" — so an unnormalised
- * comparison never matches and no nav item is ever marked current. Server-
- * rendered routes already get the clean path, where these replaces are a no-op.
+ * comparison never matches and no nav item is ever marked current. See
+ * cleanPathname, which is shared with Seo, LegalLayout and SummarizeWithAi.
  */
-const path =
-  Astro.url.pathname
-    .replace(/\/index\.html$/, '/')
-    .replace(/\.html$/, '')
-    .replace(/(.)\/$/, '$1') || '/';
+const path = cleanPathname(Astro.url.pathname);
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
 

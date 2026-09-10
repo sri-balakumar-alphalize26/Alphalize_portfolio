@@ -30,5 +30,10 @@ declare namespace Cloudflare {
 
 declare namespace App {
   /** Adapter 14 exposes `cfContext` (ExecutionContext) on locals; `runtime` is gone. */
-  interface Locals extends import('@astrojs/cloudflare').Runtime {}
+  interface Locals extends import('@astrojs/cloudflare').Runtime {
+    /** Set by src/middleware.ts for every page and endpoint. */
+    locale: import('./i18n/locales').Locale;
+    /** Translations for `locale`, falling back to English per key. */
+    t: import('./i18n/messages').Translate;
+  }
 }

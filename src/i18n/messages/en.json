@@ -1,0 +1,48 @@
+{
+  "client": {
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
+    "chooseLanguage": "Change language",
+    "sending": "Sending…",
+    "processing": "Processing…",
+    "uploading": "Uploading {pct}%",
+    "networkError": "We could not reach the server. Please check your connection and try again.",
+    "contactSent": "Thanks — we have received your message.",
+    "genericError": "Something went wrong. Please try again.",
+    "copied": "Copied",
+    "copyFailed": "Press Ctrl+C to copy"
+  },
+
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "leadership": "Leadership",
+    "services": "Services",
+    "careers": "Careers",
+    "contact": "Contact",
+    "hiring": "Hiring",
+    "openRole": "{count} open role",
+    "openRoles": "{count} open roles"
+  },
+
+  "legalNav": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "disclaimer": "Disclaimer"
+  },
+
+  "common": {
+    "skipToContent": "Skip to content",
+    "getConsultation": "Get a consultation",
+    "backToTop": "Back to top",
+    "followUs": "Follow us",
+    "company": "Company",
+    "legal": "Legal",
+    "loading": "Loading"
+  },
+
+  "site": {
+    "tagline": "Unlocking Growth Potential with ERP Solutions",
+    "description": "Alphalize builds customised ERP solutions, business intelligence dashboards and custom software that take your business to the next level of automation."
+  }
+}

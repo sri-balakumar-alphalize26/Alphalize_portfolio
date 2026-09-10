@@ -28,7 +28,14 @@ export const GET: APIRoute = async ({ request, params }) => {
   if (!object) return notFound();
 
   const name = object.customMetadata?.originalName ?? key.split('/').pop() ?? 'cv';
-  return new Response(object.body, {
+  /**
+   * R2 hands back a Workers ReadableStream while `Response` here is typed
+   * against the DOM one. They are the same object at runtime — workerd
+   * implements the same interface — but the two declarations are structurally
+   * distinct, so the assignment needs the cast. Streaming it straight through
+   * is the point: a CV must not be buffered into the isolate.
+   */
+  return new Response(object.body as unknown as ReadableStream, {
     headers: {
       'content-type': object.httpMetadata?.contentType ?? 'application/octet-stream',
       // `attachment` so a PDF cannot render inline on our own origin.

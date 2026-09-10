@@ -24,6 +24,7 @@ const { positions } = Astro.props;
 
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const { t } = Astro.locals;
 ---
 
 <form
@@ -34,9 +35,9 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   data-enhance
   class="apply-card rounded-card border-brand-100 ab border bg-white p-6 sm:p-8"
 >
-  <h2 class="text-ink ab text-xl font-semibold" style="--d:0ms">Apply to join the team</h2>
+  <h2 class="text-ink ab text-xl font-semibold" style="--d:0ms">{t('careersForm.heading')}</h2>
   <p class="text-muted ab mt-1.5 text-sm" style="--d:80ms">
-    Attach your CV and tell us which role you are after. We read every application.
+    {t('careersForm.intro')}
   </p>
 
   <div class="mt-5 empty:mt-0" role="status" aria-live="polite">
@@ -46,25 +47,31 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   <div class="mt-5 grid gap-5 sm:grid-cols-2">
     <Field
       name="name"
-      label="Name"
+      label={t('careersForm.nameLabel')}
       required
       autocomplete="name"
-      placeholder="Your full name"
+      placeholder={t('careersForm.namePlaceholder')}
       class="ab apply-f"
     />
     <Field
       name="email"
-      label="Email"
+      label={t('careersForm.emailLabel')}
       type="email"
       required
       autocomplete="email"
-      placeholder="you@example.com"
+      placeholder={t('careersForm.emailPlaceholder')}
       class="ab apply-f"
     />
-    <PhoneField name="phone" label="Phone" required placeholder="70252 05503" class="ab apply-f" />
+    <PhoneField
+      name="phone"
+      label={t('careersForm.phoneLabel')}
+      required
+      placeholder={t('careersForm.phonePlaceholder')}
+      class="ab apply-f"
+    />
     <Field
       name="position"
-      label="Position"
+      label={t('careersForm.positionLabel')}
       type="select"
       required
       options={positions}
@@ -79,7 +86,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   }
   <div class="ab apply-f mt-5" style="--d:400ms">
     <span class="text-ink block text-sm font-medium"
-      >CV / Résumé <span class="text-red-600">*</span></span
+      >{t('careersForm.resumeLabel')} <span class="text-red-600">*</span></span
     >
     <span class="text-muted mt-1 block text-xs">PDF, DOC or DOCX. Maximum 5MB.</span>
 
@@ -95,7 +102,8 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
         <Icon name="upload" class="apply-up size-5" />
         <Icon name="check" draw class="apply-ok size-5" />
         <span class="apply-drop-txt" data-drop-text>
-          <b>Choose a file</b> or drop it here
+          <b>{t('careersForm.chooseFile')}</b>
+          {t('careersForm.orDropIt')}
         </span>
       </span>
     </label>
@@ -106,11 +114,11 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   <div class="mt-5 grid">
     <Field
       name="message"
-      label="Anything else?"
+      label={t('careersForm.messageLabel')}
       type="textarea"
       rows={4}
       class="ab apply-f"
-      placeholder="Optional — a note on what you are looking for, or a link to your work."
+      placeholder={t('careersForm.messagePlaceholder')}
     />
   </div>
 
@@ -125,7 +133,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
     class="btn btn-primary apply-submit ab mt-6 w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
     style="--d:580ms"
   >
-    <span data-submit-label>Submit application</span>
+    <span data-submit-label>{t('careersForm.submit')}</span>
     <Icon name="upload" class="apply-s-ico size-4" />
     <span class="apply-spin" aria-hidden="true"></span>
     <span class="apply-prog" data-progress aria-hidden="true"></span>

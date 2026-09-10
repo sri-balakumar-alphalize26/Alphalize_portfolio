@@ -81,8 +81,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         role="img"
         aria-label={`Map of India; our office is in ${primary?.locality}, ${primary?.region}`}
       >
-        <path class="of-outline" d={INDIA} />
-        <path class="of-region" d={KERALA} />
+        <path class="of-outline" d={INDIA}></path>
+        <path class="of-region" d={KERALA}></path>
         {
           pins.map((p) => (
             <g class="of-pin">
@@ -116,9 +116,11 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     ))
   }
 
-  {/* Behind a chip so the column stays tidy; shown permanently on /contact.
+  {
+    /* Behind a chip so the column stays tidy; shown permanently on /contact.
       The panel stays mounted and toggles `data-open`, so the unfold plays in
-      both directions rather than only on the way in. */}
+      both directions rather than only on the way in. */
+  }
   {
     primary && (
       <div class="of-qr ab" style="--d:1200ms" data-qr-wrap>
@@ -150,7 +152,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
   <p class="of-row of-cp ab" style="--d:1250ms" data-copy={contact.phone} data-contact-copy="phone">
     <Icon name="phone" class="text-brand-400 mt-0.5 size-4 shrink-0" />
-    <a href={contact.phoneHref} class="text-brand-200" data-contact-tel><span data-contact-phone>{contact.phone}</span></a>
+    <a href={contact.phoneHref} class="text-brand-200" data-contact-tel
+      ><span data-contact-phone>{contact.phone}</span></a
+    >
     <button type="button" class="of-copy" aria-label="Copy phone number">
       <Icon name="copy" class="of-ci size-3.5" />
       <Icon name="check" draw class="of-co size-3.5" />
@@ -523,8 +527,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   }
 </style>
 
-<style>
-</style>
+<style></style>
 
 <style>
   .of-qr {
@@ -599,7 +602,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     width: 11px;
     height: 11px;
     background: #fff;
-    border-right: 1px solid var(--color-brand-100);
+    border-inline-end: 1px solid var(--color-brand-100);
     border-bottom: 1px solid var(--color-brand-100);
     transform: rotate(45deg);
   }

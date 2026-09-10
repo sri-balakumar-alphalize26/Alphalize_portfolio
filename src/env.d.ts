@@ -1,5 +1,17 @@
 /// <reference types="astro/client" />
-/// <reference types="@cloudflare/workers-types" />
+
+/**
+ * `@cloudflare/workers-types` is imported per-type below rather than pulled in
+ * with a `/// <reference types>` directive.
+ *
+ * The directive puts every Workers global into scope for every file in the
+ * project, including the browser-side <script> blocks in .astro components —
+ * and Workers declares its own `Element` (HTMLRewriter's), which shadows the
+ * DOM one. The result was three type errors on ordinary DOM code:
+ * `document.body.append(ta)` resolved to HTMLRewriter's
+ * `append(content: string | ReadableStream | Response)` and rejected a real
+ * element. Scoped imports give the same binding types with no global fallout.
+ */
 
 /**
  * Bindings, vars and secrets declared in wrangler.toml, merged into
@@ -22,10 +34,19 @@ declare namespace Cloudflare {
     MAIL_FROM?: string;
 
     /** Bindings. */
-    RATE_LIMIT?: KVNamespace;
-    RESUMES?: R2Bucket;
-    MANAGE?: KVNamespace;
+    RATE_LIMIT?: import('@cloudflare/workers-types').KVNamespace;
+    RESUMES?: import('@cloudflare/workers-types').R2Bucket;
+    MANAGE?: import('@cloudflare/workers-types').KVNamespace;
   }
+}
+
+/**
+ * The one thing the dropped `/// <reference types>` directive supplied that is
+ * actually used: the virtual module the adapter resolves at build time. Only
+ * `env` is imported from it anywhere in this project.
+ */
+declare module 'cloudflare:workers' {
+  export const env: Cloudflare.Env;
 }
 
 declare namespace App {

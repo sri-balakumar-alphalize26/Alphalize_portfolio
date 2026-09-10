@@ -53,15 +53,29 @@
   --color-muted: #454545;
   --color-accent: #e94d65;
 
+  /**
+   * Inter FIRST, then the locale's script face.
+   *
+   * The order matters and is deliberate: brand names, "Odoo", "ERP", the phone
+   * number and every Latin fragment inside a Hindi or Arabic sentence keep
+   * Inter, and only codepoints Inter has no glyph for fall through to the
+   * script face. `--font-script` is set per-locale in @layer base and is unset
+   * on en/fr/de, where the fallback keeps the declaration valid.
+   */
   --font-sans:
-    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
+    'Inter', var(--font-script, ui-sans-serif), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
   /* Odoo uses one family for body copy and the smaller headings. */
-  --font-display:
-    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    sans-serif;
-  /* Odoo's handwriting face: hero and section headings, marker notes. */
-  --font-hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  --font-display: var(--font-sans);
+  /**
+   * Odoo's handwriting face: hero and section headings, marker notes.
+   *
+   * The opposite order to --font-sans, on purpose. A heading is one phrase in
+   * one language, and a Caveat "24/7" sitting inside a Kalam sentence reads as
+   * a rendering fault rather than a design. So the script's own hand comes
+   * first here and Caveat is the Latin fallback behind it.
+   */
+  --font-hand: var(--font-hand-script, 'Caveat'), 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
 
   /* Odoo: h1 = 3.5rem, section headings ~2.5rem (Inter headings only; the
      handwriting <Heading> carries its own larger clamps). */
@@ -78,6 +92,146 @@
 }
 
 @layer base {
+  /**
+   * Direction sign, for transforms that have to point the way the text reads.
+   *
+   * About thirty hover affordances across the site nudge something a few pixels
+   * with `translateX` — a nav underline, an arrow, a card edge. Logical
+   * properties cannot express that: `transform` has no logical form. Rather
+   * than write thirty `[dir='rtl']` overrides, each one multiplies by this.
+   *
+   *   transform: translateX(calc(3px * var(--dir)));
+   *
+   * Genuinely symmetric motion (a shake, a scale, the splash logo halves)
+   * should NOT use it — mirroring those is wrong, not merely unnecessary.
+   */
+  :root {
+    --dir: 1;
+  }
+  [dir='rtl'] {
+    --dir: -1;
+  }
+
+  /* Directional icons flip with the reading direction. `scale` rather than
+     `transform`, so it composes with any inline rotate() instead of replacing
+     it. Applied by Icon.astro to the four arrow/chevron names. */
+  [dir='rtl'] .rtl-mirror {
+    scale: -1 1;
+  }
+
+  /**
+   * Per-script faces and metrics.
+   *
+   * Two families per locale: the body face that backs up Inter, and the
+   * handwriting face that replaces Caveat — which has no glyph outside Latin,
+   * and drives every heading on this site via .mk-hand.
+   *
+   * --mk-hand-scale is not cosmetic. Caveat has an unusually small x-height for
+   * its em, so the .mk-hand clamps were calibrated to it; Kalam, Atma and Noto
+   * Sans SC render roughly 30% larger at the same font-size and would burst
+   * every hero. Each locale scales back to match Caveat's apparent size.
+   *
+   * Line-height and tracking follow the script too. Indic scripts stack matras
+   * above and below the base glyph and clip at the 1.12 the Latin headings use;
+   * Arabic is worse, and letter-spacing on Arabic breaks the cursive join
+   * outright — the letters visually disconnect, which a native reader reads as
+   * a broken font rather than as a style.
+   */
+  html[lang='ar'] {
+    --font-script: 'Noto Sans Arabic';
+    --font-hand-script: 'Lemonada';
+    --mk-hand-scale: 0.78;
+    --mk-hand-lh: 1.6;
+    --mk-hand-weight: 600;
+    --lh-heading: 1.5;
+    --lh-body: 1.9;
+  }
+  html[lang='bn'] {
+    --font-script: 'Noto Sans Bengali';
+    --font-hand-script: 'Atma';
+    --mk-hand-scale: 0.82;
+    --mk-hand-lh: 1.45;
+    --mk-hand-weight: 600;
+  }
+  html[lang='zh'] {
+    /* No handwriting substitute — see the note in fonts-per-script.ts. The
+       marker strokes carry the personality instead, thickened to compensate. */
+    --font-script: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei';
+    --font-hand-script: 'Noto Sans SC';
+    --mk-hand-scale: 0.72;
+    --mk-hand-lh: 1.35;
+    --mk-hand-weight: 700;
+    --lh-heading: 1.3;
+    --lh-body: 1.75;
+  }
+  html[lang='hi'] {
+    --font-script: 'Noto Sans Devanagari';
+    --font-hand-script: 'Kalam';
+    --mk-hand-scale: 0.8;
+    --mk-hand-lh: 1.45;
+  }
+  html[lang='ta'] {
+    --font-script: 'Noto Sans Tamil';
+    --font-hand-script: 'Kavivanar';
+    --mk-hand-scale: 0.82;
+    --mk-hand-lh: 1.5;
+    --mk-hand-weight: 400;
+  }
+  html[lang='ml'] {
+    --font-script: 'Noto Sans Malayalam';
+    --font-hand-script: 'Chilanka';
+    --mk-hand-scale: 0.8;
+    --mk-hand-lh: 1.55;
+    --mk-hand-weight: 400;
+  }
+
+  /* Shared metric defaults, overridden per script above. */
+  :root {
+    --mk-hand-scale: 1;
+    --mk-hand-lh: 1.12;
+    --mk-hand-weight: 700;
+    --lh-heading: 1.2;
+    --lh-body: 1.6;
+  }
+
+  /* Indic and Arabic headings: negative tracking crowds stacked marks into
+     their neighbours, and on Arabic it severs the joins. Never, in any
+     component, for these scripts. */
+  :is(html[lang='ar'], html[lang='hi'], html[lang='bn'], html[lang='ta'], html[lang='ml'])
+    :is(h1, h2, h3, h4, .mk-hand) {
+    letter-spacing: 0;
+  }
+  html[lang='ar'] * {
+    letter-spacing: 0 !important;
+  }
+
+  /* Apply the metric tokens to the package's handwriting class, whose own
+     values are calibrated to Caveat. font-synthesis: none because Kavivanar
+     and Chilanka ship one weight, and a faked bold on a connected script looks
+     like a rendering fault. */
+  .mk-hand {
+    font-weight: var(--mk-hand-weight);
+    line-height: var(--mk-hand-lh);
+    font-synthesis: none;
+  }
+  .mk-hand--xl {
+    font-size: calc(clamp(2.6rem, 6.5vw, 5rem) * var(--mk-hand-scale));
+  }
+  .mk-hand--lg {
+    font-size: calc(clamp(2.1rem, 5vw, 3.8rem) * var(--mk-hand-scale));
+  }
+  .mk-hand--md {
+    font-size: calc(clamp(1.7rem, 3.6vw, 2.6rem) * var(--mk-hand-scale));
+  }
+  .mk-hand--sm {
+    font-size: calc(clamp(1.3rem, 2.6vw, 1.8rem) * var(--mk-hand-scale));
+  }
+
+  /* zh has no hand face, so the stroke does the work the letterform cannot. */
+  html[lang='zh'] .mk-mark__svg path {
+    stroke-width: calc(var(--sw, 5.5) * 1.35);
+  }
+
   /* Point the marker package at the site palette. Same layer as its
      tokens.css, declared later, so these win. */
   :root {
@@ -443,6 +597,40 @@
   to {
     transform: translate3d(-50%, 0, 0);
   }
+}
+
+/**
+ * The same travel, mirrored.
+ *
+ * A `width: max-content` flex track in an RTL container starts at the right
+ * edge and overflows to the LEFT, so the -50% above carries it further off
+ * screen instead of scrolling the duplicated half into view. Only the
+ * animation name is swapped; everything else about the track is unchanged.
+ */
+@keyframes marquee-scroll-rtl {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(50%, 0, 0);
+  }
+}
+[dir='rtl'] .marquee-track {
+  animation-name: marquee-scroll-rtl;
+}
+
+/**
+ * Reveal directions follow the reading direction.
+ *
+ * `left`/`right` here name where the element travels FROM, which in an RTL
+ * layout is the opposite side. The values are already driven by a custom
+ * property, so mirroring them is two declarations rather than a rewrite.
+ */
+[dir='rtl'] [data-reveal='left'] {
+  --reveal-x: 1.75rem;
+}
+[dir='rtl'] [data-reveal='right'] {
+  --reveal-x: -1.75rem;
 }
 
 .marquee-track {

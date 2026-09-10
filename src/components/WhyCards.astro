@@ -18,29 +18,30 @@ import SectionHeading from './SectionHeading.astro';
  *   - The tile's pop-in animates the `scale`/`rotate` properties, which compose
  *     with the `transform` its hover state sets, so neither cancels the other.
  */
-const values = [
-  {
-    icon: 'award' as const,
-    title: 'Expertise & Experience',
-    body: 'A team of highly skilled professionals with extensive expertise in ERP software development, business intelligence and IT solutions.',
-  },
-  {
-    icon: 'users' as const,
-    title: 'Customer-Centric Approach',
-    body: 'We strive to build strong, long-lasting relationships based on trust, transparency and exceptional service — through implementation and well beyond it.',
-  },
-  {
-    icon: 'sparkles' as const,
-    title: 'Innovation & Improvement',
-    body: 'The business landscape keeps moving. Staying ahead means embracing the latest technologies, trends and practices rather than settling into a stack.',
-  },
-];
+const { t } = Astro.locals;
+
+/**
+ * Icons only — the copy lives in the catalogue, zipped in by index below.
+ *
+ * Splitting them this way keeps a translator out of a file full of component
+ * internals, and keeps the icon choice out of a file a translator edits. The
+ * length assertion is what stops the two drifting: add a card to one and
+ * forget the other, and the build says so rather than dropping a card
+ * silently.
+ */
+const ICONS = ['award', 'users', 'sparkles'] as const;
+
+const copy = t('whyCards.items');
+if (copy.length !== ICONS.length) {
+  throw new Error(`[i18n] whyCards.items has ${copy.length} entries, ICONS has ${ICONS.length}`);
+}
+const values = copy.map((c, i) => ({ ...c, icon: ICONS[i]! }));
 ---
 
 <Section variant="surface" space="lg">
   <SectionHeading
-    eyebrow="Why Alphalize"
-    title="A [[partner]], not just a vendor"
+    eyebrow={t('whyCards.eyebrow')}
+    title={t('whyCards.title')}
     marker="circle"
     color="blue"
   />

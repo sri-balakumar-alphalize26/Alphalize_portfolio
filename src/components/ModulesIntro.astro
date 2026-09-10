@@ -35,15 +35,16 @@ const letters = wordmarkLetters;
 const SURVIVOR = 4;
 
 const HREF = '/services/erp-solutions#modules';
+const { t } = Astro.locals;
 ---
 
 <Section variant="white" space="lg">
   <SectionHeading
-    eyebrow="ERP modules"
-    title="[[Ready-made modules]] that ship with the platform"
+    eyebrow={t('modulesIntro.eyebrow')}
+    title={t('modulesIntro.title')}
     marker="underline"
     color="blue"
-    lead="From the weighing scale at the counter to offline sync in the back office — built once, and already running in production."
+    lead={t('modulesIntro.lead')}
   />
 
   <div class="mi-stage rounded-card bg-surface mt-12" data-modules-intro data-survivor={SURVIVOR}>

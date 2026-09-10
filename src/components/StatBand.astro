@@ -18,12 +18,23 @@ interface Stat {
   label: string;
 }
 
-const stats: Stat[] = [
-  { value: '7+', label: 'Service lines' },
-  { value: '15', label: 'ERP modules' },
-  { value: '100%', label: 'Tailored builds' },
-  { value: '24/7', label: 'Support cover' },
-];
+const { t } = Astro.locals;
+
+/**
+ * The numbers stay here, and stay in ASCII digits in every locale.
+ *
+ * The reel is a fixed-height window scrolling a 0-9 strip, so Arabic-Indic
+ * (٠١٢) or Devanagari (०१२) digits would clip — and Western digits are what
+ * tech and ERP marketing uses across all nine of these markets anyway. Only the
+ * labels are translated.
+ */
+const VALUES = ['7+', '15', '100%', '24/7'];
+
+const labels = t('stats.items');
+if (labels.length !== VALUES.length) {
+  throw new Error(`[i18n] stats.items has ${labels.length} entries, VALUES has ${VALUES.length}`);
+}
+const stats: Stat[] = VALUES.map((value, i) => ({ value, label: labels[i]!.label }));
 
 /** Cycles of 0-9 the reel travels through before it lands. */
 const REPEAT = 3;
@@ -100,6 +111,14 @@ const rows = stats.map((stat, si) => {
   .sb-num {
     /* The height of one window in the reel; every part below is sized off it. */
     --h: 1.05em;
+    /**
+     * Forced LTR. Each digit is a separate flex item, and flex item order
+     * follows `direction` — so in an RTL page "100%" renders as "%001" and
+     * "24/7" as "7/42". The numbers are ASCII in every locale (see the note in
+     * the frontmatter), so pinning the run to LTR is correct rather than a
+     * workaround.
+     */
+    direction: ltr;
     display: flex;
     align-items: flex-start;
     justify-content: center;

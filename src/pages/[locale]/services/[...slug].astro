@@ -11,27 +11,33 @@ import ServiceSidebar from '@/components/ServiceSidebar.astro';
 import SolutionCards from '@/components/SolutionCards.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/config/site';
-import { liveLocales } from '@/i18n/locales';
+import { liveLocales, type Locale } from '@/i18n/locales';
+import { localeHref } from '@/i18n/paths';
+import { getLocalized } from '@/i18n/collections';
 
 /**
- * Every live locale gets every slug.
+ * Every live locale gets every slug, translated or not.
  *
- * Content is not per-locale yet, so each locale renders the same entry. Once it
- * is, a locale missing a translation must still resolve the URL rather than
- * 404: the header dropdown and the footer list are built from the English set,
- * so the site links every slug in every locale whether or not it is translated.
+ * A locale missing a translation must still resolve the URL rather than 404:
+ * the header dropdown, the footer list and the 404 rail are all built from the
+ * English set, so the site links every slug in every locale regardless. The
+ * fallback is English prose, and it is marked as such below.
  */
 export const getStaticPaths = (async () => {
-  const services = await getCollection('services');
-  return liveLocales.flatMap((locale) =>
-    services.map((service) => ({
-      params: { locale, slug: service.id },
-      props: { service },
-    }))
+  const perLocale = await Promise.all(
+    liveLocales.map(async (locale) => {
+      const services = await getLocalized('services', locale);
+      return services.map(({ slug, entry, translated }) => ({
+        params: { locale, slug },
+        props: { service: entry, translated },
+      }));
+    })
   );
+  return perLocale.flat();
 }) satisfies GetStaticPaths;
 
-const { service } = Astro.props;
+const { service, translated } = Astro.props;
+const { locale, slug } = Astro.params as { locale: Locale; slug: string };
 const { title, titleMarked, summary, seoDescription, icon, highlights, showcase, solutions } =
   service.data;
 const { Content } = await render(service);
@@ -42,10 +48,10 @@ const apps =
     ? (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order)
     : [];
 
-// Sibling services for the "explore more" rail.
-const others = (await getCollection('services'))
-  .filter((s) => s.id !== service.id)
-  .sort((a, b) => a.data.order - b.data.order);
+/* Sibling services for the "explore more" rail — localised, so the rail follows
+   the same fallback rules as the page and its links carry no locale prefix in
+   the slug. Reading the raw collection here would emit "/en/services/en/…". */
+const others = (await getLocalized('services', locale)).filter((s) => s.slug !== slug);
 
 const jsonLd: Record<string, unknown>[] = [
   {
@@ -53,7 +59,7 @@ const jsonLd: Record<string, unknown>[] = [
     '@type': 'Service',
     name: title,
     description: seoDescription ?? summary,
-    url: `${site.url}/services/${service.id}`,
+    url: new URL(localeHref(locale, `/services/${slug}`), site.url).href,
     provider: { '@id': `${site.url}/#organization` },
     areaServed: ['IN'],
   },
@@ -96,8 +102,22 @@ if (apps.length) {
       /* Body. One [data-ab] unit with an auto-assigned stagger: the blocks come
         from rendered markdown, so there is no template to annotate them in. */
     }
+    {
+      /*
+      lang="en" whenever this locale has no translation of its own.
+
+      This is the one thing that must not be skipped on a fallback. It tells a
+      screen reader to switch voice rather than read English with an Arabic or
+      Tamil pronunciation, tells search engines the block is English inside a
+      page declared otherwise, and stops a browser's translate feature
+      re-translating text that is already in its source language. dir is set
+      too, because English inside an RTL page is still an LTR run.
+    */
+    }
     <article
       class="prose-content lg:col-span-8"
+      lang={translated ? undefined : 'en'}
+      dir={translated ? undefined : 'ltr'}
       data-ab
       data-ab-cascade
       data-base="0"

@@ -29,14 +29,15 @@ const columns = [0, 2, 4].map((offset, i) => ({
   visibility: ['', 'hidden md:block', 'hidden lg:block'][i],
 }));
 
+const { locale, t } = Astro.locals;
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <Section variant="surface" space="lg">
   <SectionHeading
-    eyebrow="Client reviews"
-    title="What our [[clients]] say"
+    eyebrow={t('testimonials.eyebrow')}
+    title={t('testimonials.title')}
     marker="underline"
     color="blue"
     lead="Shops, restaurants and showrooms running our software and hardware every day."
@@ -71,7 +72,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   </div>
 
   <Reveal class="text-muted mt-10 text-center text-sm">
-    Worked with us?
+    {t('testimonials.footer')}
     <a href={loc('/contact')} class="text-plum-600 font-semibold hover:underline"
       >Tell us how it went</a
     >.

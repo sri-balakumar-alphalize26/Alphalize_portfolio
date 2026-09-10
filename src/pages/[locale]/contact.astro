@@ -62,19 +62,17 @@ const methods = [
     copy: email,
   },
 ];
+const { t } = Astro.locals;
 ---
 
-<BaseLayout
-  title="Contact"
-  description="Talk to Alphalize about ERP, business intelligence or custom software. Office in Kollam, Kerala."
->
+<BaseLayout title={t('contactPage.metaTitle')} description={t('contactPage.metaDescription')}>
   <AboutAnim />
 
   <PageHero
     anim
-    eyebrow="Contact"
-    title="Contact [[Us]]"
-    lead="Describe your current setup and what you want to change. We will come back with a straight assessment rather than a sales deck."
+    eyebrow={t('contactPage.eyebrow')}
+    title={t('contactPage.title')}
+    lead={t('contactPage.lead')}
   />
 
   <section class="container-page py-16 lg:py-20">
@@ -222,7 +220,7 @@ const methods = [
 <style>
   .ct-rail-col {
     position: relative;
-    padding-left: 1.25rem;
+    padding-inline-start: 1.25rem;
   }
 
   /* The rail draws downward; each node pops as the line reaches it. */

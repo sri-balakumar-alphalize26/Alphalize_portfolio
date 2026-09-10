@@ -1,4 +1,5 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { getCollection } from 'astro:content';
 import AboutAnim from '@/components/AboutAnim.astro';
 import CareersForm from '@/components/CareersForm.astro';
@@ -8,11 +9,20 @@ import PageHero from '@/components/PageHero.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { offices, site } from '@/config/site';
 
-const jobs = (await getCollection('jobs', ({ data }) => data.open)).sort(
-  (a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime()
+const { t } = Astro.locals;
+
+/* Newest first — getLocalized orders by `order`, which jobs do not use. */
+const jobs = (await getLocalized('jobs', Astro.locals.locale, (j) => j.data.open)).sort(
+  (a, b) => b.entry.data.postedAt.getTime() - a.entry.data.postedAt.getTime()
 );
 
-const positions = [...jobs.map((j) => j.data.title), 'Training / Internship Program', 'Other'];
+/* Job titles come from the collection and are not translated yet; the two
+   trailing options are ours, so they come from the catalogue. */
+const positions = [
+  ...jobs.map((j) => j.entry.data.title),
+  t('careersForm.positionTraining'),
+  t('careersForm.positionOther'),
+];
 
 const india = offices.find((o) => o.id === 'kollam')!;
 
@@ -20,10 +30,10 @@ const india = offices.find((o) => o.id === 'kollam')!;
 const jsonLd = jobs.map((job) => ({
   '@context': 'https://schema.org',
   '@type': 'JobPosting',
-  title: job.data.title,
-  description: job.data.summary,
-  datePosted: job.data.postedAt.toISOString().slice(0, 10),
-  employmentType: job.data.employmentType,
+  title: job.entry.data.title,
+  description: job.entry.data.summary,
+  datePosted: job.entry.data.postedAt.toISOString().slice(0, 10),
+  employmentType: job.entry.data.employmentType,
   hiringOrganization: { '@id': `${site.url}/#organization` },
   jobLocation: {
     '@type': 'Place',
@@ -43,17 +53,17 @@ export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---
 
 <BaseLayout
-  title="Careers"
-  description="Open roles at Alphalize — Odoo Developer, Frontend Developer and System Administrator in Kollam, Kerala. Apply with your CV."
+  title={t('careersPage.metaTitle')}
+  description={t('careersPage.metaDescription')}
   jsonLd={jsonLd}
 >
   <AboutAnim />
 
   <PageHero
     anim
-    eyebrow="Careers"
-    title="Job [[opportunities]]"
-    lead="We are a small team delivering ERP and business intelligence work from our Kollam office. That means real ownership early — and code that goes in front of people who depend on it."
+    eyebrow={t('careersPage.eyebrow')}
+    title={t('careersPage.title')}
+    lead={t('careersPage.lead')}
   />
 
   <div class="container-page pt-10">

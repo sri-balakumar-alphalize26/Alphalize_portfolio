@@ -12,7 +12,6 @@
     "copied": "Copied",
     "copyFailed": "Press Ctrl+C to copy"
   },
-
   "nav": {
     "home": "Home",
     "about": "About",
@@ -27,13 +26,11 @@
     "openRole": ", {count} open role",
     "openRoles": ", {count} open roles"
   },
-
   "legalNav": {
     "privacy": "Privacy Policy",
     "terms": "Terms & Conditions",
     "disclaimer": "Disclaimer"
   },
-
   "common": {
     "skipToContent": "Skip to content",
     "getConsultation": "Get a consultation",
@@ -41,16 +38,209 @@
     "followUs": "Follow us",
     "company": "Company",
     "legal": "Legal",
-    "loading": "Loading"
+    "loading": "Loading",
+    "selectPlaceholder": "Select…"
   },
-
   "footer": {
     "rightsReserved": "© {year} {company}. All rights reserved.",
     "creditPrefix": "Site developed and maintained by"
   },
-
+  "servicesCards": {
+    "eyebrow": "Services we offer",
+    "title": "Built around how your business [[actually runs]]",
+    "lead": "From full ERP rollouts to the integrations and dashboards that make them useful, we cover the software side of running a modern operation.",
+    "allServices": "All {count} services"
+  },
+  "ctaBand": {
+    "title": "Ready to see what automation would change?",
+    "body": "Tell us how your operation runs today. We will come back with a straight assessment of what an ERP or BI rollout would actually move — and what it would not."
+  },
+  "testimonials": {
+    "eyebrow": "Client reviews",
+    "title": "What our [[clients]] say",
+    "footer": "Worked with us?"
+  },
+  "whyCards": {
+    "eyebrow": "Why Alphalize",
+    "title": "A [[partner]], not just a vendor",
+    "items": [
+      {
+        "title": "Expertise & Experience",
+        "body": "A team of highly skilled professionals with extensive expertise in ERP software development, business intelligence and IT solutions."
+      },
+      {
+        "title": "Customer-Centric Approach",
+        "body": "We strive to build strong, long-lasting relationships based on trust, transparency and exceptional service — through implementation and well beyond it."
+      },
+      {
+        "title": "Innovation & Improvement",
+        "body": "The business landscape keeps moving. Staying ahead means embracing the latest technologies, trends and practices rather than settling into a stack."
+      }
+    ]
+  },
+  "stats": {
+    "items": [
+      {
+        "label": "Service lines"
+      },
+      {
+        "label": "ERP modules"
+      },
+      {
+        "label": "Tailored builds"
+      },
+      {
+        "label": "Support cover"
+      }
+    ]
+  },
+  "hero": {
+    "eyebrow": "Odoo ERP partners",
+    "title": "Run your whole business [[on one system]]",
+    "lead": "Alphalize builds and implements Odoo ERP, business intelligence and the mobile and desktop software around it — so your counter, your warehouse and your back office all see the same numbers.",
+    "ctaPrimary": "Talk to us",
+    "ctaSecondary": "Explore services",
+    "note": "24/7 support included",
+    "footnote": "Office in Kollam, Kerala · 24/7 support",
+    "allApps": "All {count} apps"
+  },
   "site": {
     "tagline": "Unlocking Growth Potential with ERP Solutions",
     "description": "Alphalize builds customised ERP solutions, business intelligence dashboards and custom software that take your business to the next level of automation."
+  },
+  "whatWeDo": {
+    "eyebrow": "What we do",
+    "title": "[[One platform.]] Every department.",
+    "lead": "Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers."
+  },
+  "softwareStrip": {
+    "eyebrow": "Software we build",
+    "title": "Every app you run. Every tool you use. [[One core.]]",
+    "lead": "Mobile and desktop, all landing in a single Odoo back office — with nothing re-typed in between."
+  },
+  "modulesIntro": {
+    "eyebrow": "ERP modules",
+    "title": "[[Ready-made modules]] that ship with the platform",
+    "lead": "From the weighing scale at the counter to offline sync in the back office — built once, and already running in production."
+  },
+  "whyChooseUs": {
+    "eyebrow": "Why choose us",
+    "title": "What you get from working with [[Alphalize]]"
+  },
+  "appShowcase": {
+    "eyebrow": "Our apps",
+    "title": "Ten apps. One connected [[back office.]]",
+    "lead": "Purpose-built Android apps for the people who do not sit at a desk — each one signs into your Odoo server and works with live company data. Built in-house, deployed on your own server, supported 24/7."
+  },
+  "modulesGrid": {
+    "eyebrow": "ERP modules",
+    "title": "From sales to service — modules [[we have built]]",
+    "lead": "Ready-made modules that drop into your Odoo deployment and cover the complete business lifecycle, from the counter to the back office."
+  },
+  "solutionCards": {
+    "eyebrow": "Connected devices",
+    "title": "Automation, access control and [[unmanned retail]]",
+    "lead": "Hardware we install, running software we wrote — each one wired into the same ERP core as the rest of your operation. The devices themselves come from 369ai.Biz."
+  },
+  "aboutPage": {
+    "metaTitle": "About Alphalize",
+    "metaDescription": "Alphalize helps businesses turn manual processes into automated workflows — ERP implementation, business intelligence and custom software, from Kollam, Kerala.",
+    "eyebrow": "About us",
+    "title": "We help implement your ideas into [[automation]]",
+    "lead": "We understand the power of automation in streamlining business processes and unlocking operational efficiency — and we are more interested in what it changes for you than in the technology itself.",
+    "para1": "At Alphalize, we understand the power of automation in streamlining business processes and unlocking operational efficiency. We are passionate about helping our clients bring their ideas to life and transforming manual tasks into automated workflows. Whether you have a specific automation concept in mind or need guidance in identifying opportunities for automation, our team of experts is here to guide you through the implementation process.",
+    "visionHeading": "It starts with your vision",
+    "para2": "We believe that successful automation begins with a clear understanding of your vision. Our team takes the time to listen and comprehend your ideas, goals and pain points. We collaborate closely with you to gain insight into your existing processes, identify areas that can benefit from automation, and tailor solutions that align with your vision.",
+    "para3": "We combine your expertise in your industry with our technical proficiency to create automation solutions that drive tangible results — because the person who knows where the time is being lost is usually already inside your business.",
+    "whereWeWork": "Where we work",
+    "supportNote": "Support runs around the clock from Kollam, so there is cover well outside the hours the work itself happens in."
+  },
+  "notFound": {
+    "metaTitle": "Page not found",
+    "metaDescription": "The page you were looking for does not exist.",
+    "heading": "This page does not exist",
+    "body": "The link may be out of date. If you followed it from somewhere on this site, let us know and we will fix it.",
+    "backHome": "Back to home",
+    "contactUs": "Contact us",
+    "jumpToService": "Or jump to a service"
+  },
+  "careersPage": {
+    "metaTitle": "Careers",
+    "metaDescription": "Open roles at Alphalize — Odoo Developer, Frontend Developer and System Administrator in Kollam, Kerala. Apply with your CV.",
+    "eyebrow": "Careers",
+    "title": "Job [[opportunities]]",
+    "lead": "We are a small team delivering ERP and business intelligence work from our Kollam office. That means real ownership early — and code that goes in front of people who depend on it."
+  },
+  "contactPage": {
+    "metaTitle": "Contact",
+    "metaDescription": "Talk to Alphalize about ERP, business intelligence or custom software. Office in Kollam, Kerala.",
+    "eyebrow": "Contact",
+    "title": "Contact [[Us]]",
+    "lead": "Describe your current setup and what you want to change. We will come back with a straight assessment rather than a sales deck."
+  },
+  "servicesPage": {
+    "metaTitle": "Services",
+    "metaDescription": "ERP solutions, business intelligence, custom web and mobile development, integration and migration, digital marketing, and training from Alphalize.",
+    "eyebrow": "What we do",
+    "title": "Services",
+    "lead": "Seven service lines covering the software side of running a modern operation — from a full ERP rollout to the integrations, dashboards and apps that make it useful day to day.",
+    "ctaTitle": "Not sure which of these you need?"
+  },
+  "ceoPage": {
+    "role": "Managing Director",
+    "portraitAlt": "Shan Sahib, Managing Director of Alphalize Technologies",
+    "intro1": "Shan Sahib leads Alphalize Technologies from Kollam, Kerala. His focus is automation people can actually run: Odoo-based ERP built around how a shop, showroom or restaurant works day to day, the business intelligence that makes those numbers legible, and the custom software and IoT work that closes the gaps between them.",
+    "intro2": "Under his direction the company joined the Odoo Partnership Program and opened a new development office in 2025, and in February 2026 his work in robotics service was recognised at the Insight Kerala Business Awards.",
+    "awardEyebrow": "Award",
+    "awardTitle": "Robotics Service Excellence Award",
+    "awardBody": "Presented to Shan Sahib at BizConnect 2026 as part of the Insight Kerala Business Awards 2026 by Business Insight magazine — recognition for dependable robotics deployments and the long-term support that keeps them running.",
+    "trophyAlt": "The Robotics Service Excellence Award trophy",
+    "handshakeAlt": "Shan Sahib receiving the award at BizConnect 2026",
+    "stageAlt": "Award presentation on stage at BizConnect 2026",
+    "videoTitle": "The presentation",
+    "videoCaption": "Receiving the award at BizConnect 2026.",
+    "talksTitle": "From the stage",
+    "talksBody": "Mind-management sessions for corporate teams, published on his channel, Shan on Tech.",
+    "ctaTitle": "Work with the team he leads",
+    "ctaBody": "ERP implementation, business intelligence and custom software, delivered and supported from Kollam.",
+    "talkNote": "Corporate training",
+    "cardCta": "Talk to the team"
+  },
+  "contactForm": {
+    "heading": "Get in touch",
+    "intro": "Tell us what you are trying to change. We reply to every enquiry.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your full name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@company.com",
+    "phoneLabel": "Phone",
+    "phonePlaceholder": "70252 05503",
+    "subjectLabel": "Subject",
+    "subjectPlaceholder": "What is this about?",
+    "messageLabel": "Message",
+    "messagePlaceholder": "A few lines on your current setup and what you would like to improve.",
+    "submit": "Send message",
+    "whatsappNote": "This opens WhatsApp with your details already written — press send there to reach us.",
+    "noscript": "This form needs JavaScript. Use the phone, WhatsApp or email links beside it instead.",
+    "privacyNote": "We use your details only to respond to this enquiry. See our <0>privacy policy</0>."
+  },
+  "careersForm": {
+    "heading": "Apply to join the team",
+    "intro": "Attach your CV and tell us which role you are after. We read every application.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your full name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "phoneLabel": "Phone",
+    "phonePlaceholder": "70252 05503",
+    "positionLabel": "Position",
+    "resumeLabel": "CV / Résumé",
+    "chooseFile": "Choose a file",
+    "orDropIt": "or drop it here",
+    "messageLabel": "Anything else?",
+    "messagePlaceholder": "Optional — a note on what you are looking for, or a link to your work.",
+    "submit": "Submit application",
+    "positionTraining": "Training / Internship Program",
+    "positionOther": "Other"
   }
 }

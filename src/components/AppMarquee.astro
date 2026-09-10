@@ -92,6 +92,16 @@ const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
     }
   }
 
+  /* Mirrored travel — see the note on marquee-scroll-rtl in global.css. */
+  @keyframes am-scroll-rtl {
+    to {
+      transform: translateX(50%);
+    }
+  }
+  :global([dir='rtl']) .am-track {
+    animation-name: am-scroll-rtl;
+  }
+
   .am-tile {
     display: grid;
     place-items: center;

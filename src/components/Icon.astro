@@ -16,6 +16,24 @@ interface Props {
 
 const { name, class: className = 'size-6', label, draw = false } = Astro.props;
 
+/**
+ * Icons that mean "forward" and "back" rather than "left" and "right", so they
+ * have to follow the reading direction.
+ *
+ * Handled here rather than at the call sites: these four are used at 21 places
+ * across 17 files, and one shared component is the only way to get all of them
+ * without missing any. The rule lives in global.css — `[dir='rtl'] .rtl-mirror`.
+ *
+ * Deliberately not every icon: a phone, a pin or a chevron-down means the same
+ * thing in both directions, and mirroring those would just look wrong.
+ *
+ * Typed as IconName rather than string, so a name that is not in the set is a
+ * build error. That is not hypothetical — this list started with arrow-left and
+ * chevron-left, neither of which this project has, and the annotation is what
+ * said so instead of silently never matching.
+ */
+const MIRRORED: readonly IconName[] = ['arrow-right', 'chevron-right'];
+
 // `instagram` is drawn as a line icon despite being a brand mark.
 const isFilled = filledIcons.includes(name) && name !== 'instagram';
 const path = iconPaths[name];
@@ -25,7 +43,7 @@ const markup = draw
 ---
 
 <svg
-  class={className}
+  class:list={[className, MIRRORED.includes(name) && 'rtl-mirror']}
   viewBox="0 0 24 24"
   fill={isFilled ? 'currentColor' : 'none'}
   stroke={isFilled ? 'none' : 'currentColor'}

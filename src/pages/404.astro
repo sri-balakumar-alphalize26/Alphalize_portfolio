@@ -1,48 +1,45 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { localeHref } from '@/i18n/paths';
 import { Heading } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import Icon from '@/components/Icon.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
-
+const { locale, t } = Astro.locals;
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const loc = (to: string) => localeHref(locale, to);
+
+const services = await getLocalized('services', locale);
 ---
 
-<BaseLayout
-  title="Page not found"
-  description="The page you were looking for does not exist."
-  noindex
->
+<BaseLayout title={t('notFound.metaTitle')} description={t('notFound.metaDescription')} noindex>
   <section class="container-page py-24 text-center lg:py-32">
-    <p class="text-7xl font-semibold text-plum-200 lg:text-8xl">404</p>
-    <Heading as="h1" size="lg" align="center" class="mt-4">This page does not exist</Heading>
-    <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
-      The link may be out of date. If you followed it from somewhere on this site, let us know and
-      we will fix it.
+    <p class="text-plum-200 text-7xl font-semibold lg:text-8xl">404</p>
+    <Heading as="h1" size="lg" align="center" class="mt-4">{t('notFound.heading')}</Heading>
+    <p class="text-muted mx-auto mt-4 max-w-xl text-base leading-relaxed">
+      {t('notFound.body')}
     </p>
 
     <div class="mt-8 flex flex-wrap justify-center gap-3">
-      <a href={loc('/')} class="btn btn-primary"> Back to home </a>
-      <a href={loc('/contact')} class="btn btn-outline text-brand-700"> Contact us </a>
+      <a href={loc('/')} class="btn btn-primary">{t('notFound.backHome')}</a>
+      <a href={loc('/contact')} class="btn btn-outline text-brand-700">{t('notFound.contactUs')}</a>
     </div>
 
     <div class="mx-auto mt-14 max-w-2xl text-left">
-      <h2 class="text-center text-sm font-semibold uppercase tracking-wider text-muted">
-        Or jump to a service
+      <h2 class="text-muted text-center text-sm font-semibold tracking-wider uppercase">
+        {t('notFound.jumpToService')}
       </h2>
       <ul class="mt-4 grid gap-2 sm:grid-cols-2">
         {
           services.map((s) => (
             <li>
               <a
-                href={loc(`/services/${s.id}`)}
-                class="flex items-center gap-2.5 rounded-lg border border-brand-100 px-4 py-3 text-sm text-muted transition-colors hover:border-brand-200 hover:bg-brand-50/50 hover:text-brand-700"
+                href={loc(`/services/${s.slug}`)}
+                class="border-brand-100 text-muted hover:border-brand-200 hover:bg-brand-50/50 hover:text-brand-700 flex items-center gap-2.5 rounded-lg border px-4 py-3 text-sm transition-colors"
               >
-                <Icon name={s.data.icon} class="size-4 shrink-0 text-brand-500" />
-                {s.data.title}
+                <Icon name={s.entry.data.icon} class="text-brand-500 size-4 shrink-0" />
+                {s.entry.data.title}
               </a>
             </li>
           ))

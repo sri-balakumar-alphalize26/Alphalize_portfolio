@@ -1,6 +1,7 @@
 ---
 import { site } from '@/config/site';
 import { localeHref, splitLocale } from '@/i18n/paths';
+import { defaultLocale, liveLocales, localeLabels, type Locale } from '@/i18n/locales';
 
 interface Props {
   title: string;
@@ -34,7 +35,25 @@ const {
  */
 const { path: cleanPath } = splitLocale(canonicalPath ?? Astro.url.pathname);
 const { locale } = Astro.locals;
-const canonical = new URL(localeHref(locale, cleanPath), site.url).href;
+
+/** The absolute URL of this page in a given locale. */
+const urlFor = (l: Locale) => new URL(localeHref(l, cleanPath), site.url).href;
+
+const canonical = urlFor(locale);
+
+/**
+ * Alternates cover the locales that actually have pages — `liveLocales`, not
+ * all nine. Pointing hreflang at a URL that 404s is worse than omitting it.
+ *
+ * The set includes this page itself: Google requires every member of an
+ * alternate set to reference all of them, itself included, and drops the whole
+ * set if one does not.
+ */
+const alternates = liveLocales.map((l) => ({
+  hreflang: localeLabels[l].hreflang,
+  href: urlFor(l),
+}));
+
 const isHome = cleanPath === '/';
 // Home keeps the bare brand name; every other page is suffixed.
 const fullTitle = isHome ? title : `${title} | ${site.name}`;
@@ -46,7 +65,32 @@ const ogImage = new URL('/og-default.png', site.url).href;
 <link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
+{
+  /*
+    Suppressed under noindex: the 404 and the owner-only applications inbox are
+    not members of any alternate set, and advertising them as translations of
+    each other would be wrong.
+  */
+  !noindex && (
+    <>
+      {alternates.map((a) => (
+        <link rel="alternate" hreflang={a.hreflang} href={a.href} />
+      ))}
+      {/* Where a reader whose language we do not publish should land. The
+          English edition — a static site on Cloudflare assets has nothing to
+          negotiate with, so this is a destination, not a gateway. */}
+      <link rel="alternate" hreflang="x-default" href={urlFor(defaultLocale)} />
+    </>
+  )
+}
+
 <meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content={localeLabels[locale].ogLocale} />
+{
+  liveLocales
+    .filter((l) => l !== locale)
+    .map((l) => <meta property="og:locale:alternate" content={localeLabels[l].ogLocale} />)
+}
 <meta property="og:type" content={ogType} />
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />

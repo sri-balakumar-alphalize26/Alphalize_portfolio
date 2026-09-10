@@ -42,16 +42,17 @@ const tiles: {
     featured: true,
   },
 ];
+const { t } = Astro.locals;
 ---
 
 <section class="cc-surface border-brand-100 border-t py-18 lg:py-24">
   <div class="container-page">
     <SectionHeading
-      eyebrow="Software we build"
-      title="Every app you run. Every tool you use. [[One core.]]"
+      eyebrow={t('softwareStrip.eyebrow')}
+      title={t('softwareStrip.title')}
       marker="squiggle"
       color="yellow"
-      lead="Mobile and desktop, all landing in a single Odoo back office — with nothing re-typed in between."
+      lead={t('softwareStrip.lead')}
     />
 
     <div class="mt-12 grid gap-6 md:grid-cols-2">

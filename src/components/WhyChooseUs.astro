@@ -32,14 +32,15 @@ const reasons = [
     body: 'From the initial consultation through implementation and beyond, our team stays available. Go-live is the start of the relationship, not the end of the engagement.',
   },
 ];
+const { t } = Astro.locals;
 ---
 
 <section class="wcu cc-surface border-brand-100 border-t py-18 lg:py-24" data-ab>
   <div class="container-page">
     <SectionHeading
       anim
-      eyebrow="Why choose us"
-      title="What you get from working with [[Alphalize]]"
+      eyebrow={t('whyChooseUs.eyebrow')}
+      title={t('whyChooseUs.title')}
       marker="circle"
       color="blue"
     />

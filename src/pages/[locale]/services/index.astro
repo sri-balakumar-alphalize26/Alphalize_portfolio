@@ -1,4 +1,5 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { getCollection } from 'astro:content';
 import CtaBand from '@/components/CtaBand.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -6,7 +7,7 @@ import ServiceCard from '@/components/ServiceCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/config/site';
 
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const services = await getLocalized('services', Astro.locals.locale);
 
 const jsonLd = [
   {
@@ -16,37 +17,38 @@ const jsonLd = [
     itemListElement: services.map((s, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      name: s.data.title,
-      url: `${site.url}/services/${s.id}`,
+      name: s.entry.data.title,
+      url: `${site.url}/services/${s.slug}`,
     })),
   },
 ];
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
+const { t } = Astro.locals;
 ---
 
 <BaseLayout
-  title="Services"
-  description="ERP solutions, business intelligence, custom web and mobile development, integration and migration, digital marketing, and training from Alphalize."
+  title={t('servicesPage.metaTitle')}
+  description={t('servicesPage.metaDescription')}
   jsonLd={jsonLd}
 >
   <PageHero
-    eyebrow="What we do"
-    title="Services"
-    lead="Seven service lines covering the software side of running a modern operation — from a full ERP rollout to the integrations, dashboards and apps that make it useful day to day."
+    eyebrow={t('servicesPage.eyebrow')}
+    title={t('servicesPage.title')}
+    lead={t('servicesPage.lead')}
   />
 
   <section class="container-page py-16 lg:py-20">
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {
         services.map((service, i) => (
-          <ServiceCard service={service} delay={i % 3} featured={service.data.featured} />
+          <ServiceCard service={service} delay={i % 3} featured={service.entry.data.featured} />
         ))
       }
     </div>
   </section>
 
   <CtaBand
-    title="Not sure which of these you need?"
+    title={t('servicesPage.ctaTitle')}
     body="Most engagements start as one thing and turn out to be another. Describe the problem and we will tell you which service actually addresses it — including when the answer is none of them."
   />
 </BaseLayout>

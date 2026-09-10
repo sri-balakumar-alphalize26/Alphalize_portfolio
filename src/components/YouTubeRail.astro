@@ -42,6 +42,15 @@ interface Props {
 
 const { talks, channel } = Astro.props;
 
+/**
+ * Every talk in this rail carries the same note, so it is one catalogue string
+ * rather than a field repeated four times in config/ceo.ts. The video titles
+ * stay in the config: they are the real published titles, and a translated one
+ * would not match what a viewer finds on the channel.
+ */
+const { t } = Astro.locals;
+const note = t('ceoPage.talkNote');
+
 /** Duplicated once so the -50% translate loops seamlessly. */
 const track = [...talks, ...talks];
 ---
@@ -51,23 +60,23 @@ const track = [...talks, ...talks];
 >
   <ul class="marquee-track yt-rail">
     {
-      track.map((t, i) => {
+      track.map((talk, i) => {
         const clone = i >= talks.length;
         return (
           <li class="yt-item" aria-hidden={clone ? 'true' : undefined}>
             <a
               class="yt-card"
-              href={`https://www.youtube.com/watch?v=${t.id}`}
+              href={`https://www.youtube.com/watch?v=${talk.id}`}
               target="_blank"
               rel="noopener noreferrer"
               tabindex={clone ? -1 : undefined}
-              data-yt={t.id}
-              data-yt-title={t.title}
-              data-yt-note={t.note}
+              data-yt={talk.id}
+              data-yt-title={talk.title}
+              data-yt-note={note}
             >
               <span class="yt-thumb">
                 <img
-                  src={`https://i.ytimg.com/vi/${t.id}/hqdefault.jpg`}
+                  src={`https://i.ytimg.com/vi/${talk.id}/hqdefault.jpg`}
                   alt=""
                   width="480"
                   height="360"
@@ -78,8 +87,8 @@ const track = [...talks, ...talks];
                 <span class="yt-play" aria-hidden="true" />
               </span>
               <span class="yt-meta">
-                <span class="yt-title">{t.title}</span>
-                <span class="yt-note">{t.note}</span>
+                <span class="yt-title">{talk.title}</span>
+                <span class="yt-note">{note}</span>
               </span>
             </a>
           </li>

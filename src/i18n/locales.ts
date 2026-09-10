@@ -28,7 +28,17 @@ export const isLocale = (value: unknown): value is Locale => locales.includes(va
  * is the switch that turns the picker on, and the last line of each of those
  * commits.
  */
-export const liveLocales: readonly Locale[] = ['en'];
+export const liveLocales: readonly Locale[] = [
+  'en',
+  'ar',
+  'bn',
+  'zh',
+  'fr',
+  'de',
+  'hi',
+  'ta',
+  'ml',
+];
 
 export const isLive = (locale: Locale) => liveLocales.includes(locale);
 

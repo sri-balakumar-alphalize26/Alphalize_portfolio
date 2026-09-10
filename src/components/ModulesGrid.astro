@@ -12,6 +12,7 @@ import SectionHeading from './SectionHeading.astro';
  * from <AboutAnim>, which the service page loads.
  */
 const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b.data.order);
+const { t } = Astro.locals;
 ---
 
 {
@@ -21,10 +22,10 @@ const modules = (await getCollection('modules')).sort((a, b) => a.data.order - b
         <div data-ab>
           <SectionHeading
             anim
-            eyebrow="ERP modules"
-            title="From sales to service — modules [[we have built]]"
+            eyebrow={t('modulesGrid.eyebrow')}
+            title={t('modulesGrid.title')}
             color="blue"
-            lead="Ready-made modules that drop into your Odoo deployment and cover the complete business lifecycle, from the counter to the back office."
+            lead={t('modulesGrid.lead')}
           />
         </div>
 

@@ -1,0 +1,238 @@
+{
+  "client": {
+    "menuOpen": "打开菜单",
+    "menuClose": "关闭菜单",
+    "chooseLanguage": "切换语言",
+    "sending": "发送中…",
+    "processing": "处理中…",
+    "uploading": "上传中 {pct}%",
+    "networkError": "无法连接服务器。请检查网络后重试。",
+    "contactSent": "谢谢 — 我们已收到您的消息。",
+    "genericError": "出了点问题，请重试。",
+    "copied": "已复制",
+    "copyFailed": "请按 Ctrl+C 复制"
+  },
+  "nav": {
+    "home": "首页",
+    "about": "关于我们",
+    "leadership": "管理团队",
+    "services": "服务",
+    "careers": "招聘",
+    "contact": "联系我们",
+    "hiring": "正在招聘",
+    "mainLabel": "主导航",
+    "mobileLabel": "移动端",
+    "utilTag": "ERP、商业智能与定制软件 — 印度喀拉拉邦科拉姆",
+    "openRole": "，{count} 个职位空缺",
+    "openRoles": "，{count} 个职位空缺"
+  },
+  "legalNav": {
+    "privacy": "隐私政策",
+    "terms": "条款与条件",
+    "disclaimer": "免责声明"
+  },
+  "common": {
+    "skipToContent": "跳至正文",
+    "getConsultation": "获取咨询",
+    "backToTop": "返回顶部",
+    "followUs": "关注我们",
+    "company": "公司",
+    "legal": "法律信息",
+    "loading": "加载中",
+    "selectPlaceholder": "请选择…"
+  },
+  "footer": {
+    "rightsReserved": "© {year} {company}。保留所有权利。",
+    "creditPrefix": "网站开发与维护"
+  },
+  "servicesCards": {
+    "eyebrow": "我们的服务",
+    "title": "围绕您业务的[[真实运作方式]]构建",
+    "lead": "从完整的 ERP 部署，到让它真正好用的集成与看板 — 现代企业运营的软件层面，我们全程负责。",
+    "allServices": "全部 {count} 项服务"
+  },
+  "ctaBand": {
+    "title": "想知道自动化会带来什么改变吗？",
+    "body": "告诉我们您目前的运作方式。我们会给出一份直接的评估：部署 ERP 或 BI 究竟会改变什么，又不会改变什么。"
+  },
+  "testimonials": {
+    "eyebrow": "客户评价",
+    "title": "我们的[[客户]]这样说",
+    "footer": "与我们合作过？"
+  },
+  "whyCards": {
+    "eyebrow": "为什么选择 Alphalize",
+    "title": "一个[[合作伙伴]]，而不只是供应商",
+    "items": [
+      {
+        "title": "专业与经验",
+        "body": "一支高素质的专业团队，在 ERP 软件开发、商业智能与 IT 解决方案方面拥有丰富经验。"
+      },
+      {
+        "title": "以客户为中心",
+        "body": "我们以信任、透明和卓越服务为基础，建立稳固而长久的合作关系 — 贯穿实施过程，并延续至更久之后。"
+      },
+      {
+        "title": "创新与持续改进",
+        "body": "商业环境不断变化。保持领先意味着采纳新的技术、趋势与做法，而不是固守既有的技术栈。"
+      }
+    ]
+  },
+  "stats": {
+    "items": [
+      { "label": "服务领域" },
+      { "label": "ERP 模块" },
+      { "label": "定制开发" },
+      { "label": "支持覆盖" }
+    ]
+  },
+  "hero": {
+    "eyebrow": "Odoo ERP 合作伙伴",
+    "title": "让整个企业运行在[[同一个系统上]]",
+    "lead": "Alphalize 构建并实施 Odoo ERP、商业智能，以及围绕它们的移动端与桌面端软件 — 让您的柜台、仓库和后台看到同一组数字。",
+    "ctaPrimary": "与我们联系",
+    "ctaSecondary": "查看服务",
+    "note": "含 7×24 小时支持",
+    "footnote": "办公室位于喀拉拉邦科拉姆 · 7×24 小时支持",
+    "allApps": "全部 {count} 款应用"
+  },
+  "site": {
+    "tagline": "以 ERP 解决方案释放增长潜力",
+    "description": "Alphalize 打造定制 ERP 解决方案、商业智能看板与定制软件，助您的企业迈向更高水平的自动化。"
+  },
+  "whatWeDo": {
+    "eyebrow": "我们做什么",
+    "title": "[[一个平台。]]所有部门。",
+    "lead": "系统的每一部分都与其他部分相通 — 让您的柜台、仓库和后台看到同一组数字。"
+  },
+  "softwareStrip": {
+    "eyebrow": "我们开发的软件",
+    "title": "每一个应用。每一件工具。[[同一个内核。]]",
+    "lead": "移动端与桌面端，全部汇入同一个 Odoo 后台 — 中间无需重新录入任何数据。"
+  },
+  "modulesIntro": {
+    "eyebrow": "ERP 模块",
+    "title": "随平台一同交付的[[现成模块]]",
+    "lead": "从柜台的电子秤到后台的离线同步 — 一次构建，且已在生产环境中运行。"
+  },
+  "whyChooseUs": {
+    "eyebrow": "为什么选择我们",
+    "title": "与 [[Alphalize]] 合作，您能得到什么"
+  },
+  "appShowcase": {
+    "eyebrow": "我们的应用",
+    "title": "十款应用。一个互联的[[后台。]]",
+    "lead": "专为不坐在办公桌前的人打造的 Android 应用 — 每一款都登录您的 Odoo 服务器，处理真实的公司数据。由我们自己开发，部署在您自己的服务器上，提供 7×24 小时支持。"
+  },
+  "modulesGrid": {
+    "eyebrow": "ERP 模块",
+    "title": "从销售到服务 — [[我们已构建的]]模块",
+    "lead": "可直接接入您 Odoo 部署的现成模块，覆盖从柜台到后台的完整业务流程。"
+  },
+  "solutionCards": {
+    "eyebrow": "联网设备",
+    "title": "自动化、门禁控制与[[无人零售]]",
+    "lead": "我们安装的硬件，运行着我们编写的软件 — 每一台都接入与您其余业务相同的 ERP 内核。设备本身来自 369ai.Biz。"
+  },
+  "aboutPage": {
+    "metaTitle": "关于 Alphalize",
+    "metaDescription": "Alphalize 帮助企业将手工流程转变为自动化工作流 — ERP 实施、商业智能与定制软件，来自印度喀拉拉邦科拉姆。",
+    "eyebrow": "关于我们",
+    "title": "我们把您的想法落地为[[自动化]]",
+    "lead": "我们了解自动化在简化业务流程、释放运营效率方面的力量 — 相比技术本身，我们更关心它为您带来了什么改变。",
+    "para1": "在 Alphalize，我们了解自动化在简化业务流程、释放运营效率方面的力量。我们乐于帮助客户把想法变为现实，把手工作业转变为自动化工作流。无论您心中已有明确的自动化设想，还是需要有人协助找出可以着手的环节，我们的专家团队都会全程陪伴实施过程。",
+    "visionHeading": "一切从您的设想开始",
+    "para2": "我们相信，成功的自动化始于对您设想的清晰理解。我们的团队会花时间倾听并理解您的想法、目标与痛点，与您密切协作，了解现有流程，找出适合自动化的环节，并量身设计与您设想相契合的方案。",
+    "para3": "我们把您的行业经验与我们的技术能力结合起来，做出能带来切实成效的自动化方案 — 因为最清楚时间耗在哪里的人，通常就在您的企业内部。",
+    "whereWeWork": "我们的办公地点",
+    "supportNote": "支持团队在科拉姆全天候工作，覆盖范围远超实际作业时段。"
+  },
+  "notFound": {
+    "metaTitle": "页面未找到",
+    "metaDescription": "您访问的页面不存在。",
+    "heading": "该页面不存在",
+    "body": "链接可能已经失效。如果您是从本站的某个页面跳转过来的，请告诉我们，我们会修正。",
+    "backHome": "返回首页",
+    "contactUs": "联系我们",
+    "jumpToService": "或直接前往某项服务"
+  },
+  "careersPage": {
+    "metaTitle": "招聘",
+    "metaDescription": "Alphalize 招聘职位 — Odoo 开发工程师、前端开发工程师与系统管理员，工作地点印度喀拉拉邦科拉姆。请附简历投递。",
+    "eyebrow": "招聘",
+    "title": "职位[[空缺]]",
+    "lead": "我们是一支小团队，在科拉姆办公室交付 ERP 与商业智能项目。这意味着很早就能承担真正的责任 — 以及交到真正依赖它的人手中的代码。"
+  },
+  "contactPage": {
+    "metaTitle": "联系我们",
+    "metaDescription": "就 ERP、商业智能或定制软件与 Alphalize 洽谈。办公室位于印度喀拉拉邦科拉姆。",
+    "eyebrow": "联系我们",
+    "title": "与我们[[取得联系]]",
+    "lead": "请描述您目前的系统状况以及希望改变的地方。我们会给出直接的评估，而不是一份销售材料。"
+  },
+  "servicesPage": {
+    "metaTitle": "服务",
+    "metaDescription": "Alphalize 提供 ERP 解决方案、商业智能、定制网页与移动开发、集成与迁移、数字营销及培训。",
+    "eyebrow": "我们做什么",
+    "title": "服务",
+    "lead": "七大服务领域，覆盖现代企业运营的软件层面 — 从完整的 ERP 部署，到让它在日常真正好用的集成、看板与应用。",
+    "ctaTitle": "不确定自己需要哪一项？"
+  },
+  "ceoPage": {
+    "role": "董事总经理",
+    "portraitAlt": "Shan Sahib，Alphalize Technologies 董事总经理",
+    "intro1": "Shan Sahib 在印度喀拉拉邦科拉姆领导 Alphalize Technologies。他专注于让人真正用得起来的自动化：围绕门店、展厅或餐厅日常运作方式构建的 Odoo ERP，让这些数字变得可读的商业智能，以及填补两者之间空隙的定制软件与物联网工作。",
+    "intro2": "在他的带领下，公司加入了 Odoo 合作伙伴计划，并于 2025 年开设新的研发办公室；2026 年 2 月，他在机器人服务领域的工作获得 Insight Kerala Business Awards 认可。",
+    "awardEyebrow": "奖项",
+    "awardTitle": "Robotics Service Excellence Award",
+    "awardBody": "由 Business Insight 杂志主办的 Insight Kerala Business Awards 2026 于 BizConnect 2026 颁发给 Shan Sahib — 表彰其可靠的机器人部署，以及使其持续运转的长期支持。",
+    "trophyAlt": "Robotics Service Excellence Award 奖杯",
+    "handshakeAlt": "Shan Sahib 在 BizConnect 2026 上领奖",
+    "stageAlt": "BizConnect 2026 舞台上的颁奖仪式",
+    "videoTitle": "颁奖现场",
+    "videoCaption": "在 BizConnect 2026 上领奖。",
+    "talksTitle": "来自讲台",
+    "talksBody": "面向企业团队的心智管理课程，发布于他的频道 Shan on Tech。",
+    "ctaTitle": "与他带领的团队合作",
+    "ctaBody": "ERP 实施、商业智能与定制软件 — 由科拉姆交付并提供支持。",
+    "talkNote": "企业培训",
+    "cardCta": "与团队沟通"
+  },
+  "contactForm": {
+    "heading": "联系我们",
+    "intro": "告诉我们您想改变什么。每一条询问我们都会回复。",
+    "nameLabel": "姓名",
+    "namePlaceholder": "您的全名",
+    "emailLabel": "电子邮箱",
+    "emailPlaceholder": "nin@company.com",
+    "phoneLabel": "电话",
+    "phonePlaceholder": "70252 05503",
+    "subjectLabel": "主题",
+    "subjectPlaceholder": "这是关于什么的？",
+    "messageLabel": "留言",
+    "messagePlaceholder": "简单说明您目前的系统状况，以及希望改进的地方。",
+    "submit": "发送消息",
+    "whatsappNote": "这将打开 WhatsApp，并已填好您的信息 — 请在那里点击发送以联系我们。",
+    "noscript": "此表单需要 JavaScript。请改用旁边的电话、WhatsApp 或电子邮件链接。",
+    "privacyNote": "我们仅使用您的信息回复此次询问。请参阅我们的<0>隐私政策</0>。"
+  },
+  "careersForm": {
+    "heading": "申请加入我们",
+    "intro": "请附上简历并说明您想应聘的职位。每一份申请我们都会阅读。",
+    "nameLabel": "姓名",
+    "namePlaceholder": "您的全名",
+    "emailLabel": "电子邮箱",
+    "emailPlaceholder": "nin@example.com",
+    "phoneLabel": "电话",
+    "phonePlaceholder": "70252 05503",
+    "positionLabel": "应聘职位",
+    "resumeLabel": "简历",
+    "chooseFile": "选择文件",
+    "orDropIt": "或拖放到此处",
+    "messageLabel": "还有其他内容吗？",
+    "messagePlaceholder": "选填 — 简述您正在寻找的机会，或附上作品链接。",
+    "submit": "提交申请",
+    "positionTraining": "培训 / 实习项目",
+    "positionOther": "其他"
+  }
+}

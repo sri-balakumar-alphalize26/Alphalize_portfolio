@@ -1,4 +1,5 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { localeHref } from '@/i18n/paths';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
@@ -33,7 +34,7 @@ interface Props {
 
 const { hover = 'underline' } = Astro.props;
 
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const services = await getLocalized('services', Astro.locals.locale);
 const year = new Date().getFullYear();
 
 /** Prefix an internal path with this page's locale. */
@@ -100,8 +101,8 @@ const loc = (to: string) => localeHref(locale, to);
           {
             services.map((s) => (
               <li>
-                <a href={loc(`/services/${s.id}`)} class="text-brand-200">
-                  {s.data.title}
+                <a href={loc(`/services/${s.slug}`)} class="text-brand-200">
+                  {s.entry.data.title}
                 </a>
               </li>
             ))

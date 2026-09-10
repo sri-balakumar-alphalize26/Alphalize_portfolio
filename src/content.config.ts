@@ -9,7 +9,18 @@ import { stripMarks } from './components/marks';
 const iconName = z.enum(Object.keys(iconPaths) as [IconName, ...IconName[]]);
 
 const services = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/services' }),
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/services',
+    /**
+     * Ids are '<locale>/<slug>' — see i18n/collections.ts.
+     *
+     * Set explicitly because the default generator prefers a `slug:`
+     * frontmatter field when one exists, which would drop the locale prefix
+     * and let two locales' entries collide with no error at all.
+     */
+    generateId: ({ entry }) => entry.replace(/\.mdx?$/, ''),
+  }),
   schema: ({ image }) =>
     z
       .object({
@@ -66,7 +77,11 @@ const services = defineCollection({
 });
 
 const jobs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/jobs' }),
+  loader: glob({
+    pattern: '**/*.md',
+    base: './src/content/jobs',
+    generateId: ({ entry }) => entry.replace(/\.mdx?$/, ''),
+  }),
   schema: z.object({
     title: z.string(),
     summary: z.string(),

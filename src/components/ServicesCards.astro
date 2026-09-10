@@ -1,4 +1,5 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { localeHref } from '@/i18n/paths';
 import { getCollection } from 'astro:content';
 import ArrowButton from './ArrowButton.astro';
@@ -14,18 +15,19 @@ import ServiceCard from './ServiceCard.astro';
  * and the closing button is the shared ArrowButton, so all that lives here is
  * the section frame and which services go in the grid.
  */
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
-const featured = services.filter((s) => s.data.featured);
+const services = await getLocalized('services', Astro.locals.locale);
+const featured = services.filter((s) => s.entry.data.featured);
 
+const { locale, t } = Astro.locals;
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <Section variant="white" space="lg">
   <SectionHeading
-    eyebrow="Services we offer"
-    title="Built around how your business [[actually runs]]"
-    lead="From full ERP rollouts to the integrations and dashboards that make them useful, we cover the software side of running a modern operation."
+    eyebrow={t('servicesCards.eyebrow')}
+    title={t('servicesCards.title')}
+    lead={t('servicesCards.lead')}
   />
 
   <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -33,6 +35,8 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   </div>
 
   <Reveal class="mt-10 text-center">
-    <ArrowButton href={loc('/services')}>All {services.length} services</ArrowButton>
+    <ArrowButton href={loc('/services')}
+      >{t('servicesCards.allServices', { count: services.length })}</ArrowButton
+    >
   </Reveal>
 </Section>

@@ -39,13 +39,14 @@ interface Props {
   ctaHref?: string;
 }
 
+const { t } = Astro.locals;
 const {
   photo = ceo.portrait,
   name = ceo.name,
-  role = `${ceo.role} · ${ceo.company}`,
-  paras = ceo.intro,
-  kicker = 'Leadership',
-  cta = 'Talk to the team',
+  role = `${t('ceoPage.role')} · ${ceo.company}`,
+  paras = [t('ceoPage.intro1'), t('ceoPage.intro2')],
+  kicker = t('nav.leadership'),
+  cta = t('ceoPage.cardCta'),
   ctaHref = '/contact',
 } = Astro.props;
 ---
@@ -65,7 +66,7 @@ const {
       <span class="ld-mask">
         <Image
           src={photo}
-          alt={ceo.portraitAlt}
+          alt={t('ceoPage.portraitAlt')}
           widths={[330, 660]}
           sizes="(min-width: 1024px) 330px, 280px"
           loading="eager"
@@ -199,7 +200,7 @@ const {
     width: 34px;
     height: 34px;
     pointer-events: none;
-    border-left: 2px solid var(--color-brand-400);
+    border-inline-start: 2px solid var(--color-brand-400);
     border-top: 2px solid var(--color-brand-400);
     border-radius: 4px 0 0 0;
     opacity: 0;

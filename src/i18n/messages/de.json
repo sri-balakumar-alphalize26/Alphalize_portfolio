@@ -1,0 +1,238 @@
+{
+  "client": {
+    "menuOpen": "Menü öffnen",
+    "menuClose": "Menü schließen",
+    "chooseLanguage": "Sprache wechseln",
+    "sending": "Wird gesendet…",
+    "processing": "Wird verarbeitet…",
+    "uploading": "Wird hochgeladen: {pct} %",
+    "networkError": "Der Server ist nicht erreichbar. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "contactSent": "Danke — wir haben Ihre Nachricht erhalten.",
+    "genericError": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+    "copied": "Kopiert",
+    "copyFailed": "Zum Kopieren Strg+C drücken"
+  },
+  "nav": {
+    "home": "Startseite",
+    "about": "Über uns",
+    "leadership": "Geschäftsführung",
+    "services": "Leistungen",
+    "careers": "Karriere",
+    "contact": "Kontakt",
+    "hiring": "Wir stellen ein",
+    "mainLabel": "Hauptnavigation",
+    "mobileLabel": "Mobil",
+    "utilTag": "ERP, Business Intelligence und Individualsoftware — Kollam, Kerala",
+    "openRole": ", {count} offene Stelle",
+    "openRoles": ", {count} offene Stellen"
+  },
+  "legalNav": {
+    "privacy": "Datenschutzerklärung",
+    "terms": "Allgemeine Geschäftsbedingungen",
+    "disclaimer": "Haftungsausschluss"
+  },
+  "common": {
+    "skipToContent": "Zum Inhalt springen",
+    "getConsultation": "Beratung anfragen",
+    "backToTop": "Nach oben",
+    "followUs": "Folgen Sie uns",
+    "company": "Unternehmen",
+    "legal": "Rechtliches",
+    "loading": "Wird geladen",
+    "selectPlaceholder": "Auswählen…"
+  },
+  "footer": {
+    "rightsReserved": "© {year} {company}. Alle Rechte vorbehalten.",
+    "creditPrefix": "Website entwickelt und betreut von"
+  },
+  "servicesCards": {
+    "eyebrow": "Unsere Leistungen",
+    "title": "Ausgerichtet auf den [[echten Ablauf]] Ihres Betriebs",
+    "lead": "Von der vollständigen ERP-Einführung bis zu den Integrationen und Dashboards, die sie nützlich machen — wir decken die Softwareseite eines modernen Betriebs ab.",
+    "allServices": "Alle {count} Leistungen"
+  },
+  "ctaBand": {
+    "title": "Neugierig, was Automatisierung verändern würde?",
+    "body": "Erzählen Sie uns, wie Ihr Betrieb heute läuft. Wir melden uns mit einer ehrlichen Einschätzung, was eine ERP- oder BI-Einführung tatsächlich bewegen würde — und was nicht."
+  },
+  "testimonials": {
+    "eyebrow": "Kundenstimmen",
+    "title": "Was unsere [[Kunden]] sagen",
+    "footer": "Schon mit uns gearbeitet?"
+  },
+  "whyCards": {
+    "eyebrow": "Warum Alphalize",
+    "title": "Ein [[Partner]], nicht bloß ein Lieferant",
+    "items": [
+      {
+        "title": "Fachwissen und Erfahrung",
+        "body": "Ein Team hoch qualifizierter Fachleute mit umfassender Erfahrung in ERP-Softwareentwicklung, Business Intelligence und IT-Lösungen."
+      },
+      {
+        "title": "Kundenorientierter Ansatz",
+        "body": "Wir bauen belastbare, langfristige Beziehungen auf — getragen von Vertrauen, Transparenz und außergewöhnlichem Service, während der Einführung und weit darüber hinaus."
+      },
+      {
+        "title": "Innovation und Weiterentwicklung",
+        "body": "Der Markt bleibt in Bewegung. Vorn zu bleiben heißt, neue Technologien, Entwicklungen und Verfahren aufzugreifen, statt sich in einem festen Stack einzurichten."
+      }
+    ]
+  },
+  "stats": {
+    "items": [
+      { "label": "Leistungsbereiche" },
+      { "label": "ERP-Module" },
+      { "label": "Maßgeschneiderte Umsetzungen" },
+      { "label": "Support-Abdeckung" }
+    ]
+  },
+  "hero": {
+    "eyebrow": "Odoo-ERP-Partner",
+    "title": "Führen Sie Ihr ganzes Unternehmen [[auf einem System]]",
+    "lead": "Alphalize entwickelt und implementiert Odoo ERP, Business Intelligence und die Mobil- und Desktop-Software drumherum — damit Ihre Kasse, Ihr Lager und Ihr Backoffice dieselben Zahlen sehen.",
+    "ctaPrimary": "Sprechen Sie uns an",
+    "ctaSecondary": "Leistungen ansehen",
+    "note": "Support rund um die Uhr inklusive",
+    "footnote": "Büro in Kollam, Kerala · Support rund um die Uhr",
+    "allApps": "Alle {count} Apps"
+  },
+  "site": {
+    "tagline": "Wachstumspotenzial freisetzen mit ERP-Lösungen",
+    "description": "Alphalize entwickelt maßgeschneiderte ERP-Lösungen, Business-Intelligence-Dashboards und Individualsoftware, die Ihr Unternehmen auf die nächste Stufe der Automatisierung bringen."
+  },
+  "whatWeDo": {
+    "eyebrow": "Was wir tun",
+    "title": "[[Eine Plattform.]] Alle Abteilungen.",
+    "lead": "Jeder Teil des Systems spricht mit jedem anderen — damit Ihre Kasse, Ihr Lager und Ihr Backoffice dieselben Zahlen sehen."
+  },
+  "softwareStrip": {
+    "eyebrow": "Software, die wir bauen",
+    "title": "Jede App, die Sie nutzen. Jedes Werkzeug. [[Ein Kern.]]",
+    "lead": "Mobil und Desktop, alles läuft in einem einzigen Odoo-Backoffice zusammen — ohne dass unterwegs etwas neu eingetippt wird."
+  },
+  "modulesIntro": {
+    "eyebrow": "ERP-Module",
+    "title": "[[Fertige Module]], die mit der Plattform kommen",
+    "lead": "Von der Waage an der Kasse bis zur Offline-Synchronisierung im Backoffice — einmal gebaut und bereits im Produktivbetrieb."
+  },
+  "whyChooseUs": {
+    "eyebrow": "Warum wir",
+    "title": "Was Ihnen die Zusammenarbeit mit [[Alphalize]] bringt"
+  },
+  "appShowcase": {
+    "eyebrow": "Unsere Apps",
+    "title": "Zehn Apps. Ein vernetztes [[Backoffice.]]",
+    "lead": "Speziell entwickelte Android-Apps für alle, die nicht am Schreibtisch sitzen — jede meldet sich an Ihrem Odoo-Server an und arbeitet mit echten Unternehmensdaten. Im eigenen Haus entwickelt, auf Ihrem Server betrieben, rund um die Uhr betreut."
+  },
+  "modulesGrid": {
+    "eyebrow": "ERP-Module",
+    "title": "Vom Vertrieb bis zum Service — Module, [[die wir gebaut haben]]",
+    "lead": "Fertige Module, die sich in Ihre Odoo-Installation einfügen und den gesamten Geschäftsablauf abdecken, von der Kasse bis ins Backoffice."
+  },
+  "solutionCards": {
+    "eyebrow": "Vernetzte Geräte",
+    "title": "Automatisierung, Zutrittskontrolle und [[unbemannter Handel]]",
+    "lead": "Hardware, die wir installieren, betrieben mit Software, die wir geschrieben haben — jedes Gerät an denselben ERP-Kern angebunden wie der Rest Ihres Betriebs. Die Geräte selbst stammen von 369ai.Biz."
+  },
+  "aboutPage": {
+    "metaTitle": "Über Alphalize",
+    "metaDescription": "Alphalize hilft Unternehmen, manuelle Abläufe in automatisierte Prozesse zu überführen — ERP-Einführung, Business Intelligence und Individualsoftware, aus Kollam, Kerala.",
+    "eyebrow": "Über uns",
+    "title": "Wir setzen Ihre Ideen in [[Automatisierung]] um",
+    "lead": "Wir wissen, was Automatisierung für Abläufe und betriebliche Effizienz leisten kann — und uns interessiert mehr, was sie für Sie verändert, als die Technologie selbst.",
+    "para1": "Bei Alphalize wissen wir, was Automatisierung für Geschäftsabläufe und betriebliche Effizienz leisten kann. Wir helfen unseren Kunden mit Überzeugung dabei, ihre Ideen umzusetzen und manuelle Tätigkeiten in automatisierte Prozesse zu überführen. Ob Sie bereits eine konkrete Vorstellung haben oder erst herausfinden möchten, wo sich Automatisierung lohnt — unser Team begleitet Sie durch die gesamte Einführung.",
+    "visionHeading": "Es beginnt mit Ihrer Vorstellung",
+    "para2": "Wir sind überzeugt, dass erfolgreiche Automatisierung mit einem klaren Verständnis Ihrer Vorstellung beginnt. Unser Team nimmt sich die Zeit, Ihre Ideen, Ziele und Schwachstellen wirklich zu verstehen. Gemeinsam mit Ihnen sehen wir uns Ihre bestehenden Abläufe an, finden heraus, wo Automatisierung etwas bringt, und entwickeln Lösungen, die zu Ihrer Vorstellung passen.",
+    "para3": "Wir verbinden Ihr Branchenwissen mit unserem technischen Können, um Automatisierung zu schaffen, die messbare Ergebnisse liefert — denn wer weiß, wo die Zeit verloren geht, arbeitet meist schon in Ihrem Unternehmen.",
+    "whereWeWork": "Wo wir arbeiten",
+    "supportNote": "Der Support läuft rund um die Uhr aus Kollam und deckt damit weit mehr ab als die Stunden, in denen die Arbeit selbst stattfindet."
+  },
+  "notFound": {
+    "metaTitle": "Seite nicht gefunden",
+    "metaDescription": "Die gesuchte Seite existiert nicht.",
+    "heading": "Diese Seite existiert nicht",
+    "body": "Der Link ist womöglich veraltet. Wenn Sie ihm von einer Seite dieser Website gefolgt sind, sagen Sie uns Bescheid — wir korrigieren das.",
+    "backHome": "Zurück zur Startseite",
+    "contactUs": "Kontakt aufnehmen",
+    "jumpToService": "Oder direkt zu einer Leistung"
+  },
+  "careersPage": {
+    "metaTitle": "Karriere",
+    "metaDescription": "Offene Stellen bei Alphalize — Odoo-Entwickler, Frontend-Entwickler und Systemadministrator in Kollam, Kerala. Bewerben Sie sich mit Ihrem Lebenslauf.",
+    "eyebrow": "Karriere",
+    "title": "Offene [[Stellen]]",
+    "lead": "Wir sind ein kleines Team und liefern ERP- und Business-Intelligence-Projekte aus unserem Büro in Kollam. Das bedeutet früh echte Verantwortung — und Code, der bei Menschen landet, die darauf angewiesen sind."
+  },
+  "contactPage": {
+    "metaTitle": "Kontakt",
+    "metaDescription": "Sprechen Sie mit Alphalize über ERP, Business Intelligence oder Individualsoftware. Büro in Kollam, Kerala.",
+    "eyebrow": "Kontakt",
+    "title": "Kontakt [[aufnehmen]]",
+    "lead": "Beschreiben Sie Ihre aktuelle Situation und was Sie verändern möchten. Sie bekommen von uns eine ehrliche Einschätzung statt einer Verkaufspräsentation."
+  },
+  "servicesPage": {
+    "metaTitle": "Leistungen",
+    "metaDescription": "ERP-Lösungen, Business Intelligence, individuelle Web- und Mobilentwicklung, Integration und Migration, digitales Marketing und Schulungen von Alphalize.",
+    "eyebrow": "Was wir tun",
+    "title": "Leistungen",
+    "lead": "Sieben Leistungsbereiche, die die Softwareseite eines modernen Betriebs abdecken — von der vollständigen ERP-Einführung bis zu den Integrationen, Dashboards und Apps, die sie im Alltag nützlich machen.",
+    "ctaTitle": "Unsicher, was davon Sie brauchen?"
+  },
+  "ceoPage": {
+    "role": "Geschäftsführer",
+    "portraitAlt": "Shan Sahib, Geschäftsführer von Alphalize Technologies",
+    "intro1": "Shan Sahib leitet Alphalize Technologies von Kollam in Kerala aus. Sein Schwerpunkt liegt auf Automatisierung, die sich tatsächlich betreiben lässt: Odoo-basiertes ERP, aufgebaut um den Alltag eines Ladens, Showrooms oder Restaurants, die Business Intelligence, die diese Zahlen lesbar macht, und die Individualsoftware- und IoT-Arbeit, die die Lücken dazwischen schließt.",
+    "intro2": "Unter seiner Leitung trat das Unternehmen dem Odoo-Partnerprogramm bei und eröffnete 2025 ein neues Entwicklungsbüro; im Februar 2026 wurde seine Arbeit im Robotik-Service bei den Insight Kerala Business Awards ausgezeichnet.",
+    "awardEyebrow": "Auszeichnung",
+    "awardTitle": "Robotics Service Excellence Award",
+    "awardBody": "Verliehen an Shan Sahib auf der BizConnect 2026 im Rahmen der Insight Kerala Business Awards 2026 durch das Magazin Business Insight — eine Anerkennung für verlässliche Robotik-Installationen und die langfristige Betreuung, die sie am Laufen hält.",
+    "trophyAlt": "Die Trophäe des Robotics Service Excellence Award",
+    "handshakeAlt": "Shan Sahib bei der Entgegennahme der Auszeichnung auf der BizConnect 2026",
+    "stageAlt": "Übergabe der Auszeichnung auf der Bühne der BizConnect 2026",
+    "videoTitle": "Die Übergabe",
+    "videoCaption": "Entgegennahme der Auszeichnung auf der BizConnect 2026.",
+    "talksTitle": "Auf der Bühne",
+    "talksBody": "Sitzungen zum Thema Mind Management für Unternehmensteams, veröffentlicht auf seinem Kanal Shan on Tech.",
+    "ctaTitle": "Arbeiten Sie mit dem Team, das er führt",
+    "ctaBody": "ERP-Einführung, Business Intelligence und Individualsoftware, geliefert und betreut aus Kollam.",
+    "talkNote": "Unternehmensschulung",
+    "cardCta": "Mit dem Team sprechen"
+  },
+  "contactForm": {
+    "heading": "Kontakt aufnehmen",
+    "intro": "Sagen Sie uns, was Sie verändern möchten. Wir beantworten jede Anfrage.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Ihr vollständiger Name",
+    "emailLabel": "E-Mail",
+    "emailPlaceholder": "sie@firma.de",
+    "phoneLabel": "Telefon",
+    "phonePlaceholder": "70252 05503",
+    "subjectLabel": "Betreff",
+    "subjectPlaceholder": "Worum geht es?",
+    "messageLabel": "Nachricht",
+    "messagePlaceholder": "Ein paar Zeilen zu Ihrer aktuellen Situation und dem, was Sie verbessern möchten.",
+    "submit": "Nachricht senden",
+    "whatsappNote": "Damit öffnet sich WhatsApp mit Ihren bereits eingetragenen Angaben — dort auf Senden drücken, um uns zu erreichen.",
+    "noscript": "Dieses Formular benötigt JavaScript. Nutzen Sie stattdessen die Telefon-, WhatsApp- oder E-Mail-Links daneben.",
+    "privacyNote": "Wir verwenden Ihre Angaben ausschließlich zur Beantwortung dieser Anfrage. Siehe unsere <0>Datenschutzerklärung</0>."
+  },
+  "careersForm": {
+    "heading": "Bewerben Sie sich bei uns",
+    "intro": "Hängen Sie Ihren Lebenslauf an und sagen Sie uns, welche Stelle Sie interessiert. Wir lesen jede Bewerbung.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Ihr vollständiger Name",
+    "emailLabel": "E-Mail",
+    "emailPlaceholder": "sie@beispiel.de",
+    "phoneLabel": "Telefon",
+    "phonePlaceholder": "70252 05503",
+    "positionLabel": "Position",
+    "resumeLabel": "Lebenslauf",
+    "chooseFile": "Datei auswählen",
+    "orDropIt": "oder hier ablegen",
+    "messageLabel": "Sonst noch etwas?",
+    "messagePlaceholder": "Optional — eine Notiz dazu, was Sie suchen, oder ein Link zu Ihren Arbeiten.",
+    "submit": "Bewerbung absenden",
+    "positionTraining": "Schulungs- / Praktikumsprogramm",
+    "positionOther": "Sonstiges"
+  }
+}

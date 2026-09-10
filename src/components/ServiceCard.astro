@@ -1,6 +1,6 @@
 ---
 import { localeHref } from '@/i18n/paths';
-import type { CollectionEntry } from 'astro:content';
+import type { Localized } from '@/i18n/collections';
 import Icon from './Icon.astro';
 import Reveal from './Reveal.astro';
 
@@ -15,7 +15,7 @@ import Reveal from './Reveal.astro';
  *     properties, which compose with the `transform` their hover states set.
  */
 interface Props {
-  service: CollectionEntry<'services'>;
+  service: Localized<'services'>;
   delay?: number;
   /**
    * Marks the card as one of the highlighted services: plum rim, tile already
@@ -27,14 +27,14 @@ interface Props {
 }
 
 const { service, delay = 0, featured = false } = Astro.props;
-const { title, summary, icon } = service.data;
+const { title, summary, icon } = service.entry.data;
 
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(Astro.locals.locale, to);
 ---
 
 <Reveal as="article" delay={delay} class="h-full [perspective:1200px]">
-  <a href={loc(`/services/${service.id}`)} class:list={['sc-card', featured && 'is-featured']}>
+  <a href={loc(`/services/${service.slug}`)} class:list={['sc-card', featured && 'is-featured']}>
     <span class="sc-tile">
       <Icon name={icon} class="size-6" />
     </span>

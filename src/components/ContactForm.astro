@@ -4,8 +4,15 @@ import Field from './Field.astro';
 import PhoneField from './PhoneField.astro';
 import Icon from './Icon.astro';
 
+import { parts } from '@/i18n/messages';
+
+const { locale, t } = Astro.locals;
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const loc = (to: string) => localeHref(locale, to);
+
+/* The privacy sentence carries an inline link, so it is one string split on
+   <0>…</0> rather than three keys a translator cannot reorder. */
+const [privacyBefore, privacyLink, privacyAfter] = parts(t('contactForm.privacyNote'));
 ---
 
 {
@@ -14,36 +21,52 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
     enquiry only reaches us once the visitor presses send in WhatsApp. */
 }
 <form class="rounded-card border-brand-100 border bg-white p-6 sm:p-8">
-  <h2 class="text-ink text-xl font-semibold">Get in touch</h2>
+  <h2 class="text-ink text-xl font-semibold">{t('contactForm.heading')}</h2>
   <p class="text-muted mt-1.5 text-sm">
-    Tell us what you are trying to change. We reply to every enquiry.
+    {t('contactForm.intro')}
   </p>
 
   <div class="mt-5 grid gap-5 sm:grid-cols-2">
-    <Field name="name" label="Name" required autocomplete="name" placeholder="Your full name" />
+    <Field
+      name="name"
+      label={t('contactForm.nameLabel')}
+      required
+      autocomplete="name"
+      placeholder={t('contactForm.namePlaceholder')}
+    />
     <Field
       name="email"
-      label="Email"
+      label={t('contactForm.emailLabel')}
       type="email"
       required
       autocomplete="email"
-      placeholder="you@company.com"
+      placeholder={t('contactForm.emailPlaceholder')}
     />
-    <PhoneField name="phone" label="Phone" required placeholder="70252 05503" />
-    <Field name="subject" label="Subject" required placeholder="What is this about?" />
+    <PhoneField
+      name="phone"
+      label={t('contactForm.phoneLabel')}
+      required
+      placeholder={t('contactForm.phonePlaceholder')}
+    />
+    <Field
+      name="subject"
+      label={t('contactForm.subjectLabel')}
+      required
+      placeholder={t('contactForm.subjectPlaceholder')}
+    />
     <Field
       name="message"
-      label="Message"
+      label={t('contactForm.messageLabel')}
       type="textarea"
       required
       class="sm:col-span-2"
-      placeholder="A few lines on your current setup and what you would like to improve."
+      placeholder={t('contactForm.messagePlaceholder')}
     />
   </div>
 
   <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
     <button type="submit" data-wa-send class="btn btn-primary w-full sm:w-auto">
-      Send message
+      {t('contactForm.submit')}
       <Icon name="whatsapp" class="size-4" />
     </button>
 
@@ -55,17 +78,18 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   </div>
 
   <p class="text-muted mt-3 text-xs">
-    This opens WhatsApp with your details already written — press send there to reach us.
+    {t('contactForm.whatsappNote')}
   </p>
 
   <noscript>
     <p class="text-muted mt-3 text-xs">
-      This form needs JavaScript. Use the phone, WhatsApp or email links beside it instead.
+      {t('contactForm.noscript')}
     </p>
   </noscript>
 
   <p class="text-muted mt-3 text-xs">
-    We use your details only to respond to this enquiry. See our{' '}
-    <a href={loc('/legal/privacy-policy')} class="text-brand-700 underline">privacy policy</a>.
+    {privacyBefore}<a href={loc('/legal/privacy-policy')} class="text-brand-700 underline"
+      >{privacyLink}</a
+    >{privacyAfter}
   </p>
 </form>

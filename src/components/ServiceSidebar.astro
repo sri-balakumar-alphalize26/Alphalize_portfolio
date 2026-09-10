@@ -1,6 +1,6 @@
 ---
 import { localeHref } from '@/i18n/paths';
-import type { CollectionEntry } from 'astro:content';
+import type { Localized } from '@/i18n/collections';
 import Icon from './Icon.astro';
 import type { IconName } from './icons';
 
@@ -15,7 +15,7 @@ import type { IconName } from './icons';
 interface Props {
   icon: IconName;
   highlights: string[];
-  others: CollectionEntry<'services'>[];
+  others: Localized<'services'>[];
 }
 
 const { icon, highlights, others } = Astro.props;
@@ -73,11 +73,11 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
       {
         others.map((s, i) => (
           <li class="ab" style={`--d:${120 + i * 90}ms`}>
-            <a href={loc(`/services/${s.id}`)}>
+            <a href={loc(`/services/${s.slug}`)}>
               <span class="sd-oico">
-                <Icon name={s.data.icon} class="size-4" />
+                <Icon name={s.entry.data.icon} class="size-4" />
               </span>
-              <span>{s.data.title}</span>
+              <span>{s.entry.data.title}</span>
               <span class="sd-oline" aria-hidden="true" />
             </a>
           </li>

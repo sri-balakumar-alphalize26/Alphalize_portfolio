@@ -14,15 +14,15 @@ solutions:
   - title: "Robotics & Automation"
     tagline: "Automation that thinks for you."
     body: "Unlock new levels of efficiency with our AI-powered robotic and automation solutions. From product dispensing and warehouse management to smart manufacturing and vending automation, our robots integrate with ERP and IoT systems to deliver precision, consistency and real-time coordination. By reducing human error and repetitive tasks, we help businesses operate smarter and faster than ever before."
-    image: ../../assets/solutions/robot.webp
+    image: ../../../assets/solutions/robot.webp
   - title: "Smart Lock Systems"
     tagline: "Security meets intelligence."
     body: "Redefine security with our IoT-based Smart Locks designed for modern businesses. Integrated with ERP and mobile apps, these locks provide centralized access control, live monitoring and digital authorization for users and locations. Perfect for warehouses, offices and vending systems — ensuring every access is secure, recorded and controlled in real time."
-    image: ../../assets/solutions/smart-locks.jpg
+    image: ../../../assets/solutions/smart-locks.jpg
   - title: "Smart Vending Machines"
     tagline: "Automated. Intelligent. Always connected."
     body: "Experience the future of unmanned retail through our Smart Vending Machines powered by AI, IoT and ERP integration. Manage products, track stock and monitor performance remotely — all while offering customers an effortless buying experience through touchless, card or QR-based payments. Designed for efficiency and 24/7 operation, it is the perfect blend of innovation, convenience and business intelligence."
-    image: ../../assets/solutions/vending.webp
+    image: ../../../assets/solutions/vending.webp
 ---
 
 We combine intelligence, automation and connectivity to change the way businesses operate. Our connected-device solutions — Smart Locks, Robotics and Vending Machines — deliver seamless integration between hardware and software. From real-time insights to automated operations, we help companies enhance efficiency, improve security and create smarter customer experiences.

@@ -74,15 +74,16 @@ const rows: Row[] = [
     fit: 'cover',
   },
 ];
+const { t } = Astro.locals;
 ---
 
 <Section variant="white" space="lg">
   <SectionHeading
-    eyebrow="What we do"
-    title="[[One platform.]] Every department."
+    eyebrow={t('whatWeDo.eyebrow')}
+    title={t('whatWeDo.title')}
     marker="highlight"
     color="yellow"
-    lead="Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers."
+    lead={t('whatWeDo.lead')}
   />
 
   <div class="wwd-stack" data-wwd>

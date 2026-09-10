@@ -36,13 +36,16 @@ interface Props {
   caption?: string;
 }
 
+const { t } = Astro.locals;
 const {
-  kicker = ceo.award.eyebrow,
-  title = ceo.award.title,
-  blurb = ceo.award.body,
-  caption = ceo.award.videoCaption,
+  kicker = t('ceoPage.awardEyebrow'),
+  title = t('ceoPage.awardTitle'),
+  blurb = t('ceoPage.awardBody'),
+  caption = t('ceoPage.videoCaption'),
 } = Astro.props;
 
+/* config/ceo.ts now holds the images alone; the alt text is copy, so it comes
+   from the catalogue and is paired back up here. */
 const { trophy, handshake, stage } = ceo.award;
 
 /**
@@ -50,13 +53,25 @@ const { trophy, handshake, stage } = ceo.award;
  * tile's `src`, which is sized for a 380px column and would open blurry.
  */
 const [trophyFull, handshakeFull] = await Promise.all([
-  getImage({ src: trophy.src, width: 1200 }),
-  getImage({ src: handshake.src, width: 1600 }),
+  getImage({ src: trophy, width: 1200 }),
+  getImage({ src: handshake, width: 1600 }),
 ]);
 
 const top = [
-  { ...trophy, cls: 'tall', full: trophyFull.src, gleam: true },
-  { ...handshake, cls: 'wide', full: handshakeFull.src, gleam: false },
+  {
+    src: trophy,
+    alt: t('ceoPage.trophyAlt'),
+    cls: 'tall',
+    full: trophyFull.src,
+    gleam: true,
+  },
+  {
+    src: handshake,
+    alt: t('ceoPage.handshakeAlt'),
+    cls: 'wide',
+    full: handshakeFull.src,
+    gleam: false,
+  },
 ];
 ---
 
@@ -90,11 +105,11 @@ const top = [
       }
     </div>
 
-    <p class="aw-sub" style="--d:760ms">{ceo.award.videoTitle}</p>
+    <p class="aw-sub" style="--d:760ms">{t('ceoPage.videoTitle')}</p>
 
     {/* Not a button: it holds the clip, which has its own controls. */}
     <div class="aw-shot aw-stage" style="--d:840ms">
-      <AmbientVideo src={ceo.award.video} poster={stage.src.src} />
+      <AmbientVideo src={ceo.award.video} poster={stage.src} />
     </div>
 
     <p class="aw-cap" style="--d:1180ms">{caption}</p>

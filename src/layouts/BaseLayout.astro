@@ -7,6 +7,7 @@ import ContactSync from '@/components/ContactSync.astro';
 import SplashScreen from '@/components/SplashScreen.astro';
 import { contact, offices, site } from '@/config/site';
 import { localeLabels } from '@/i18n/locales';
+import { scriptFonts } from '@/styles/fonts-per-script';
 import inter400 from '@alphalize/astro-marker/fonts/inter-latin-400-normal.woff2?url';
 import caveat700 from '@alphalize/astro-marker/fonts/caveat-latin-700-normal.woff2?url';
 import '@/styles/global.css';
@@ -44,9 +45,25 @@ const organization = {
 };
 /* Set by src/middleware.ts, from the [locale] route segment. */
 const { locale, t } = Astro.locals;
+
+/**
+ * Dev-only direction override: `?dir=rtl` on any page renders it mirrored.
+ *
+ * The RTL work is ~106 physical CSS declarations plus ~125 direction-bearing
+ * transforms spread across sixty-odd scoped <style> blocks, and none of it can
+ * be looked at until something renders right-to-left. This makes every page
+ * inspectable today, with no Arabic catalogue, no translated content and no
+ * routing — which is what lets the whole RTL pass be built and reviewed before
+ * a single Arabic string exists.
+ *
+ * Gated on import.meta.env.DEV, so it is stripped from the production build and
+ * cannot be triggered by a query string on the live site.
+ */
+const forcedDir = import.meta.env.DEV ? Astro.url.searchParams.get('dir') : null;
+const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabels[locale].dir;
 ---
 
-<html lang={locale} dir={localeLabels[locale].dir}>
+<html lang={locale} dir={dir}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -57,6 +74,17 @@ const { locale, t } = Astro.locals;
     <!-- Fonts are self-hosted (packages/astro-marker); preload the two above-the-fold faces. -->
     <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={caveat700} as="font" type="font/woff2" crossorigin />
+
+    {
+      /*
+        The locale's own script faces, linked only on pages that need them.
+        A French visitor gets Latin-ext and nothing more; the Arabic, Tamil and
+        Malayalam labels in the language picker render in whatever the OS has,
+        which costs nothing and looks right. See styles/fonts-per-script.ts for
+        why this cannot be one stylesheet.
+      */
+      (scriptFonts[locale] ?? []).map((href) => <link rel="stylesheet" href={href} />)
+    }
 
     <Seo
       title={title}

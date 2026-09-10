@@ -21,9 +21,13 @@ import { ceo, talks } from '@/config/ceo';
  * about-anim.ts: html.ab-js arms the hidden states, .in releases them.
  */
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
+const { t } = Astro.locals;
 ---
 
-<BaseLayout title={`${ceo.name} — ${ceo.role}`} description={ceo.intro[0].slice(0, 155)}>
+<BaseLayout
+  title={`${ceo.name} — ${t('ceoPage.role')}`}
+  description={t('ceoPage.intro1').slice(0, 155)}
+>
   <AboutAnim />
 
   {/* Portrait, name, role and bio, with its own entrance — see LeaderCard. */}
@@ -34,12 +38,12 @@ export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 
   <Section variant="white" space="lg">
     <div data-ab>
-      <SectionHeading anim title={ceo.talks.title} lead={ceo.talks.body} />
+      <SectionHeading anim title={t('ceoPage.talksTitle')} lead={t('ceoPage.talksBody')} />
       <div class="mt-12">
         <YouTubeRail talks={talks} channel={ceo.talks.channel} />
       </div>
     </div>
   </Section>
 
-  <CtaBand title={ceo.cta.title} body={ceo.cta.body} />
+  <CtaBand title={t('ceoPage.ctaTitle')} body={t('ceoPage.ctaBody')} />
 </BaseLayout>

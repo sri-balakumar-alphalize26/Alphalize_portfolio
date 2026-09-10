@@ -1,4 +1,5 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { getCollection, render } from 'astro:content';
 import Icon from './Icon.astro';
 import SectionHeading from './SectionHeading.astro';
@@ -16,12 +17,17 @@ import SectionHeading from './SectionHeading.astro';
  * candidates search for "Angular" or "PostgreSQL" in. `name` gives the
  * one-open-at-a-time behaviour natively.
  */
-const jobs = (await getCollection('jobs', ({ data }) => data.open)).sort(
-  (a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime()
+/* Newest first. getLocalized orders by `order`, which jobs do not carry. */
+const jobs = (await getLocalized('jobs', Astro.locals.locale, (j) => j.data.open)).sort(
+  (a, b) => b.entry.data.postedAt.getTime() - a.entry.data.postedAt.getTime()
 );
 
 const rendered = await Promise.all(
-  jobs.map(async (job) => ({ job, Content: (await render(job)).Content }))
+  jobs.map(async ({ entry, translated }) => ({
+    job: entry,
+    translated,
+    Content: (await render(entry)).Content,
+  }))
 );
 ---
 
@@ -37,7 +43,10 @@ const rendered = await Promise.all(
   <ul class="job-list mt-10">
     {
       rendered.map(({ job, Content }, i) => (
-        <li class="job-row rounded-card border-brand-100 border bg-white" style={`--d:${640 + i * 150}ms`}>
+        <li
+          class="job-row rounded-card border-brand-100 border bg-white"
+          style={`--d:${640 + i * 150}ms`}
+        >
           <span class="job-accent" aria-hidden="true" />
 
           <details name="jobs" class="job-details">
@@ -47,16 +56,32 @@ const rendered = await Promise.all(
               </span>
 
               <span class="job-meta">
-                <span class="job-h text-ink block text-lg font-semibold" data-edit-job={job.id} data-edit-field="title">{job.data.title}</span>
-                <span class="text-muted mt-1 block text-sm leading-relaxed" data-edit-job={job.id} data-edit-field="summary">{job.data.summary}</span>
+                <span
+                  class="job-h text-ink block text-lg font-semibold"
+                  data-edit-job={job.id}
+                  data-edit-field="title"
+                >
+                  {job.data.title}
+                </span>
+                <span
+                  class="text-muted mt-1 block text-sm leading-relaxed"
+                  data-edit-job={job.id}
+                  data-edit-field="summary"
+                >
+                  {job.data.summary}
+                </span>
                 <span class="mt-3 flex flex-wrap gap-2">
                   <span class="job-chip">
                     <Icon name="pin" class="size-3" />
-                    <span data-edit-job={job.id} data-edit-field="location">{job.data.location}</span>
+                    <span data-edit-job={job.id} data-edit-field="location">
+                      {job.data.location}
+                    </span>
                   </span>
                   <span class="job-chip">
                     <Icon name="clock" class="size-3" />
-                    <span data-edit-job={job.id} data-edit-field="experience">{job.data.experience}</span>
+                    <span data-edit-job={job.id} data-edit-field="experience">
+                      {job.data.experience}
+                    </span>
                   </span>
                 </span>
               </span>
@@ -68,7 +93,13 @@ const rendered = await Promise.all(
 
             <div class="job-panel">
               <div class="border-brand-100 border-t px-6 py-6">
-                <div class="prose-content job-line" style="--k:0" data-edit-job={job.id} data-edit-field="body" data-edit-html>
+                <div
+                  class="prose-content job-line"
+                  style="--k:0"
+                  data-edit-job={job.id}
+                  data-edit-field="body"
+                  data-edit-html
+                >
                   <Content />
                 </div>
 
@@ -85,7 +116,13 @@ const rendered = await Promise.all(
                             style={`--k:${2 + k}`}
                           >
                             <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
-                            <span data-edit-job={job.id} data-edit-field="responsibilities" data-edit-index={k}>{r}</span>
+                            <span
+                              data-edit-job={job.id}
+                              data-edit-field="responsibilities"
+                              data-edit-index={k}
+                            >
+                              {r}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -103,7 +140,13 @@ const rendered = await Promise.all(
                             style={`--k:${2 + k}`}
                           >
                             <Icon name="check" class="text-plum-600 mt-0.5 size-4 shrink-0" />
-                            <span data-edit-job={job.id} data-edit-field="requirements" data-edit-index={k}>{r}</span>
+                            <span
+                              data-edit-job={job.id}
+                              data-edit-field="requirements"
+                              data-edit-index={k}
+                            >
+                              {r}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -148,7 +191,10 @@ const rendered = await Promise.all(
     doc.body.querySelectorAll('*').forEach((n) => {
       for (const attr of [...n.attributes]) {
         const name = attr.name.toLowerCase();
-        if (name.startsWith('on') || (name === 'href' && attr.value.trim().toLowerCase().startsWith('javascript:'))) {
+        if (
+          name.startsWith('on') ||
+          (name === 'href' && attr.value.trim().toLowerCase().startsWith('javascript:'))
+        ) {
           n.removeAttribute(attr.name);
         }
       }
@@ -173,7 +219,10 @@ const rendered = await Promise.all(
 
       // plaintext-only keeps pasted markup out of single-line fields; the body
       // needs real HTML, and its paste is flattened by the handler below.
-      el.setAttribute('contenteditable', el.dataset.editHtml === undefined ? 'plaintext-only' : 'true');
+      el.setAttribute(
+        'contenteditable',
+        el.dataset.editHtml === undefined ? 'plaintext-only' : 'true'
+      );
       el.classList.add('is-editable');
 
       // Title, summary, location and experience all sit inside <summary>, where
@@ -197,7 +246,8 @@ const rendered = await Promise.all(
       el.addEventListener('blur', () => {
         const drafts = readJson<Drafts>(KEY, {});
         const job = el.dataset.editJob ?? '';
-        const value = el.dataset.editHtml !== undefined ? sanitize(el.innerHTML) : (el.textContent ?? '');
+        const value =
+          el.dataset.editHtml !== undefined ? sanitize(el.innerHTML) : (el.textContent ?? '');
         drafts[job] = { ...drafts[job], [fieldKey(el)]: value };
         writeJson(KEY, drafts);
       });
@@ -212,10 +262,10 @@ const rendered = await Promise.all(
     if ((await status()).unlocked) enableEditing();
   }
 
-  document.addEventListener("astro:page-load", () => void initJobEditing());
-  document.addEventListener("manage:unlocked", () => void initJobEditing());
-  if (document.readyState !== "loading") void initJobEditing();
-  else document.addEventListener("DOMContentLoaded", () => void initJobEditing(), { once: true });
+  document.addEventListener('astro:page-load', () => void initJobEditing());
+  document.addEventListener('manage:unlocked', () => void initJobEditing());
+  if (document.readyState !== 'loading') void initJobEditing();
+  else document.addEventListener('DOMContentLoaded', () => void initJobEditing(), { once: true });
 </script>
 
 <style>

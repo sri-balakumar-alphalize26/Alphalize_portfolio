@@ -145,7 +145,13 @@ export const POST: APIRoute = async ({ request }) => {
   // limit is NOT catchable — the request is killed and the application is lost,
   // which is far worse than storing a file that is a little larger. Anything
   // above the threshold is passed through untouched.
-  let stored = bytes;
+  /**
+   * Widened to ArrayBufferLike because pdf-lib's save() returns
+   * Uint8Array<ArrayBufferLike> while the upload gives Uint8Array<ArrayBuffer>
+   * — TypeScript 5.7 made that buffer type a parameter, so the two no longer
+   * assign to each other. Both are plain byte arrays at runtime.
+   */
+  let stored: Uint8Array<ArrayBufferLike> = bytes;
   if (sniffed === 'pdf' && bytes.length <= COMPRESS_MAX_BYTES) {
     try {
       const doc = await PDFDocument.load(bytes);

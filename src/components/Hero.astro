@@ -1,9 +1,10 @@
 ---
 import { localeHref } from '@/i18n/paths';
-import { Arrow, Heading, Marker, Note } from '@alphalize/astro-marker';
+import { Arrow, Heading, Note } from '@alphalize/astro-marker';
 import { getCollection } from 'astro:content';
 import AppOrbit from './AppOrbit.astro';
 import Icon from './Icon.astro';
+import MarkedTitle from './MarkedTitle.astro';
 
 /**
  * Odoo-style hero: light background, one large handwriting heading with a
@@ -15,8 +16,9 @@ import Icon from './Icon.astro';
  */
 const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
 
+const { locale, t } = Astro.locals;
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <section class="cc-white relative isolate overflow-hidden">
@@ -30,35 +32,35 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
   <div class="container-page py-16 lg:py-24">
     <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
       <div class="lg:col-span-6">
-        <p class="eyebrow">Odoo ERP partners</p>
+        <p class="eyebrow">{t('hero.eyebrow')}</p>
 
         <Heading as="h1" size="xl" class="mt-3">
-          Run your whole business <Marker type="highlight" color="yellow">on one system</Marker>
+          <MarkedTitle title={t('hero.title')} marker="highlight" color="yellow" />
         </Heading>
 
         <p class="lead text-muted mt-6 max-w-xl">
-          Alphalize builds and implements Odoo ERP, business intelligence and the mobile and desktop
-          software around it — so your counter, your warehouse and your back office all see the same
-          numbers.
+          {t('hero.lead')}
         </p>
 
         <div class="mt-9 flex flex-wrap items-start gap-3">
           <a href={loc('/contact')} class="btn btn-primary">
-            Talk to us
+            {t('hero.ctaPrimary')}
             <Icon name="arrow-right" class="size-4" />
           </a>
-          <a href={loc('/services')} class="btn btn-outline text-heading"> Explore services </a>
+          <a href={loc('/services')} class="btn btn-outline text-heading"
+            >{t('hero.ctaSecondary')}</a
+          >
 
           <!-- Odoo's handwritten aside beside the CTAs ("… / month for ALL apps"). -->
           <span class="ml-1 hidden items-start sm:flex">
             <Arrow variant="curve-down-right" color="purple" size={44} delay={700} />
             <Note color="purple" rotate={-6} size="1.25rem" align="left" class="mt-5">
-              24/7 support included
+              {t('hero.note')}
             </Note>
           </span>
         </div>
 
-        <p class="text-muted mt-6 text-sm">Office in Kollam, Kerala &middot; 24/7 support</p>
+        <p class="text-muted mt-6 text-sm">{t('hero.footnote')}</p>
       </div>
 
       <!-- Product visual: the app line-up orbiting the brand mark. -->
@@ -69,7 +71,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
             href={loc('/services/mobile-app-development#apps')}
             class="text-brand-700 hover:text-plum-600 inline-flex items-center gap-1.5 text-sm font-medium"
           >
-            All {apps.length} apps
+            {t('hero.allApps', { count: apps.length })}
             <Icon name="arrow-right" class="size-4" />
           </a>
         </p>

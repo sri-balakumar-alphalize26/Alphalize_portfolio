@@ -5,24 +5,22 @@ import SectionHeading from './SectionHeading.astro';
 
 /** Rendered on /services/mobile-app-development via `showcase: apps`. */
 const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.order);
+const { t } = Astro.locals;
 ---
 
 {
   apps.length > 0 && (
-    <section
-      id="apps"
-      class="scroll-mt-24 cc-surface border-t border-brand-100 py-16 lg:py-20"
-    >
+    <section id="apps" class="cc-surface border-brand-100 scroll-mt-24 border-t py-16 lg:py-20">
       <div class="container-page">
         {/* Its own [data-ab] unit: the cards below each become one too, so the
             heading cannot share theirs. */}
         <div data-ab>
           <SectionHeading
             anim
-            eyebrow="Our apps"
-            title="Ten apps. One connected [[back office.]]"
+            eyebrow={t('appShowcase.eyebrow')}
+            title={t('appShowcase.title')}
             color="sky"
-            lead="Purpose-built Android apps for the people who do not sit at a desk — each one signs into your Odoo server and works with live company data. Built in-house, deployed on your own server, supported 24/7."
+            lead={t('appShowcase.lead')}
           />
         </div>
 

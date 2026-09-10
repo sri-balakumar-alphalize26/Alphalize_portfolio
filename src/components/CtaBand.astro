@@ -18,13 +18,17 @@ interface Props {
   body?: string;
 }
 
-const {
-  title = 'Ready to see what automation would change?',
-  body = 'Tell us how your operation runs today. We will come back with a straight assessment of what an ERP or BI rollout would actually move — and what it would not.',
-} = Astro.props;
+const { locale, t } = Astro.locals;
 
+/**
+ * The defaults come from the catalogue rather than being written here, so the
+ * band reads in the page's language when a caller passes nothing. A caller that
+ * does pass a title is responsible for its own translation — every one of them
+ * today reads it from the catalogue too.
+ */
+const { title = t('ctaBand.title'), body = t('ctaBand.body') } = Astro.props;
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <section class="container-page py-16 lg:py-20">

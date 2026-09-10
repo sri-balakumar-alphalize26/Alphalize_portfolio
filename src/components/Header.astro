@@ -1,4 +1,5 @@
 ---
+import { getLocalized } from '@/i18n/collections';
 import { getCollection } from 'astro:content';
 import { contact, nav } from '@/config/site';
 import { localeHref, splitLocale } from '@/i18n/paths';
@@ -27,11 +28,11 @@ import Logo from './Logo.astro';
  * The utility bar now lives INSIDE the sticky header so it can roll up on
  * scroll; it used to sit above and simply scroll away.
  */
-const services = (await getCollection('services')).sort((a, b) => a.data.order - b.data.order);
+const services = await getLocalized('services', Astro.locals.locale);
 
 // Derived from the collection rather than a flag on `nav`, so the badge goes
 // away on its own once every role is closed.
-const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
+const openRoles = (await getLocalized('jobs', Astro.locals.locale, (j) => j.data.open)).length;
 
 /**
  * `path` is locale-free and extension-free, so it can be compared against the
@@ -105,11 +106,11 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
                     <ul>
                       {services.map((s, k) => (
                         <li style={`--k:${k}`}>
-                          <a href={loc(`/services/${s.id}`)}>
+                          <a href={loc(`/services/${s.slug}`)}>
                             <span class="mi">
-                              <Icon name={s.data.icon} />
+                              <Icon name={s.entry.data.icon} />
                             </span>
-                            <span class="mt">{s.data.title}</span>
+                            <span class="mt">{s.entry.data.title}</span>
                             <Icon name="arrow-right" class="marw" />
                           </a>
                         </li>
@@ -180,7 +181,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
               <div class="msub">
                 <div>
                   {services.map((s) => (
-                    <a href={loc(`/services/${s.id}`)}>{s.data.title}</a>
+                    <a href={loc(`/services/${s.slug}`)}>{s.entry.data.title}</a>
                   ))}
                 </div>
               </div>
@@ -510,7 +511,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     display: none;
     align-items: center;
     gap: 0.25rem;
-    margin-left: auto;
+    margin-inline-start: auto;
   }
   @media (min-width: 1024px) {
     .nav {
@@ -639,10 +640,20 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   }
   .menu {
     position: absolute;
+    /**
+     * Centred with `translate`, not a negative start-margin.
+     *
+     * This was `left: 50%; margin-left: -7.375rem`, where the magic number was
+     * half the 19.5rem width minus the trigger's own offset. Converting that
+     * margin to `margin-inline-start` looks right but is not: under dir="rtl"
+     * BOTH the inset and the margin flip, so they cancel and the panel lands
+     * off to one side. `translate` is direction-agnostic, and it drops the
+     * hard-coded number — the panel now stays centred if the width changes.
+     */
     left: 50%;
+    translate: -50% 0;
     top: calc(100% + 0.625rem);
     width: 19.5rem;
-    margin-left: -7.375rem;
     padding: 0.5rem;
     border: 1px solid var(--color-brand-100);
     border-radius: var(--radius-card);
@@ -687,9 +698,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     left: 50%;
     width: 11px;
     height: 11px;
-    margin-left: -5px;
+    margin-inline-start: -5px;
     background: #fff;
-    border-left: 1px solid var(--color-brand-100);
+    border-inline-start: 1px solid var(--color-brand-100);
     border-top: 1px solid var(--color-brand-100);
     border-radius: 2px 0 0 0;
     transform: rotate(45deg);
@@ -883,8 +894,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     gap: 4px;
     width: 2.75rem;
     height: 2.75rem;
-    margin-right: -0.5rem;
-    margin-left: auto;
+    margin-inline-end: -0.5rem;
+    margin-inline-start: auto;
     padding: 0 0.5rem;
     cursor: pointer;
     transition:
@@ -967,7 +978,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     font-size: 0.9375rem;
     font-weight: 500;
     color: var(--color-heading);
-    text-align: left;
+    text-align: start;
     cursor: pointer;
   }
   .mrow.on {
@@ -1034,7 +1045,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   .hiring-badge {
     display: inline-flex;
     align-items: center;
-    margin-left: 0.4rem;
+    margin-inline-start: 0.4rem;
     padding: 0.1rem 0.4rem;
     border-radius: 99px;
     background: var(--color-plum-600);
@@ -1139,5 +1150,36 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     .cta::after {
       display: none;
     }
+  }
+  /* ---------- right-to-left ---------- */
+  /**
+   * What logical properties cannot express: transforms, transform-origin and
+   * an animation that moves a physical `left`. Each of these points the way
+   * the text reads, so each has to flip with it.
+   */
+  :global([dir='rtl']) .cta-fill {
+    /* The fill wipes in from the start edge, which is the right in RTL. */
+    transform-origin: right;
+  }
+  :global([dir='rtl']) .cta:hover .cta-txt {
+    /* The label slides toward the arrow; the arrow is now on the other side. */
+    transform: translateX(10px);
+  }
+  :global([dir='rtl']) .cta:hover::after {
+    animation-name: cta-sheen-rtl;
+  }
+  @keyframes cta-sheen-rtl {
+    from {
+      opacity: 1;
+      left: 120%;
+    }
+    to {
+      opacity: 1;
+      left: -40%;
+    }
+  }
+  /* The travelling dot under a nav item runs out from the start edge. */
+  :global([dir='rtl']) .nl::before {
+    transform-origin: right;
   }
 </style>

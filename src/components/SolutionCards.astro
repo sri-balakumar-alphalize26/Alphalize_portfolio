@@ -20,15 +20,16 @@ interface Props {
 const { solutions } = Astro.props;
 
 const AI369 = 'https://369ai.biz/';
+const { t } = Astro.locals;
 ---
 
 <section id="solutions" class="cc-surface border-brand-100 scroll-mt-24 border-t py-16 lg:py-20">
   <div class="container-page">
     <SectionHeading
-      eyebrow="Connected devices"
-      title="Automation, access control and [[unmanned retail]]"
+      eyebrow={t('solutionCards.eyebrow')}
+      title={t('solutionCards.title')}
       color="pink"
-      lead="Hardware we install, running software we wrote — each one wired into the same ERP core as the rest of your operation. The devices themselves come from 369ai.Biz."
+      lead={t('solutionCards.lead')}
     />
 
     <div class="mt-12 grid gap-6 lg:grid-cols-3">

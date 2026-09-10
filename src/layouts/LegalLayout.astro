@@ -21,7 +21,8 @@ const plainTitle = stripMarks(title);
 const { path } = splitLocale(Astro.url.pathname);
 
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const { locale, t } = Astro.locals;
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <BaseLayout title={plainTitle} description={description}>
@@ -52,7 +53,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
                       : 'text-muted hover:text-brand-700',
                   ]}
                 >
-                  {l.label}
+                  {t(l.labelKey)}
                 </a>
               </li>
             ))

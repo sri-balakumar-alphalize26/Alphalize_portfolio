@@ -43,7 +43,7 @@ const organization = {
   })),
 };
 /* Set by src/middleware.ts, from the [locale] route segment. */
-const { locale } = Astro.locals;
+const { locale, t } = Astro.locals;
 ---
 
 <html lang={locale} dir={localeLabels[locale].dir}>
@@ -67,6 +67,24 @@ const { locale } = Astro.locals;
       jsonLd={[organization, ...jsonLd]}
     />
 
+    {
+      /*
+      Strings for code that runs in the browser, read by i18n/client.ts.
+      Inlined rather than fetched: a client script has no way to know which of
+      nine catalogues to ask for without shipping all nine, and this namespace
+      is about a dozen strings. No request, no flash.
+
+      `<` is escaped because a translated string containing "</script>" would
+      otherwise end the block early.
+    */
+    }
+    <script
+      type="application/json"
+      id="i18n-client"
+      is:inline
+      set:html={JSON.stringify(t('client')).replace(/</g, '\\u003c')}
+    />
+
     <!-- Cross-fade page transitions. Static HTML, SPA-like navigation. -->
     <ClientRouter />
   </head>
@@ -79,7 +97,7 @@ const { locale } = Astro.locals;
       href="#main"
       class="focus:bg-brand-700 sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white"
     >
-      Skip to content
+      {t('common.skipToContent')}
     </a>
 
     <Header />

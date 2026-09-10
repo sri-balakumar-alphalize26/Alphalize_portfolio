@@ -21,8 +21,11 @@
     "careers": "Careers",
     "contact": "Contact",
     "hiring": "Hiring",
-    "openRole": "{count} open role",
-    "openRoles": "{count} open roles"
+    "mainLabel": "Main",
+    "mobileLabel": "Mobile",
+    "utilTag": "ERP, business intelligence and custom software — Kollam, Kerala",
+    "openRole": ", {count} open role",
+    "openRoles": ", {count} open roles"
   },
 
   "legalNav": {
@@ -39,6 +42,11 @@
     "company": "Company",
     "legal": "Legal",
     "loading": "Loading"
+  },
+
+  "footer": {
+    "rightsReserved": "© {year} {company}. All rights reserved.",
+    "creditPrefix": "Site developed and maintained by"
   },
 
   "site": {

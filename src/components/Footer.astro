@@ -37,7 +37,8 @@ const services = (await getCollection('services')).sort((a, b) => a.data.order -
 const year = new Date().getFullYear();
 
 /** Prefix an internal path with this page's locale. */
-const loc = (to: string) => localeHref(Astro.locals.locale, to);
+const { locale, t } = Astro.locals;
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <footer
@@ -61,7 +62,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
         <p class="text-brand-200 mt-4 max-w-sm text-sm leading-relaxed">
           {site.description}
         </p>
-        <p class="ft-kicker mt-6">Follow us</p>
+        <p class="ft-kicker mt-6">{t('common.followUs')}</p>
         <ul class="icon-dock ft-socials mt-4" data-ab-cascade data-base="140" data-step="70">
           {
             socials.map((s) => (
@@ -92,7 +93,9 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
 
       <!-- Services -->
       <nav class="ft-col ab lg:col-span-3" style="--d:120ms" aria-label="Services">
-        <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Services</h2>
+        <h2 class="text-sm font-semibold tracking-wider text-white uppercase">
+          {t('nav.services')}
+        </h2>
         <ul class="mt-4 space-y-2.5 text-sm">
           {
             services.map((s) => (
@@ -108,17 +111,19 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
 
       <!-- Company -->
       <nav class="ft-col ab lg:col-span-2" style="--d:220ms" aria-label="Company">
-        <h2 class="text-sm font-semibold tracking-wider text-white uppercase">Company</h2>
+        <h2 class="text-sm font-semibold tracking-wider text-white uppercase">
+          {t('common.company')}
+        </h2>
         <ul class="mt-4 space-y-2.5 text-sm">
-          <li><a href={loc('/about')} class="text-brand-200">About</a></li>
-          <li><a href={loc('/ceo')} class="text-brand-200">Leadership</a></li>
-          <li><a href={loc('/careers')} class="text-brand-200">Careers</a></li>
-          <li><a href={loc('/contact')} class="text-brand-200">Contact</a></li>
+          <li><a href={loc('/about')} class="text-brand-200">{t('nav.about')}</a></li>
+          <li><a href={loc('/ceo')} class="text-brand-200">{t('nav.leadership')}</a></li>
+          <li><a href={loc('/careers')} class="text-brand-200">{t('nav.careers')}</a></li>
+          <li><a href={loc('/contact')} class="text-brand-200">{t('nav.contact')}</a></li>
           {
             legalNav.map((l) => (
               <li>
                 <a href={loc(l.href)} class="text-brand-200">
-                  {l.label}
+                  {t(l.labelKey)}
                 </a>
               </li>
             ))
@@ -136,7 +141,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
       class="text-brand-300 ab mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between"
       style="--d:440ms"
     >
-      <p>&copy; {year} {site.legalName}. All rights reserved.</p>
+      <p>{t('footer.rightsReserved', { year, company: site.legalName })}</p>
       {
         /*
         As 369's footer does it: the sentence stops at "by" and the wordmark
@@ -149,7 +154,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
       */
       }
       <p>
-        Site developed and maintained by{' '}
+        {t('footer.creditPrefix')}{' '}
         <a href={`${site.url}/`} class="ft-credit">
           {
             /* densities, not widths: `widths` also emits a full-resolution
@@ -168,7 +173,7 @@ const loc = (to: string) => localeHref(Astro.locals.locale, to);
     </div>
   </div>
 
-  <button type="button" class="ft-top" id="ftTop" aria-label="Back to top">
+  <button type="button" class="ft-top" id="ftTop" aria-label={t('common.backToTop')}>
     <Icon name="chevron-down" class="size-4 rotate-180" />
   </button>
 </footer>

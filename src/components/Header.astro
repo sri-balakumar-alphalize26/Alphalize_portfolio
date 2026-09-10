@@ -40,6 +40,7 @@ const openRoles = (await getCollection('jobs', ({ data }) => data.open)).length;
  * "/en/about.html", and the locale prefix is not part of any nav href.
  */
 const { locale, path } = splitLocale(Astro.url.pathname);
+const { t } = Astro.locals;
 /** Prefix an internal path with this page's locale. */
 const loc = (to: string) => localeHref(locale, to);
 const isActive = (href: string) =>
@@ -53,7 +54,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   <!-- Utility bar: contact details that were buried in the old off-canvas panel. -->
   <div class="util">
     <div class="container-page util-in">
-      <p class="util-tag">ERP, business intelligence and custom software — Kollam, Kerala</p>
+      <p class="util-tag">{t('nav.utilTag')}</p>
       <p class="util-contact">
         <a href={contact.phoneHref} data-contact-tel>
           <Icon name="phone" class="size-3.5" />
@@ -78,7 +79,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
       <div class="container-page bar-in">
         <Logo size={28} />
 
-        <nav class="nav" aria-label="Main">
+        <nav class="nav" aria-label={t('nav.mainLabel')}>
           {
             nav.map((item, i) =>
               item.hasChildren ? (
@@ -91,7 +92,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
                     aria-controls="svc-menu"
                     style={`--d:${i * 60}ms`}
                   >
-                    {item.label}
+                    {t(item.labelKey)}
                     <Icon name="chevron-down" class="chev" />
                   </a>
                   {/*
@@ -123,12 +124,15 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
                   aria-current={isActive(item.href) ? 'page' : undefined}
                   style={`--d:${i * 60}ms`}
                 >
-                  {item.label}
+                  {t(item.labelKey)}
                   {item.href === '/careers' && openRoles > 0 && (
                     <span class="hiring-badge">
-                      Hiring<span aria-hidden="true">&nbsp;!!</span>
+                      {t('nav.hiring')}
+                      <span aria-hidden="true">&nbsp;!!</span>
                       <span class="sr-only">
-                        , {openRoles} open {openRoles === 1 ? 'role' : 'roles'}
+                        {t(openRoles === 1 ? 'nav.openRole' : 'nav.openRoles', {
+                          count: openRoles,
+                        })}
                       </span>
                     </span>
                   )}
@@ -142,7 +146,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
         <a class="cta" href={loc('/contact')}>
           <span class="cta-fill" aria-hidden="true"></span>
-          <span class="cta-txt">Get a consultation</span>
+          <span class="cta-txt">{t('common.getConsultation')}</span>
           <Icon name="arrow-right" class="cta-arw" />
         </a>
 
@@ -153,7 +157,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
           aria-expanded="false"
           aria-controls="mobile-menu"
         >
-          <span class="sr-only">Open menu</span>
+          <span class="sr-only">{t('client.menuOpen')}</span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -164,13 +168,13 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 
   <!-- Mobile drawer -->
   <div class="mnav" id="mobile-menu">
-    <nav class="container-page mnav-in" aria-label="Mobile">
+    <nav class="container-page mnav-in" aria-label={t('nav.mobileLabel')}>
       {
         nav.map((item) =>
           item.hasChildren ? (
             <div>
               <button class="mrow msvc" type="button" aria-expanded="false">
-                {item.label}
+                {t(item.labelKey)}
                 <Icon name="chevron-down" class="chev" />
               </button>
               <div class="msub">
@@ -187,12 +191,13 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
               href={loc(item.href)}
               aria-current={isActive(item.href) ? 'page' : undefined}
             >
-              {item.label}
+              {t(item.labelKey)}
               {item.href === '/careers' && openRoles > 0 && (
                 <span class="hiring-badge">
-                  Hiring<span aria-hidden="true">&nbsp;!!</span>
+                  {t('nav.hiring')}
+                  <span aria-hidden="true">&nbsp;!!</span>
                   <span class="sr-only">
-                    , {openRoles} open {openRoles === 1 ? 'role' : 'roles'}
+                    {t(openRoles === 1 ? 'nav.openRole' : 'nav.openRoles', { count: openRoles })}
                   </span>
                 </span>
               )}
@@ -201,7 +206,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         )
       }
 
-      <a class="mcta" href={loc('/contact')}>Get a consultation</a>
+      <a class="mcta" href={loc('/contact')}>{t('common.getConsultation')}</a>
 
       <div class="mls">
         <LocaleSwitcher />
@@ -222,6 +227,8 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
 </header>
 
 <script>
+  import { ct } from '@/i18n/client';
+
   // Mobile drawer + sticky-shadow + dropdown. Re-bound on every view transition
   // via astro:page-load, which also fires on the initial load.
   //
@@ -240,7 +247,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
       menu.classList.toggle('open', open);
       toggle.setAttribute('aria-expanded', String(open));
       const label = toggle.querySelector('.sr-only');
-      if (label) label.textContent = open ? 'Close menu' : 'Open menu';
+      if (label) label.textContent = ct(open ? 'menuClose' : 'menuOpen');
       // The drawer scrolls inside itself; the page behind it must not.
       document.body.style.overflow = open ? 'hidden' : '';
     };

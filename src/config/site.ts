@@ -90,20 +90,29 @@ export const socials: { name: string; href: string; mark: keyof typeof socialMar
   { name: 'YouTube', href: 'https://www.youtube.com/@shanontech4849', mark: 'youtube' },
 ];
 
-export type NavItem = { label: string; href: string; hasChildren?: boolean };
+import type { MessageKey } from '@/i18n/messages';
 
-/** Primary navigation. Services children are generated from the content collection. */
+export type NavItem = { labelKey: MessageKey; href: string; hasChildren?: boolean };
+
+/**
+ * Primary navigation. Services children are generated from the content
+ * collection.
+ *
+ * Structure only — the label is a catalogue key, looked up per locale by
+ * whoever renders it. `href` stays locale-free here and is prefixed at render
+ * time by localeHref, so this list does not have to know about locales at all.
+ */
 export const nav: NavItem[] = [
-  { label: 'Home', href: '/' },
-  { label: 'About', href: '/about' },
-  { label: 'Leadership', href: '/ceo' },
-  { label: 'Services', href: '/services', hasChildren: true },
-  { label: 'Careers', href: '/careers' },
-  { label: 'Contact', href: '/contact' },
+  { labelKey: 'nav.home', href: '/' },
+  { labelKey: 'nav.about', href: '/about' },
+  { labelKey: 'nav.leadership', href: '/ceo' },
+  { labelKey: 'nav.services', href: '/services', hasChildren: true },
+  { labelKey: 'nav.careers', href: '/careers' },
+  { labelKey: 'nav.contact', href: '/contact' },
 ];
 
 export const legalNav = [
-  { label: 'Privacy Policy', href: '/legal/privacy-policy' },
-  { label: 'Terms & Conditions', href: '/legal/terms-conditions' },
-  { label: 'Disclaimer', href: '/legal/disclaimer' },
-] as const;
+  { labelKey: 'legalNav.privacy', href: '/legal/privacy-policy' },
+  { labelKey: 'legalNav.terms', href: '/legal/terms-conditions' },
+  { labelKey: 'legalNav.disclaimer', href: '/legal/disclaimer' },
+] as const satisfies readonly { labelKey: MessageKey; href: string }[];

@@ -163,7 +163,11 @@ const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabel
     opacity: 0;
     pointer-events: none;
   }
-  :global([dir='rtl']) #nav-progress {
+  /* No :global() wrapper — this block is already is:global, and Astro only
+     strips :global() out of SCOPED styles. In here it passed through to the
+     stylesheet verbatim, where it is not a valid pseudo-class, so lightningcss
+     dropped the rule and the bar filled from the left in Arabic. */
+  [dir='rtl'] #nav-progress {
     transform-origin: right center;
   }
   /* Creeps toward 90% while the page is fetched — it cannot know real progress,

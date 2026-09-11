@@ -26,6 +26,12 @@
     "openRole": ", {count} offene Stelle",
     "openRoles": ", {count} offene Stellen"
   },
+  "brand": {
+    "switchLabel": "Produkt wechseln",
+    "alphalizeTagline": "ERP und Business Intelligence",
+    "ai369Tagline": "Smarte Geräte und Robotik",
+    "newTab": "wird in einem neuen Tab geöffnet"
+  },
   "legalNav": {
     "privacy": "Datenschutzerklärung",
     "terms": "Allgemeine Geschäftsbedingungen",

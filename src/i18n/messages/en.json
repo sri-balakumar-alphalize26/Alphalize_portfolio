@@ -26,6 +26,12 @@
     "openRole": ", {count} open role",
     "openRoles": ", {count} open roles"
   },
+  "brand": {
+    "switchLabel": "Switch product",
+    "alphalizeTagline": "ERP and business intelligence",
+    "ai369Tagline": "Smart devices and robotics",
+    "newTab": "opens in a new tab"
+  },
   "legalNav": {
     "privacy": "Privacy Policy",
     "terms": "Terms & Conditions",

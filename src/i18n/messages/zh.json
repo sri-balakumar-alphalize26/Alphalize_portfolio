@@ -26,6 +26,12 @@
     "openRole": "，{count} 个职位空缺",
     "openRoles": "，{count} 个职位空缺"
   },
+  "brand": {
+    "switchLabel": "切换产品",
+    "alphalizeTagline": "ERP 与商业智能",
+    "ai369Tagline": "智能设备与机器人",
+    "newTab": "在新标签页中打开"
+  },
   "legalNav": {
     "privacy": "隐私政策",
     "terms": "条款与条件",

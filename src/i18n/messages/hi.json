@@ -26,6 +26,12 @@
     "openRole": ", {count} पद रिक्त",
     "openRoles": ", {count} पद रिक्त"
   },
+  "brand": {
+    "switchLabel": "उत्पाद बदलें",
+    "alphalizeTagline": "ERP और बिज़नेस इंटेलिजेंस",
+    "ai369Tagline": "स्मार्ट डिवाइस और रोबोटिक्स",
+    "newTab": "नए टैब में खुलता है"
+  },
   "legalNav": {
     "privacy": "गोपनीयता नीति",
     "terms": "नियम एवं शर्तें",

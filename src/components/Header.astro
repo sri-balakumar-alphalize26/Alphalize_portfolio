@@ -3,6 +3,7 @@ import { getLocalized } from '@/i18n/collections';
 import { getCollection } from 'astro:content';
 import { contact, nav } from '@/config/site';
 import { localeHref, splitLocale } from '@/i18n/paths';
+import BrandSwitcher from './BrandSwitcher.astro';
 import Icon from './Icon.astro';
 import LocaleSwitcher from './LocaleSwitcher.astro';
 import Logo from './Logo.astro';
@@ -78,7 +79,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   <div class="stick">
     <div class="bar">
       <div class="container-page bar-in">
-        <Logo size={28} />
+        <BrandSwitcher class="brand">
+          <Logo size={28} />
+        </BrandSwitcher>
 
         <nav class="nav" aria-label={t('nav.mainLabel')}>
           {
@@ -296,10 +299,15 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(() => {
           const y = window.scrollY;
-          // Never hide with a menu open — it would yank it off screen. The
+          // Never hide with anything open — it would yank it off screen. Every
+          // panel hanging off the bar counts, not just the mobile drawer. The
           // 140px floor keeps the header still through a short bounce at the
           // top of the page.
-          const menuOpen = menu.classList.contains('open') || !!header.querySelector('.drop.open');
+          const menuOpen =
+            menu.classList.contains('open') ||
+            !!header.querySelector(
+              '.drop.open, [data-brand-switcher].open, [data-locale-switcher].open'
+            );
           if (menuOpen || y < 8) header.removeAttribute('data-hidden');
           else if (y > lastY && y > 140) header.setAttribute('data-hidden', '');
           else if (y < lastY) header.removeAttribute('data-hidden');
@@ -554,6 +562,21 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     inset-inline-start: 0;
     --ls-origin: left;
   }
+
+  /* ---------- brand ---------- */
+  /* BrandSwitcher wraps the logo, so it is the bar's first flex item and keeps
+     its own `position: relative`. Nothing else shifts: .nav still takes the
+     auto start margin on desktop, .burger takes it below lg. `flex: none`
+     because the wrapper, unlike the bare .logo, is otherwise shrinkable and the
+     wordmark would compress at 320px.
+     --d is inherited by .bs-btn. The logo's own wordmark wipe runs 300–1100ms
+     after the splash lifts, so 760ms lands the chevron as the wipe crosses the
+     last glyph beside it; near 0 would pop it in against a half-drawn word. */
+  .brand {
+    flex: none;
+    --d: 760ms;
+  }
+
   .nl {
     position: relative;
     display: inline-flex;
@@ -1088,6 +1111,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   :global(html.splash-open) .nl,
   :global(html.splash-open) .cta,
   :global(html.splash-open) .hdr-ls,
+  :global(html.splash-open) .brand :global(.bs-btn),
   :global(html.splash-open) .burger {
     opacity: 0;
     transform: translateY(-8px);
@@ -1098,6 +1122,10 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   :global(html:not(.splash-open)) .nl,
   :global(html:not(.splash-open)) .cta,
   :global(html:not(.splash-open)) .hdr-ls,
+  /* The button, never .brand — the logo has its own lg-up / lg-wipe entrance
+     and would otherwise run two at once. Reached through :global because
+     Astro's scope hash lands on a child component's root element only. */
+  :global(html:not(.splash-open)) .brand :global(.bs-btn),
   :global(html:not(.splash-open)) .burger {
     animation: hdr-in 0.5s var(--ease-out-soft) calc(220ms + var(--d, 0ms)) backwards;
   }
@@ -1118,6 +1146,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     :global(html.splash-open) .nl,
     :global(html.splash-open) .cta,
     :global(html.splash-open) .hdr-ls,
+    :global(html.splash-open) .brand :global(.bs-btn),
     :global(html.splash-open) .burger {
       opacity: 1;
       transform: none;
@@ -1126,6 +1155,7 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
     :global(html:not(.splash-open)) .nl,
     :global(html:not(.splash-open)) .cta,
     :global(html:not(.splash-open)) .hdr-ls,
+    :global(html:not(.splash-open)) .brand :global(.bs-btn),
     :global(html:not(.splash-open)) .burger {
       animation: none;
     }

@@ -7,6 +7,11 @@ export const site = {
   name: 'Alphalize',
   legalName: 'Alphalize',
   url: 'https://www.alphalize.com',
+  /**
+   * The sibling brand — connected devices and robotics, the same operation
+   * behind both. Read by the header brand switcher, SolutionCards and WhatWeDo.
+   */
+  ai369Url: 'https://369ai.biz/',
   tagline: 'Unlocking Growth Potential with ERP Solutions',
   description:
     'Alphalize builds customised ERP solutions, business intelligence dashboards and custom software that take your business to the next level of automation.',

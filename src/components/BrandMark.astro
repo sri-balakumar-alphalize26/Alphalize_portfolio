@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import markA from '@/assets/brand/splash-a.png';
+import markB from '@/assets/brand/splash-b.png';
+
+/**
+ * The Alphalize mark alone — no wordmark, no link, no entrance.
+ *
+ * Logo.astro cannot be reused for three reasons. Its root element IS an <a>,
+ * which inside a menu row would nest an anchor in an anchor; its .word sets
+ * `overflow: hidden` plus an animated clip-path that would clip anything placed
+ * in it; and its halves declare `opacity: 0` as a start state released only by
+ * the `html:not(.splash-open)` animation, so a tile reusing them would render
+ * empty wherever that gate never runs.
+ *
+ * splash-a and splash-b are two full-canvas 692x584 exports of the same
+ * artwork, so stacking them under one `object-fit: contain` keeps them in
+ * register at any box size. No per-half transform-origin here: those exist in
+ * Logo only to drive the entrance.
+ */
+interface Props {
+  /** Nominal box in px — picks the raster emitted, not the layout size. */
+  size?: number;
+  class?: string;
+}
+
+const { size = 34, class: className } = Astro.props;
+const width = Math.round(size * (markA.width / markA.height));
+---
+
+<span class:list={['bm', className]} aria-hidden="true">
+  <Image class="bm-half" src={markA} alt="" width={width} height={size} densities={[1, 2]} />
+  <Image class="bm-half" src={markB} alt="" width={width} height={size} densities={[1, 2]} />
+</span>
+
+<style>
+  .bm {
+    position: relative;
+    display: block;
+  }
+  /* :global because <Image> is a component — Astro's scope hash lands on it,
+     not on the <img> it renders. Same reason Logo.astro writes
+     `.mark :global(.half)`. */
+  .bm :global(.bm-half) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+</style>

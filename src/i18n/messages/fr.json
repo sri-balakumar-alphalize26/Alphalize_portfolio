@@ -26,6 +26,12 @@
     "openRole": ", {count} poste ouvert",
     "openRoles": ", {count} postes ouverts"
   },
+  "brand": {
+    "switchLabel": "Changer de produit",
+    "alphalizeTagline": "ERP et business intelligence",
+    "ai369Tagline": "Objets connectés et robotique",
+    "newTab": "ouvre dans un nouvel onglet"
+  },
   "legalNav": {
     "privacy": "Politique de confidentialité",
     "terms": "Conditions générales",

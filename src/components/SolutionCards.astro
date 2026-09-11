@@ -4,6 +4,7 @@ import type { CollectionEntry } from 'astro:content';
 import ArrowButton from './ArrowButton.astro';
 import Reveal from './Reveal.astro';
 import SectionHeading from './SectionHeading.astro';
+import { site } from '@/config/site';
 
 /**
  * The connected-device line-up on /services/iot-and-automation.
@@ -19,7 +20,7 @@ interface Props {
 
 const { solutions } = Astro.props;
 
-const AI369 = 'https://369ai.biz/';
+const AI369 = site.ai369Url;
 const { t } = Astro.locals;
 ---
 

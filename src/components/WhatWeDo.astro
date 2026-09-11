@@ -7,6 +7,7 @@ import type { MarkerType } from './marks';
 import Section from './Section.astro';
 import SectionHeading from './SectionHeading.astro';
 import appAlphalize from '@/assets/apps/369ai-alphalize.png';
+import { site } from '@/config/site';
 import smartLocks from '@/assets/solutions/smart-locks.jpg';
 
 /**
@@ -66,7 +67,7 @@ const rows: Row[] = [
       'Smart vending machines — remote stock and performance monitoring, with touchless, card and QR payment',
       'Robotics — dispensing, warehousing and smart manufacturing, coordinated in real time',
     ],
-    href: 'https://369ai.biz/',
+    href: site.ai369Url,
     cta: 'See the range on 369ai.Biz',
     external: true,
     image: smartLocks,

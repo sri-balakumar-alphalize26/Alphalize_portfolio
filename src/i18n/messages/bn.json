@@ -26,6 +26,12 @@
     "openRole": ", {count}টি শূন্যপদ",
     "openRoles": ", {count}টি শূন্যপদ"
   },
+  "brand": {
+    "switchLabel": "পণ্য পরিবর্তন করুন",
+    "alphalizeTagline": "ERP ও বিজনেস ইন্টেলিজেন্স",
+    "ai369Tagline": "স্মার্ট ডিভাইস ও রোবোটিক্স",
+    "newTab": "নতুন ট্যাবে খোলে"
+  },
   "legalNav": {
     "privacy": "গোপনীয়তা নীতি",
     "terms": "শর্তাবলি",

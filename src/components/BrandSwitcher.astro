@@ -1,0 +1,378 @@
+---
+import { Image } from 'astro:assets';
+import BrandMark from './BrandMark.astro';
+import Icon from './Icon.astro';
+import ai369 from '@/assets/trusted/369ai.png';
+import { site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
+
+/**
+ * Alphalize / 369AI switcher, hung off the header logo — the Flipkart pattern.
+ * Two sibling brands of one operation, and until now nothing in the chrome said
+ * the other one existed.
+ *
+ * The logo arrives through the slot rather than being rendered here, so this
+ * component's root is at once the hover target, the positioning context and the
+ * [data-brand-switcher] hook. A sibling arrangement would leave the logo
+ * outside that root, and the delegated pointerover below would never see it —
+ * hovering the logo is the whole feature.
+ *
+ * Mechanics follow LocaleSwitcher.astro: document listeners registered once
+ * behind a window flag, 80/180ms hover intent, and a CSS-only
+ * :hover/:focus-within baseline that a `js-bs` class hands over to the script
+ * so Escape sticks. Every hook is brand-scoped — Header.astro takes the FIRST
+ * [data-drop] only, so nothing here may borrow that name.
+ *
+ * Not a listbox and not a menu, so no aria-haspopup: two links that navigate,
+ * behind a plain disclosure button.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const { locale, t } = Astro.locals;
+
+/**
+ * Unique per render. LocaleSwitcher hardcodes id="ls-panel" and renders twice
+ * per page, so every page ships a duplicate id and one aria-controls points at
+ * the wrong node. One instance is enough here; the id is generated anyway so a
+ * second one cannot repeat that.
+ */
+const panelId = `bs-panel-${crypto.randomUUID().slice(0, 8)}`;
+---
+
+<div class:list={['bs', className]} data-brand-switcher>
+  <slot />
+
+  <button
+    type="button"
+    class="bs-btn"
+    aria-expanded="false"
+    aria-controls={panelId}
+    aria-label={t('brand.switchLabel')}
+    data-brand-trigger
+  >
+    <Icon name="chevron-down" class="bs-chev" />
+  </button>
+
+  {
+    /*
+    Stays in the DOM and toggles a class rather than using [hidden], so the
+    panel plays its close as well as its open — same as the two menus beside it.
+  */
+  }
+  <ul class="bs-panel" id={panelId} aria-label={t('brand.switchLabel')}>
+    <li>
+      <a class="bs-row bs-row-on" href={localeHref(locale, '/')} aria-current="true">
+        <span class="bs-tile" aria-hidden="true"><BrandMark class="bs-img" /></span>
+        <span class="bs-txt">
+          <b>Alphalize</b>
+          <span>{t('brand.alphalizeTagline')}</span>
+        </span>
+        <Icon name="check" class="bs-check" />
+      </a>
+    </li>
+    <li>
+      <a class="bs-row" href={site.ai369Url} target="_blank" rel="noopener noreferrer">
+        <span class="bs-tile" aria-hidden="true">
+          <Image class="bs-img" src={ai369} alt="" width={40} height={38} densities={[1, 2]} />
+        </span>
+        <span class="bs-txt">
+          <b>369AI</b>
+          <span>{t('brand.ai369Tagline')}</span>
+        </span>
+        <span class="sr-only">({t('brand.newTab')})</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<script>
+  /**
+   * Open and close. Both hrefs are already correct in the HTML, so nothing here
+   * touches paths.
+   *
+   * One set of delegated document listeners, registered once for the life of
+   * the document and never removed, because none of them closes over an element
+   * — they re-query on each event. A switcher swapped in by <ClientRouter> is
+   * picked up with no rebinding and nothing to tear down.
+   *
+   * Its own flag and its own hooks, so it coexists with __localeSwitcherWired
+   * (separate module scope, separate timer, separate selectors) and with the
+   * header's Services dropdown, which binds directly to the single [data-drop]
+   * it finds and never sees these nodes.
+   */
+  const FLAG = '__brandSwitcherWired';
+
+  if (!(FLAG in window)) {
+    (window as unknown as Record<string, boolean>)[FLAG] = true;
+
+    const roots = () => document.querySelectorAll<HTMLElement>('[data-brand-switcher]');
+    const triggerOf = (root: Element) =>
+      root.querySelector<HTMLButtonElement>('[data-brand-trigger]');
+
+    function setOpen(root: HTMLElement, open: boolean) {
+      root.classList.toggle('open', open);
+      triggerOf(root)?.setAttribute('aria-expanded', String(open));
+    }
+
+    const closeAll = () => roots().forEach((root) => setOpen(root, false));
+
+    /* Hand over from the CSS-only :hover baseline. Until this class lands the
+       panel opens on hover alone, so it still works with JS off; after it, only
+       .open opens it, so a panel dismissed with Escape does not spring back
+       under a pointer that never moved. Same contract as the Services menu. */
+    const claim = () => roots().forEach((root) => root.classList.add('js-bs'));
+    claim();
+    document.addEventListener('astro:page-load', claim);
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const after = (ms: number, fn: () => void) => {
+      clearTimeout(timer);
+      timer = setTimeout(fn, ms);
+    };
+    const finePointer = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element | null;
+      const trigger = target?.closest<HTMLElement>('[data-brand-trigger]');
+
+      if (trigger) {
+        /* A touch tap emits pointerout BEFORE click, and that has already queued
+           a close 180ms out. Without this the panel would open and shut by
+           itself — and on touch the tap is the only way in. */
+        clearTimeout(timer);
+        const root = trigger.closest<HTMLElement>('[data-brand-switcher]');
+        if (!root) return;
+        const wasOpen = root.classList.contains('open');
+        closeAll();
+        setOpen(root, !wasOpen);
+        return;
+      }
+
+      // A click on the logo or on a brand row falls through to a real
+      // navigation; closing first would fight the outgoing page for nothing.
+      if (!target?.closest('[data-brand-switcher]')) closeAll();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const open = document.querySelector<HTMLElement>('[data-brand-switcher].open');
+      if (!open) return;
+      setOpen(open, false);
+      triggerOf(open)?.focus();
+    });
+
+    /* Tabbing past the last row has to close the panel. :focus-within cannot do
+       it once .js-bs has taken over, and the logo is inside the root, so
+       without this a keyboard user opens the panel and leaves it hanging. */
+    document.addEventListener('focusin', (event) => {
+      const inside = (event.target as Element | null)?.closest('[data-brand-switcher]');
+      roots().forEach((root) => {
+        if (root !== inside) setOpen(root, false);
+      });
+    });
+
+    /* Hover intent, the same 80/180ms as the locale switcher: quick to open,
+       slow to close so the pointer can travel down into the panel without it
+       snapping shut. pointerover/pointerout rather than enter/leave, because
+       only the former bubble to document. Both sides are gated on a fine
+       pointer — an ungated pointerout closes a panel a tap had just opened. */
+    document.addEventListener('pointerover', (event) => {
+      if (!finePointer()) return;
+      const root = (event.target as Element | null)?.closest<HTMLElement>('[data-brand-switcher]');
+      if (root) after(80, () => setOpen(root, true));
+    });
+
+    document.addEventListener('pointerout', (event) => {
+      if (!finePointer()) return;
+      const root = (event.target as Element | null)?.closest<HTMLElement>('[data-brand-switcher]');
+      if (!root || root.contains(event.relatedTarget as Node)) return;
+      after(180, () => setOpen(root, false));
+    });
+
+    // Never let a pending open fire against a page you have already left.
+    document.addEventListener('astro:before-swap', () => clearTimeout(timer));
+  }
+</script>
+
+<style>
+  .bs {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.125rem;
+  }
+
+  /* 2rem square: comfortably past WCAG 2.2's 24px target minimum without
+     punching a 44px hit area into the bar, which would overlap the wordmark and
+     steal taps from the home link. */
+  .bs-btn {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--radius-btn);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition:
+      color 0.25s ease,
+      background 0.25s ease;
+  }
+  .bs-btn:hover,
+  .bs.open .bs-btn {
+    color: var(--color-plum-600);
+    background: var(--color-brand-50);
+  }
+  .bs-chev {
+    width: 0.75rem;
+    height: 0.75rem;
+    transition: transform 0.35s ease;
+  }
+  .bs.open .bs-chev {
+    transform: rotate(180deg);
+  }
+
+  /* Same border, radius, shadow and easing as the Services and locale panels,
+     so all three under one bar read as the same object. Anchored to the START
+     edge, unlike the locale panel — the logo sits at the start of the bar. */
+  .bs-panel {
+    position: absolute;
+    inset-inline-start: 0;
+    top: calc(100% + 0.625rem);
+    z-index: 50;
+    /* The bar is logo + burger at 320px, where a fixed 19rem would overflow the
+       page gutters. */
+    width: min(19rem, calc(100vw - 2.5rem));
+    margin: 0;
+    padding: 0.375rem;
+    list-style: none;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    /* transform-origin takes no logical keyword, so RTL flips it by hand. */
+    transform-origin: top var(--bs-origin, left);
+    transition:
+      opacity 0.26s ease,
+      transform 0.32s cubic-bezier(0.22, 0.9, 0.32, 1.15),
+      visibility 0s 0.3s;
+  }
+  :global([dir='rtl']) .bs-panel {
+    --bs-origin: right;
+  }
+  /* An invisible bridge across the 10px gap, live only while the panel is, so a
+     pointer travelling down from the logo never leaves the root and never
+     starts the 180ms close. */
+  .bs-panel::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    top: -0.625rem;
+    height: 0.625rem;
+  }
+
+  /* No-JS baseline. */
+  .bs:hover .bs-panel,
+  .bs:focus-within .bs-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+  /* Once .js-bs lands the script owns it, so Escape sticks. Source order
+     matters — these three carry equal specificity. */
+  .bs.js-bs:hover .bs-panel,
+  .bs.js-bs:focus-within .bs-panel {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+  }
+  .bs.js-bs.open .bs-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition-delay: 0s;
+  }
+
+  /* Rows follow contact.astro's .ct-row, minus its tile flip and its
+     `word-break: break-all` — that one exists for email addresses. */
+  .bs-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5625rem 0.625rem;
+    border-radius: var(--radius-btn);
+    transition: background 0.2s ease;
+  }
+  .bs-row:hover {
+    background: var(--color-brand-50);
+  }
+
+  .bs-tile {
+    position: relative;
+    display: block;
+    flex: none;
+    width: 2.125rem;
+    height: 2.125rem;
+    padding: 0.1875rem;
+    border-radius: var(--radius-btn);
+    background: var(--color-brand-50);
+    transition: background 0.2s ease;
+  }
+  .bs-row:hover .bs-tile {
+    background: #fff;
+  }
+  /* :global — one child is a component root, the other the <img> <Image> makes. */
+  .bs-tile :global(.bs-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .bs-txt {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+  }
+  /* The contact rows use one size for both lines; a tagline is subordinate to
+     the name above it, so this one steps down. */
+  .bs-txt b {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .bs-txt span {
+    font-size: 0.6875rem;
+    line-height: 1.35;
+    color: var(--color-muted);
+  }
+
+  .bs-check {
+    flex: none;
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-inline-start: auto;
+    color: var(--color-brand-600);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bs-panel,
+    .bs-chev,
+    .bs-btn,
+    .bs-tile,
+    .bs-row {
+      transition: none;
+    }
+  }
+</style>

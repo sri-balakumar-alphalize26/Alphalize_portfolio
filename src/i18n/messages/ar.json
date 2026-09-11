@@ -26,6 +26,12 @@
     "openRole": "، {count} وظيفة شاغرة",
     "openRoles": "، {count} وظائف شاغرة"
   },
+  "brand": {
+    "switchLabel": "تبديل المنتج",
+    "alphalizeTagline": "تخطيط موارد المؤسسات وذكاء الأعمال",
+    "ai369Tagline": "أجهزة ذكية وروبوتات",
+    "newTab": "يُفتح في تبويب جديد"
+  },
   "legalNav": {
     "privacy": "سياسة الخصوصية",
     "terms": "الشروط والأحكام",

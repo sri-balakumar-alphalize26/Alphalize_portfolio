@@ -297,6 +297,27 @@
     "responseTime": "Response time",
     "responseBody": "We aim to reply within one business day, and support runs around the clock from Kollam."
   },
+  "promo": {
+    "label": "Also from us",
+    "close": "Close",
+    "prev": "Previous",
+    "next": "Next",
+    "cta": "Take a look",
+    "cards": {
+      "apps": {
+        "title": "Ten apps, one back office",
+        "body": "Android apps for the people who do not sit at a desk."
+      },
+      "erp": {
+        "title": "Fifteen ready-made ERP modules",
+        "body": "From the weighing scale at the counter to offline sync in the back office."
+      },
+      "ai369": {
+        "title": "Smart locks, vending and robotics",
+        "body": "The 369ai.Biz device range, on the same ERP core as your software."
+      }
+    }
+  },
   "contactMethods": {
     "call": "Call us",
     "whatsapp": "Chat on WhatsApp",

@@ -379,7 +379,9 @@ const loc = (to: string) => localeHref(locale, to);
   /* --- back to top --- */
   .ft-top {
     position: fixed;
-    right: 1.25rem;
+    /* Logical, so under dir="rtl" it swaps corners with the promo deck
+       instead of landing on top of it. */
+    inset-inline-end: 1.25rem;
     bottom: 1.25rem;
     z-index: 60;
     display: grid;

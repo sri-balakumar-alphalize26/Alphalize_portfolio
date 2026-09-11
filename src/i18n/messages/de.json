@@ -297,6 +297,27 @@
     "responseTime": "Antwortzeit",
     "responseBody": "Wir antworten in der Regel innerhalb eines Werktags, und der Support läuft rund um die Uhr aus Kollam."
   },
+  "promo": {
+    "label": "Auch von uns",
+    "close": "Schließen",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "cta": "Ansehen",
+    "cards": {
+      "apps": {
+        "title": "Zehn Apps, ein Backoffice",
+        "body": "Android-Apps für alle, die nicht am Schreibtisch sitzen."
+      },
+      "erp": {
+        "title": "Fünfzehn fertige ERP-Module",
+        "body": "Von der Waage an der Kasse bis zur Offline-Synchronisation im Backoffice."
+      },
+      "ai369": {
+        "title": "Smarte Schlösser, Automaten, Robotik",
+        "body": "Die 369ai.Biz-Gerätereihe, auf demselben ERP-Kern wie Ihre Software."
+      }
+    }
+  },
   "contactMethods": {
     "call": "Rufen Sie uns an",
     "whatsapp": "Auf WhatsApp schreiben",

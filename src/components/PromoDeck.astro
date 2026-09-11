@@ -1,0 +1,503 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import appAlphalize from '@/assets/apps/369ai-alphalize.png';
+import odoo from '@/assets/trusted/odoo.png';
+import smartLocks from '@/assets/solutions/smart-locks.jpg';
+import { site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
+
+/**
+ * Three things worth clicking, in the corner, one at a time.
+ *
+ * An <aside> rather than a <dialog>: showModal() makes the page inert behind
+ * it, which is the one thing a promo must never do. The page keeps scrolling
+ * and every link behind it keeps working.
+ *
+ * All three cards are in the DOM and the stack is CSS — the two behind are
+ * pushed back with translateY + scale off an index on the container, so the
+ * whole thing costs one card's height rather than three. Three full cards
+ * stacked is about 400px, which is half a phone screen.
+ *
+ * It rotates on its own so all three are seen without asking for a click, but
+ * the moment someone uses an arrow or a dot it stops for good — taking control
+ * back off a visitor who has just taken it is hostile. Hover and focus pause it
+ * for the same reason: a card sliding out from under a pointer mid-read is how
+ * these earn their reputation.
+ */
+const { locale, t } = Astro.locals;
+const loc = (to: string) => localeHref(locale, to);
+
+/**
+ * `fit: 'contain'` is the Odoo wordmark, which is a 3.1:1 badge rather than a
+ * photograph — it sits on a tinted tile instead of filling the box.
+ */
+const cards = [
+  {
+    key: 'apps',
+    image: appAlphalize,
+    fit: 'contain' as const,
+    href: loc('/services/mobile-app-development'),
+    external: false,
+  },
+  {
+    key: 'erp',
+    image: odoo,
+    fit: 'contain' as const,
+    href: loc('/services/erp-solutions'),
+    external: false,
+  },
+  {
+    key: 'ai369',
+    image: smartLocks,
+    fit: 'cover' as const,
+    href: site.ai369Url,
+    external: true,
+  },
+] as const;
+---
+
+{
+  /*
+    Rendered `hidden` and unhidden only by script — the same contract
+    SplashScreen uses. With JavaScript off nothing appears at all, which matters
+    more here than elsewhere: a promo whose dismiss button does nothing is worse
+    than no promo.
+  */
+}
+<aside class="pd" data-promo aria-label={t('promo.label')} hidden>
+  <div class="pd-stack">
+    {
+      cards.map((card, i) => (
+        <article class="pd-card" data-card data-i={i}>
+          <span class:list={['pd-shot', card.fit === 'contain' && 'is-badge']}>
+            <Image
+              src={card.image}
+              alt=""
+              widths={[320, 640]}
+              sizes="20rem"
+              loading="lazy"
+              class={card.fit === 'cover' ? 'pd-img is-cover' : 'pd-img'}
+            />
+          </span>
+
+          <div class="pd-txt">
+            <b>{t(`promo.cards.${card.key}.title` as 'promo.cards.apps.title')}</b>
+            <span>{t(`promo.cards.${card.key}.body` as 'promo.cards.apps.body')}</span>
+          </div>
+
+          <a
+            class="pd-cta"
+            href={card.href}
+            target={card.external ? '_blank' : undefined}
+            rel={card.external ? 'noopener noreferrer' : undefined}
+          >
+            {t('promo.cta')}
+            <Icon name="arrow-right" class="size-3.5" />
+          </a>
+        </article>
+      ))
+    }
+  </div>
+
+  <button type="button" class="pd-x" data-promo-close aria-label={t('promo.close')}>
+    <Icon name="close" class="size-3.5" />
+  </button>
+
+  <div class="pd-nav">
+    <button type="button" class="pd-arw" data-prev aria-label={t('promo.prev')}>
+      <Icon name="chevron-right" class="size-3.5" />
+    </button>
+    <div class="pd-dots" role="tablist" aria-label={t('promo.label')}>
+      {
+        cards.map((_, i) => (
+          <button
+            type="button"
+            class="pd-dot"
+            data-dot
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            aria-label={`${i + 1}`}
+          />
+        ))
+      }
+    </div>
+    <button type="button" class="pd-arw" data-next aria-label={t('promo.next')}>
+      <Icon name="chevron-right" class="size-3.5" />
+    </button>
+  </div>
+</aside>
+
+<script>
+  import { readRaw, writeRaw } from './manage';
+
+  /**
+   * One set of delegated document listeners, registered once for the life of
+   * the document and never removed, because none of them closes over an
+   * element — they re-query on each event. This repo uses no transition:persist,
+   * so <ClientRouter> rebuilds the aside on every navigation; a handler holding
+   * the old node would be pointing at something detached two pages ago, and a
+   * per-page timer would restart on every click and never reach 15 seconds.
+   */
+  const FLAG = '__promoWired';
+
+  if (!(FLAG in window)) {
+    (window as unknown as Record<string, boolean>)[FLAG] = true;
+
+    /** Before it appears. Long enough that it follows reading rather than interrupting it. */
+    const DELAY_MS = 15_000;
+    /** Between cards. */
+    const ROTATE_MS = 5_000;
+    /** How long a dismissal lasts. */
+    const DISMISS_MS = 86_400_000;
+    const KEY = 'alphalize:promo';
+
+    const deck = () => document.querySelector<HTMLElement>('[data-promo]');
+    const cardsOf = (el: HTMLElement) => [...el.querySelectorAll<HTMLElement>('[data-card]')];
+    const dotsOf = (el: HTMLElement) => [...el.querySelectorAll<HTMLElement>('[data-dot]')];
+
+    const still = matchMedia('(prefers-reduced-motion: reduce)');
+
+    let at = 0;
+    /** Set once someone uses an arrow or a dot. Never unset. */
+    let manual = false;
+    let shown = false;
+    let revealTimer: ReturnType<typeof setTimeout> | undefined;
+    let rotateTimer: ReturnType<typeof setInterval> | undefined;
+
+    const dismissed = () => {
+      const raw = readRaw(KEY);
+      if (!raw) return false;
+      const when = Number(raw);
+      // A corrupt value should not hide the deck for ever.
+      return Number.isFinite(when) && Date.now() - when < DISMISS_MS;
+    };
+
+    function paint(el: HTMLElement) {
+      const cards = cardsOf(el);
+      at = (at + cards.length) % cards.length;
+      cards.forEach((card, i) => {
+        // Distance from the front, so the two behind sit back in order.
+        const depth = (i - at + cards.length) % cards.length;
+        card.dataset.depth = String(depth);
+        // Only the front card is reachable; the others are decoration until
+        // they come round.
+        card.inert = depth !== 0;
+      });
+      dotsOf(el).forEach((dot, i) => dot.setAttribute('aria-selected', String(i === at)));
+    }
+
+    const stopRotate = () => {
+      clearInterval(rotateTimer);
+      rotateTimer = undefined;
+    };
+    function startRotate() {
+      if (rotateTimer || manual || still.matches) return;
+      rotateTimer = setInterval(() => {
+        const el = deck();
+        if (!el) return stopRotate();
+        at += 1;
+        paint(el);
+      }, ROTATE_MS);
+    }
+
+    function reveal() {
+      const el = deck();
+      if (!el || dismissed()) return;
+      shown = true;
+      el.hidden = false;
+      // Next frame, so the transition has a start state to move from rather
+      // than the element appearing already in place.
+      requestAnimationFrame(() => el.classList.add('is-in'));
+      paint(el);
+      startRotate();
+    }
+
+    function close() {
+      const el = deck();
+      stopRotate();
+      writeRaw(KEY, String(Date.now()));
+      if (!el) return;
+      el.classList.remove('is-in');
+      // Let the slide-out play before it leaves the accessibility tree.
+      setTimeout(() => {
+        el.hidden = true;
+      }, 320);
+    }
+
+    /** An arrow or a dot means the visitor is driving now. */
+    function take(next: number) {
+      const el = deck();
+      if (!el) return;
+      manual = true;
+      stopRotate();
+      at = next;
+      paint(el);
+    }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target as Element | null;
+      if (!target?.closest('[data-promo]')) return;
+
+      if (target.closest('[data-promo-close]')) return close();
+
+      const el = deck();
+      if (!el) return;
+      if (target.closest('[data-prev]')) return take(at - 1);
+      if (target.closest('[data-next]')) return take(at + 1);
+
+      const dot = target.closest<HTMLElement>('[data-dot]');
+      if (dot) return take(dotsOf(el).indexOf(dot));
+      // A click on the card's own link falls through to a real navigation.
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const el = deck();
+      if (el && !el.hidden) close();
+    });
+
+    /* Pause while it is being read. Not while someone is driving — that is
+       already stopped for good. */
+    document.addEventListener('pointerover', (event) => {
+      if ((event.target as Element | null)?.closest('[data-promo]')) stopRotate();
+    });
+    document.addEventListener('pointerout', (event) => {
+      const el = (event.target as Element | null)?.closest<HTMLElement>('[data-promo]');
+      if (!el || el.contains(event.relatedTarget as Node)) return;
+      startRotate();
+    });
+    document.addEventListener('focusin', (event) => {
+      const inside = (event.target as Element | null)?.closest('[data-promo]');
+      if (inside) stopRotate();
+      else if (shown) startRotate();
+    });
+
+    /**
+     * The timer belongs to the document, not the page. It is armed once; every
+     * later navigation only has to put the freshly rendered aside back into the
+     * state this one is already in.
+     */
+    revealTimer = setTimeout(reveal, DELAY_MS);
+
+    document.addEventListener('astro:page-load', () => {
+      const el = deck();
+      if (!el || !shown || dismissed()) return;
+      el.hidden = false;
+      requestAnimationFrame(() => el.classList.add('is-in'));
+      paint(el);
+      startRotate();
+    });
+
+    // Never leave a timer running against a page that has been swapped out.
+    document.addEventListener('astro:before-swap', () => {
+      clearTimeout(revealTimer);
+      stopRotate();
+    });
+  }
+</script>
+
+<style>
+  .pd {
+    position: fixed;
+    /* Logical, so it moves to the other corner under dir="rtl" — the footer's
+       back-to-top sits at the end edge and the two must never overlap. */
+    inset-inline-start: 1.25rem;
+    bottom: 1.25rem;
+    /* Above the footer's back-to-top (60), below the skip link (100) and the
+       splash (200). */
+    z-index: 70;
+    width: min(20rem, calc(100vw - 2.5rem));
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.3s ease,
+      transform 0.42s var(--ease-out-soft);
+  }
+  .pd[hidden] {
+    display: none;
+  }
+  .pd.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The stack. Height comes from the front card; the others are lifted out of
+     flow so the box never jumps as they swap. */
+  .pd-stack {
+    position: relative;
+  }
+  .pd-card {
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+    overflow: hidden;
+    transition:
+      opacity 0.4s ease,
+      transform 0.46s cubic-bezier(0.22, 0.9, 0.32, 1.15);
+  }
+  .pd-card[data-depth='0'] {
+    position: relative;
+    z-index: 3;
+    opacity: 1;
+    transform: none;
+  }
+  /* The two behind, showing as edges above the front card. */
+  .pd-card[data-depth='1'],
+  .pd-card[data-depth='2'] {
+    position: absolute;
+    inset: 0;
+    /* Only the top strip is visible, so the body of the card behind never
+       shows through the rounded corners of the one in front. */
+    overflow: hidden;
+  }
+  .pd-card[data-depth='1'] {
+    z-index: 2;
+    transform: translateY(-7px) scale(0.96);
+    opacity: 0.85;
+  }
+  .pd-card[data-depth='2'] {
+    z-index: 1;
+    transform: translateY(-13px) scale(0.92);
+    opacity: 0.6;
+  }
+
+  .pd-shot {
+    display: block;
+    aspect-ratio: 16 / 9;
+    background: var(--color-surface);
+  }
+  .pd-shot.is-badge {
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+    background: var(--color-brand-50);
+  }
+  .pd-shot :global(.pd-img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .pd-shot :global(.pd-img.is-cover) {
+    object-fit: cover;
+  }
+
+  .pd-txt {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 0.875rem 0.9375rem 0;
+  }
+  .pd-txt b {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .pd-txt span {
+    font-size: 0.6875rem;
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+
+  .pd-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.625rem 0.9375rem 0.875rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-brand-700);
+    transition: color 0.2s ease;
+  }
+  .pd-cta:hover {
+    color: var(--color-plum-600);
+  }
+  .pd-cta :global(svg) {
+    transition: transform 0.3s var(--ease-out-soft);
+  }
+  .pd-cta:hover :global(svg) {
+    transform: translateX(3px);
+  }
+
+  /* Sits on the artwork, so it needs its own ground to stay legible. */
+  .pd-x {
+    position: absolute;
+    inset-inline-end: 0.5rem;
+    top: 0.5rem;
+    z-index: 4;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.88);
+    color: var(--color-heading);
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .pd-x:hover {
+    background: #fff;
+  }
+
+  .pd-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .pd-arw {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--color-muted);
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .pd-arw:hover {
+    color: var(--color-plum-600);
+  }
+  /* chevron-right is in Icon's MIRRORED set and already flips under RTL; this
+     turns it into "back" in whichever direction that is. */
+  .pd-arw[data-prev] {
+    rotate: 180deg;
+  }
+
+  .pd-dots {
+    display: flex;
+    gap: 0.3125rem;
+  }
+  .pd-dot {
+    width: 0.375rem;
+    height: 0.375rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.75);
+    box-shadow: 0 0 0 1px rgb(4 30 57 / 0.2);
+    cursor: pointer;
+    transition:
+      width 0.25s ease,
+      background 0.25s ease;
+  }
+  .pd-dot[aria-selected='true'] {
+    width: 1rem;
+    background: var(--color-brand-500);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pd,
+    .pd-card,
+    .pd-dot,
+    .pd-cta,
+    .pd-cta :global(svg) {
+      transition: none;
+    }
+  }
+</style>

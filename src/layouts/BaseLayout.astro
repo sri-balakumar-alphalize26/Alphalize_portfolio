@@ -5,6 +5,7 @@ import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import ContactSync from '@/components/ContactSync.astro';
 import IconDefs from '@/components/IconDefs.astro';
+import PromoDeck from '@/components/PromoDeck.astro';
 import SplashScreen from '@/components/SplashScreen.astro';
 import { contact, offices, site } from '@/config/site';
 import { localeLabels } from '@/i18n/locales';
@@ -137,6 +138,9 @@ const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabel
     </main>
 
     <Footer />
+
+    {/* Corner promo. Late in the body so it never delays the page it sits over. */}
+    <PromoDeck />
 
     {
       /*

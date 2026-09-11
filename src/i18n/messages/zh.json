@@ -297,6 +297,27 @@
     "responseTime": "响应时间",
     "responseBody": "我们力争在一个工作日内回复，支持团队在科拉姆全天候待命。"
   },
+  "promo": {
+    "label": "我们还提供",
+    "close": "关闭",
+    "prev": "上一个",
+    "next": "下一个",
+    "cta": "看一看",
+    "cards": {
+      "apps": {
+        "title": "十款应用，一个后台",
+        "body": "为不坐办公桌的人打造的 Android 应用。"
+      },
+      "erp": {
+        "title": "十五个现成的 ERP 模块",
+        "body": "从收银台的计重秤到后台的离线同步。"
+      },
+      "ai369": {
+        "title": "智能锁、售货机与机器人",
+        "body": "369ai.Biz 设备系列，与您的软件共用同一个 ERP 核心。"
+      }
+    }
+  },
   "contactMethods": {
     "call": "致电我们",
     "whatsapp": "在 WhatsApp 上联系",

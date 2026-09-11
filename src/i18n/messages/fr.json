@@ -297,6 +297,27 @@
     "responseTime": "Délai de réponse",
     "responseBody": "Nous répondons sous un jour ouvré, et le support fonctionne en continu depuis Kollam."
   },
+  "promo": {
+    "label": "Également chez nous",
+    "close": "Fermer",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "cta": "Jeter un œil",
+    "cards": {
+      "apps": {
+        "title": "Dix applications, un back-office",
+        "body": "Des applis Android pour ceux qui ne travaillent pas à un bureau."
+      },
+      "erp": {
+        "title": "Quinze modules ERP prêts à l’emploi",
+        "body": "De la balance du comptoir à la synchronisation hors ligne du back-office."
+      },
+      "ai369": {
+        "title": "Serrures, distributeurs et robotique",
+        "body": "La gamme 369ai.Biz, sur le même noyau ERP que vos logiciels."
+      }
+    }
+  },
   "contactMethods": {
     "call": "Appelez-nous",
     "whatsapp": "Discuter sur WhatsApp",

@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "check:i18n": "node scripts/check-i18n.mjs",
     "check:redirects": "node scripts/check-redirects.mjs",
-    "check:english": "node scripts/check-leftover-english.mjs"
+    "check:english": "node scripts/check-leftover-english.mjs",
+    "check:links": "node scripts/check-links.mjs"
   },
   "dependencies": {
     "@alphalize/astro-marker": "file:./packages/astro-marker",

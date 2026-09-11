@@ -7,6 +7,7 @@ import Section from './Section.astro';
 import SectionHeading from './SectionHeading.astro';
 import { moduleArt } from './module-art';
 import { WORDMARK_H, WORDMARK_W, wordmarkLetters } from '@/lib/wordmark';
+import { localeHref } from '@/i18n/paths';
 
 /**
  * The ERP module wall, introduced by the alphalize wordmark collapsing into its
@@ -34,8 +35,9 @@ const letters = wordmarkLetters;
 /** The letter every other one collapses into, and which then bursts. */
 const SURVIVOR = 4;
 
-const HREF = '/services/erp-solutions#modules';
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
+/** Locale-prefixed: unprefixed 404s in dev and 301s to English live. */
+const HREF = `${localeHref(locale, '/services/erp-solutions')}#modules`;
 ---
 
 <Section variant="white" space="lg">

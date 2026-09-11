@@ -44,7 +44,14 @@ const { compact = false, class: className, ...rest } = Astro.props;
  * it — so every entry can point at the same page in its own language. Resolved
  * server-side, which is why no client code here touches paths at all.
  */
-const { locale: current, path: here } = splitLocale(Astro.url.pathname);
+const { locale: current, path: rawPath } = splitLocale(Astro.url.pathname);
+/**
+ * The 404 page is the one route with no per-locale URL — `/ar/404` is not
+ * built and never will be — so switching language there would hand out a dead
+ * link for every entry in the list. Send it to that locale's home instead,
+ * which is what someone reaching for another language on a missing page wants.
+ */
+const here = rawPath === '/404' ? '/' : rawPath;
 const meta = localeLabels[current];
 
 /**

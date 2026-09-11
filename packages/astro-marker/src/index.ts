@@ -7,3 +7,4 @@ export { default as Button } from './components/Button.astro';
 export { default as Fonts } from './components/Fonts.astro';
 export { default as Quote } from './components/Quote.astro';
 export { default as ReviewCard } from './components/ReviewCard.astro';
+export { default as ReviewCardDefs } from './components/ReviewCardDefs.astro';

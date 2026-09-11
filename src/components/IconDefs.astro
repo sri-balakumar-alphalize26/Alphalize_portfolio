@@ -1,0 +1,27 @@
+---
+import { iconPaths } from './icons';
+
+/**
+ * Every icon shape, defined once per document.
+ *
+ * <Icon> renders a `<use href="#ic-name">` pointing in here instead of
+ * repeating the path data. The homepage draws 472 icons from 51 distinct
+ * shapes — inline, that was 160 KB, 47% of the document.
+ *
+ * The whole set is 5.6 KB of path data, so emitting all of it is cheaper than
+ * working out which subset a page needs: even the lightest page draws ~67
+ * icons, and the repeated markup costs more than the unused definitions.
+ *
+ * `<g>` rather than `<symbol>`: every icon shares the 0 0 24 24 viewBox that
+ * <Icon> already sets on its own <svg>, so a per-symbol viewBox would just be
+ * a second copy of the same number. fill and stroke are left unset here and
+ * inherit from the <svg> doing the referencing, which is what lets one shape
+ * serve both the filled and the outlined treatment.
+ */
+---
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    {Object.entries(iconPaths).map(([name, path]) => <g id={`ic-${name}`} set:html={path} />)}
+  </defs>
+</svg>

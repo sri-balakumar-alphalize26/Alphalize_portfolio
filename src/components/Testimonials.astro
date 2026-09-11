@@ -1,7 +1,7 @@
 ---
 import { localeHref } from '@/i18n/paths';
 import { getCollection } from 'astro:content';
-import { ReviewCard } from '@alphalize/astro-marker';
+import { ReviewCard, ReviewCardDefs } from '@alphalize/astro-marker';
 import Reveal from './Reveal.astro';
 import Section from './Section.astro';
 import SectionHeading from './SectionHeading.astro';
@@ -19,12 +19,22 @@ const reviews = (await getCollection('testimonials')).sort((a, b) => a.data.orde
 const palette = ['blue', 'orange', 'yellow'];
 const cards = reviews.map((review, i) => ({ ...review.data, color: palette[i % palette.length] }));
 
-// Every column carries all nine reviews, each starting at a different point in
-// the list — two-per-column would loop far too visibly. Offsets are the list in
-// exact thirds, so no two columns show the same card side by side. Speeds differ
-// so the columns never travel in lockstep, and the middle one runs the other way.
+/**
+ * Each column carries six of the nine, starting a third of the way further
+ * along than the one before it, and every card is rendered twice for the
+ * seamless loop.
+ *
+ * Six rather than all nine: a column shows about three cards at a time, so six
+ * is already twice the visible run — long enough that the repeat is never on
+ * screen with its original. Carrying all nine put 54 cards in the document and
+ * made the testimonial wall the heaviest section of the homepage; this is 36.
+ * The offsets are still thirds, so no two columns show the same card level
+ * with each other. Speeds differ so the columns never travel in lockstep, and
+ * the middle one runs the other way.
+ */
+const PER_COLUMN = 6;
 const columns = [0, 3, 6].map((offset, i) => ({
-  items: [...cards.slice(offset), ...cards.slice(0, offset)],
+  items: [...cards.slice(offset), ...cards.slice(0, offset)].slice(0, PER_COLUMN),
   duration: [46, 58, 52][i],
   reverse: i === 1,
   visibility: ['', 'hidden md:block', 'hidden lg:block'][i],
@@ -36,6 +46,12 @@ const loc = (to: string) => localeHref(locale, to);
 ---
 
 <Section variant="surface" space="lg">
+  {
+    /* Once for the whole wall. Every card's quote mark and stars are <use>
+       references into this — 54 cards each carrying their own copies was 99 KB,
+       29% of the homepage. */
+  }
+  <ReviewCardDefs />
   <SectionHeading
     eyebrow={t('testimonials.eyebrow')}
     title={t('testimonials.title')}

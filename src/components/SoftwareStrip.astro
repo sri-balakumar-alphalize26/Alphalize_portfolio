@@ -4,6 +4,7 @@ import AppMarquee from './AppMarquee.astro';
 import Icon from './Icon.astro';
 import type { IconName } from './icons';
 import Reveal from './Reveal.astro';
+import { localeHref } from '@/i18n/paths';
 import SectionHeading from './SectionHeading.astro';
 
 /**
@@ -42,7 +43,12 @@ const tiles: {
     featured: true,
   },
 ];
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
+/** Locale-prefixed: unprefixed 404s in dev and 301s to English live. */
+const loc = (to: string) => {
+  const [path, hash] = to.split('#');
+  return localeHref(locale, path) + (hash ? `#${hash}` : '');
+};
 ---
 
 <section class="cc-surface border-brand-100 border-t py-18 lg:py-24">
@@ -59,7 +65,11 @@ const { t } = Astro.locals;
       {
         tiles.map((t, i) => (
           <Reveal as="article" delay={i} class="h-full">
-            <a href={t.href} class:list={['sw-card', t.featured && 'is-featured']} data-sw-card>
+            <a
+              href={loc(t.href)}
+              class:list={['sw-card', t.featured && 'is-featured']}
+              data-sw-card
+            >
               <span class="sw-spot" aria-hidden="true" />
               <svg class="sw-trace" preserveAspectRatio="none" aria-hidden="true">
                 <rect x="1" y="1" rx="8" />

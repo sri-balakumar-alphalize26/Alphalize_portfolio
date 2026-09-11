@@ -120,6 +120,26 @@
   }
 
   /**
+   * Icon presentation, in CSS rather than as attributes on every <svg>.
+   *
+   * These five were inline on each icon. The homepage draws 365 of them, so
+   * that was ~36 KB of the same six attributes repeated — more, after the path
+   * data itself moved into <IconDefs>. As a class it is written once.
+   */
+  .ic {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  /* Brand marks and a few solid glyphs are filled shapes, not strokes. */
+  .ic-fill {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  /**
    * Per-script faces and metrics.
    *
    * Two families per locale: the body face that backs up Inter, and the

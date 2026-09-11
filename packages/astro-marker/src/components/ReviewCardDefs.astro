@@ -1,0 +1,30 @@
+---
+/**
+ * <ReviewCardDefs> — the two shapes every <ReviewCard> draws, defined once.
+ *
+ * Render this ONCE per page, anywhere, before or after the cards. Each card
+ * then references the shapes with <use> instead of carrying its own copy.
+ *
+ * Why it exists: a wall of cards repeats the same geometry brutally. The “66”
+ * mark alone is drawn four times per card — twice for the ink outline, twice
+ * for the fill — and the star five times. On a page with 54 cards that came to
+ * 99 KB of duplicated path data, 29% of the whole document. As <use>
+ * references it is a few hundred bytes plus these definitions.
+ *
+ * A card rendered without this on the page shows no quote mark and no stars,
+ * which is why ReviewCard's own doc comment points here.
+ */
+---
+
+<svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    {/* One half of the “66”. The card places it twice, 40 units apart. */}
+    <path
+      id="mk-quote-half"
+      d="M30 4 C 16 4, 6 14, 6 28 C 6 37, 12 42, 20 42 C 27 42, 32 37, 32 30 C 32 23, 27 18, 20 18 C 18 18, 16 18.5, 15 19 C 16 12, 22 8, 30 8 Z"
+    ></path>
+    <path
+      id="mk-star"
+      d="M10 1.8l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 15.2 4.7 18l1.1-5.9L1.5 8l5.9-.8z"></path>
+  </defs>
+</svg>

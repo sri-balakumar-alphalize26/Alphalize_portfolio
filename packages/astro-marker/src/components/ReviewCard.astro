@@ -3,49 +3,156 @@
  * <ReviewCard> — testimonial card with a coloured “66” mark.
  *   <ReviewCard name="Ajmal" rating={5} color="blue">The weighing scale integration…</ReviewCard>
  * Put cards in a container with class "mk-reviews" and omit `color` to auto-cycle blue → orange → yellow.
+ *
+ * REQUIRES <ReviewCardDefs /> once on the page — the quote mark and stars are
+ * <use> references to shapes it defines. Without it a card renders neither.
  * name · role (optional line under the name) · rating 0–5 · color · avatar (image url; falls back to initial)
  */
-export interface Props { name: string; role?: string; rating?: number; color?: string; avatar?: string; class?: string }
+export interface Props {
+  name: string;
+  role?: string;
+  rating?: number;
+  color?: string;
+  avatar?: string;
+  class?: string;
+}
 const NAMED = ['yellow', 'pink', 'teal', 'blue', 'sky', 'orange', 'purple', 'green'];
 const { name, role, rating = 5, color, avatar, class: className = '' } = Astro.props;
 const col = color ? (NAMED.includes(color) ? `var(--mk-${color})` : color) : undefined;
 const stars = [1, 2, 3, 4, 5];
 ---
+
 <article class:list={['mk-review', className]} style={col ? `--mk-review-c:${col}` : undefined}>
   <svg class="mk-review__quote" viewBox="0 0 88 44" aria-hidden="true">
-    <g class="mk-review__ink"><path d="M30 4 C 16 4, 6 14, 6 28 C 6 37, 12 42, 20 42 C 27 42, 32 37, 32 30 C 32 23, 27 18, 20 18 C 18 18, 16 18.5, 15 19 C 16 12, 22 8, 30 8 Z" /><path transform="translate(40 0)" d="M30 4 C 16 4, 6 14, 6 28 C 6 37, 12 42, 20 42 C 27 42, 32 37, 32 30 C 32 23, 27 18, 20 18 C 18 18, 16 18.5, 15 19 C 16 12, 22 8, 30 8 Z" /></g>
-    <g class="mk-review__fill"><path d="M30 4 C 16 4, 6 14, 6 28 C 6 37, 12 42, 20 42 C 27 42, 32 37, 32 30 C 32 23, 27 18, 20 18 C 18 18, 16 18.5, 15 19 C 16 12, 22 8, 30 8 Z" /><path transform="translate(40 0)" d="M30 4 C 16 4, 6 14, 6 28 C 6 37, 12 42, 20 42 C 27 42, 32 37, 32 30 C 32 23, 27 18, 20 18 C 18 18, 16 18.5, 15 19 C 16 12, 22 8, 30 8 Z" /></g>
+    <g class="mk-review__ink"
+      ><use href="#mk-quote-half"></use><use href="#mk-quote-half" x="40"></use></g
+    >
+    <g class="mk-review__fill"
+      ><use href="#mk-quote-half"></use><use href="#mk-quote-half" x="40"></use></g
+    >
   </svg>
   <header class="mk-review__head">
-    {avatar ? <img class="mk-review__avatar" src={avatar} alt="" /> : <span class="mk-review__avatar">{name.trim().charAt(0).toUpperCase()}</span>}
+    {
+      avatar ? (
+        <img class="mk-review__avatar" src={avatar} alt="" />
+      ) : (
+        <span class="mk-review__avatar">{name.trim().charAt(0).toUpperCase()}</span>
+      )
+    }
     <div>
       <div class="mk-review__name">{name}</div>
       {role && <div class="mk-review__role">{role}</div>}
       <div class="mk-review__stars" aria-label={`${rating} out of 5`}>
-        {stars.map((s) => <svg viewBox="0 0 20 20" class:list={{ on: s <= rating }}><path d="M10 1.8l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 15.2 4.7 18l1.1-5.9L1.5 8l5.9-.8z"/></svg>)}
+        {
+          stars.map((s) => (
+            <svg viewBox="0 0 20 20" class:list={{ on: s <= rating }}>
+              <use href="#mk-star" />
+            </svg>
+          ))
+        }
       </div>
     </div>
   </header>
   <p class="mk-review__text"><slot /></p>
 </article><style>
-  .mk-review { --mk-review-c: var(--mk-blue); position: relative; background: #fff; border: 1px solid #E5E7EB; border-radius: 14px; padding: 40px 24px 24px;
-    font-family: var(--mk-font-sans); color: var(--mk-ink); box-shadow: 0 2px 6px rgba(20,24,40,.05); transition: transform .28s cubic-bezier(.22,.9,.32,1.2), box-shadow .28s, border-color .28s; }
-  .mk-review:hover { transform: translateY(-5px); box-shadow: 0 14px 28px rgba(20,24,40,.12); border-color: var(--mk-review-c); }
+  .mk-review {
+    --mk-review-c: var(--mk-blue);
+    position: relative;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 40px 24px 24px;
+    font-family: var(--mk-font-sans);
+    color: var(--mk-ink);
+    box-shadow: 0 2px 6px rgba(20, 24, 40, 0.05);
+    transition:
+      transform 0.28s cubic-bezier(0.22, 0.9, 0.32, 1.2),
+      box-shadow 0.28s,
+      border-color 0.28s;
+  }
+  .mk-review:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 28px rgba(20, 24, 40, 0.12);
+    border-color: var(--mk-review-c);
+  }
   /* auto-cycle inside .mk-reviews when no color prop is given */
-  :global(.mk-reviews) > .mk-review:nth-child(3n+1) { --mk-review-c: var(--mk-blue); }
-  :global(.mk-reviews) > .mk-review:nth-child(3n+2) { --mk-review-c: var(--mk-orange); }
-  :global(.mk-reviews) > .mk-review:nth-child(3n+3) { --mk-review-c: var(--mk-yellow); }
-  .mk-review[style*="--mk-review-c"] { /* explicit color prop wins over the cycle */ }
-  .mk-review__quote { position: absolute; top: -18px; left: 20px; width: 64px; height: 32px; overflow: visible; }
-  .mk-review__ink { transform: translate(-1.5px, 1.5px); }
-  .mk-review__ink path { fill: none; stroke: var(--mk-ink); stroke-width: 3.5; stroke-linejoin: round; }
-  .mk-review__fill path { fill: var(--mk-review-c); }
-  .mk-review__head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-  .mk-review__avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--mk-review-c); color: #fff; font-weight: 700; display: grid; place-items: center; object-fit: cover; flex: none; }
-  .mk-review__name { font-weight: 700; font-size: 16px; }
-  .mk-review__role { font-size: 13px; color: var(--mk-ink-muted); }
-  .mk-review__stars { display: flex; gap: 2px; margin-top: 3px; }
-  .mk-review__stars svg { width: 15px; height: 15px; fill: none; stroke: #F5A623; stroke-width: 1.6; }
-  .mk-review__stars svg.on { fill: #F5A623; }
-  .mk-review__text { margin: 0; font-size: 15px; line-height: 1.55; color: #374151; }
+  :global(.mk-reviews) > .mk-review:nth-child(3n + 1) {
+    --mk-review-c: var(--mk-blue);
+  }
+  :global(.mk-reviews) > .mk-review:nth-child(3n + 2) {
+    --mk-review-c: var(--mk-orange);
+  }
+  :global(.mk-reviews) > .mk-review:nth-child(3n + 3) {
+    --mk-review-c: var(--mk-yellow);
+  }
+  .mk-review[style*='--mk-review-c'] {
+    /* explicit color prop wins over the cycle */
+  }
+  .mk-review__quote {
+    position: absolute;
+    top: -18px;
+    left: 20px;
+    width: 64px;
+    height: 32px;
+    overflow: visible;
+  }
+  .mk-review__ink {
+    transform: translate(-1.5px, 1.5px);
+  }
+  .mk-review__ink use {
+    fill: none;
+    stroke: var(--mk-ink);
+    stroke-width: 3.5;
+    stroke-linejoin: round;
+  }
+  .mk-review__fill use {
+    fill: var(--mk-review-c);
+  }
+  .mk-review__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .mk-review__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--mk-review-c);
+    color: #fff;
+    font-weight: 700;
+    display: grid;
+    place-items: center;
+    object-fit: cover;
+    flex: none;
+  }
+  .mk-review__name {
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .mk-review__role {
+    font-size: 13px;
+    color: var(--mk-ink-muted);
+  }
+  .mk-review__stars {
+    display: flex;
+    gap: 2px;
+    margin-top: 3px;
+  }
+  .mk-review__stars svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: #f5a623;
+    stroke-width: 1.6;
+  }
+  .mk-review__stars svg.on {
+    fill: #f5a623;
+  }
+  .mk-review__text {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: #374151;
+  }
 </style>

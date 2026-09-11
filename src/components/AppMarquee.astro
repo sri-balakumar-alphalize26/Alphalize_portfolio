@@ -1,6 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
+import { localeHref } from '@/i18n/paths';
 
 /**
  * The app line-up as an auto-scrolling logo strip.
@@ -25,7 +26,10 @@ const apps = (await getCollection('apps')).sort((a, b) => a.data.order - b.data.
 const track = [...apps, ...apps];
 
 /** Each tile lands on its own card in the showcase, which flags itself on :target. */
-const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
+const { locale } = Astro.locals;
+/** Locale-prefixed: an unprefixed link 404s in dev and 301s to English live. */
+const hrefFor = (id: string) =>
+  `${localeHref(locale, '/services/mobile-app-development')}#app-${id}`;
 ---
 
 {
@@ -103,6 +107,9 @@ const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
   }
 
   .am-tile {
+    /* No 300ms double-tap wait, and the browser does not claim the gesture as a
+       pan — both cost taps on a target this small. */
+    touch-action: manipulation;
     display: grid;
     place-items: center;
     width: 11.25rem;
@@ -166,8 +173,8 @@ const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
   }
   .am-fly.is-going {
     animation:
-      am-lift 0.95s cubic-bezier(0.22, 0.9, 0.32, 1.05) forwards,
-      am-spin 1s cubic-bezier(0.45, 0.05, 0.3, 1) forwards;
+      am-lift 0.66s cubic-bezier(0.22, 0.9, 0.32, 1.05) forwards,
+      am-spin 0.7s cubic-bezier(0.45, 0.05, 0.3, 1) forwards;
   }
   .am-fly.is-leaving {
     animation: none;
@@ -287,6 +294,26 @@ const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
         busy = false;
       };
 
+      /**
+       * Hold the strip still the instant a finger lands on it.
+       *
+       * The CSS pause is `:hover`/`:focus-within` only, and touch fires
+       * neither — so on a phone the logo kept sliding between touchstart and
+       * touchend, the pointer travelled past the browser's slop threshold, and
+       * the click was discarded as a drag. That is the two-and-three-taps
+       * problem: the first taps were landing on a target that had moved.
+       *
+       * pointerdown rather than touchstart, so a mouse drag across the strip
+       * gets the same courtesy.
+       */
+      root.addEventListener('pointerdown', () => track.classList.add('is-paused'));
+      const release = () => {
+        if (!busy) track.classList.remove('is-paused');
+      };
+      root.addEventListener('pointerup', release);
+      root.addEventListener('pointercancel', release);
+      root.addEventListener('pointerleave', release);
+
       track.querySelectorAll<HTMLAnchorElement>('[data-tile]').forEach((tile) => {
         tile.addEventListener('click', (event) => {
           // Reduced motion, a modified click or a flight already in progress all
@@ -337,10 +364,15 @@ const hrefFor = (id: string) => `/services/mobile-app-development#app-${id}`;
             wash.classList.add('is-on');
             fly.classList.add('is-leaving');
             // A full load rather than the router: the flood already covers the
-            // screen, and this way nothing has to survive the DOM swap.
+            // screen, and this way nothing has to survive the DOM swap. The
+            // splash does not reappear behind it — SplashScreen shows once per
+            // session, on arrival only.
+            //
+            // The wash runs 620ms and is opaque well before it ends, so this
+            // only has to outlast the point where it hides the swap.
             setTimeout(() => {
               location.href = href;
-            }, 460);
+            }, 180);
           });
         });
       });

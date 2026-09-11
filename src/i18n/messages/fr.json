@@ -114,7 +114,10 @@
   "whatWeDo": {
     "eyebrow": "Ce que nous faisons",
     "title": "[[Une plateforme.]] Tous les services.",
-    "lead": "Chaque brique de la pile dialogue avec les autres — pour que votre comptoir, votre entrepôt et votre back-office voient tous les mêmes chiffres."
+    "lead": "Chaque brique de la pile dialogue avec les autres — pour que votre comptoir, votre entrepôt et votre back-office voient tous les mêmes chiffres.",
+    "prev": "Appareil précédent",
+    "next": "Appareil suivant",
+    "slidesLabel": "Gamme d’appareils"
   },
   "softwareStrip": {
     "eyebrow": "Les logiciels que nous développons",

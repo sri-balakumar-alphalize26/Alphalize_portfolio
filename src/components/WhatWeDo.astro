@@ -8,7 +8,10 @@ import Section from './Section.astro';
 import SectionHeading from './SectionHeading.astro';
 import appAlphalize from '@/assets/apps/369ai-alphalize.png';
 import { site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
 import smartLocks from '@/assets/solutions/smart-locks.jpg';
+import vending from '@/assets/solutions/vending.webp';
+import robot from '@/assets/solutions/robot.webp';
 
 /**
  * "What we do" as a pile of cards rather than a run of rows.
@@ -33,7 +36,13 @@ interface Row {
   href: string;
   cta: string;
   external?: boolean;
-  image: ImageMetadata;
+  /**
+   * One image, or several to rotate through. The devices row carries three
+   * because the range is three distinct products — a single locker photo said
+   * "we sell lockers" where the copy beside it promises vending and robotics
+   * too.
+   */
+  image: ImageMetadata | { src: ImageMetadata; alt: string }[];
   imageAlt: string;
   fit: 'cover' | 'contain';
 }
@@ -70,12 +79,23 @@ const rows: Row[] = [
     href: site.ai369Url,
     cta: 'See the range on 369ai.Biz',
     external: true,
-    image: smartLocks,
+    image: [
+      { src: smartLocks, alt: 'Smart locker bank with centralised access control' },
+      { src: vending, alt: 'Smart vending machine with touchless and QR payment' },
+      { src: robot, alt: 'Warehouse robot for dispensing and smart manufacturing' },
+    ],
     imageAlt: 'Smart locker bank with centralised access control',
     fit: 'cover',
   },
 ];
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
+/**
+ * Prefix an internal path with this page's locale. `row.href` is locale-free so
+ * the table above does not have to know about locales; without this the link
+ * went out unprefixed, which 404s in dev and 301s to English in production —
+ * silently dropping a non-English reader out of their own language.
+ */
+const loc = (to: string) => localeHref(locale, to);
 ---
 
 <Section variant="white" space="lg">
@@ -109,7 +129,7 @@ const { t } = Astro.locals;
               </ul>
 
               <a
-                href={row.href}
+                href={row.external ? row.href : loc(row.href)}
                 target={row.external ? '_blank' : undefined}
                 rel={row.external ? 'noopener noreferrer' : undefined}
                 class="wwd-link text-brand-700 hover:text-plum-600 mt-7 inline-flex items-center gap-1.5 text-sm font-semibold"
@@ -119,27 +139,82 @@ const { t } = Astro.locals;
               </a>
             </div>
 
-            <div
-              class:list={[
-                'rounded-card border-brand-100 overflow-hidden border',
-                row.fit === 'contain'
-                  ? 'bg-surface flex h-64 items-center justify-center p-10'
-                  : '',
-              ]}
-            >
-              <Image
-                src={row.image}
-                alt={row.imageAlt}
-                widths={[560, 1120]}
-                sizes="(min-width: 1024px) 520px, 92vw"
-                loading="lazy"
-                class={
-                  row.fit === 'cover'
-                    ? 'aspect-[4/3] w-full object-cover'
-                    : 'max-h-full w-auto object-contain'
-                }
-              />
-            </div>
+            {Array.isArray(row.image) ? (
+              <div class="wwd-slider" data-wwd-slider>
+                {/*
+                  Every slide is in the DOM and the current one is chosen by an
+                  index on the wrapper, so the swap cross-fades rather than
+                  popping — and with JS off the first slide still shows, which
+                  is what the single image used to be.
+                */}
+                <ul class="wwd-slides" data-slides>
+                  {row.image.map((shot, s) => (
+                    <li class="wwd-slide" data-slide aria-hidden={s > 0 ? 'true' : undefined}>
+                      <Image
+                        src={shot.src}
+                        alt={shot.alt}
+                        widths={[560, 1120]}
+                        sizes="(min-width: 1024px) 520px, 92vw"
+                        loading="lazy"
+                        class="aspect-[4/3] w-full object-cover"
+                      />
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  type="button"
+                  class="wwd-arw wwd-prev"
+                  data-prev
+                  aria-label={t('whatWeDo.prev')}
+                >
+                  <Icon name="chevron-right" class="size-4" />
+                </button>
+                <button
+                  type="button"
+                  class="wwd-arw wwd-next"
+                  data-next
+                  aria-label={t('whatWeDo.next')}
+                >
+                  <Icon name="chevron-right" class="size-4" />
+                </button>
+
+                <div class="wwd-dots" role="tablist" aria-label={t('whatWeDo.slidesLabel')}>
+                  {row.image.map((shot, s) => (
+                    <button
+                      type="button"
+                      class="wwd-dot"
+                      data-dot
+                      role="tab"
+                      aria-selected={s === 0 ? 'true' : 'false'}
+                      aria-label={shot.alt}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div
+                class:list={[
+                  'rounded-card border-brand-100 overflow-hidden border',
+                  row.fit === 'contain'
+                    ? 'bg-surface flex h-64 items-center justify-center p-6'
+                    : '',
+                ]}
+              >
+                <Image
+                  src={row.image}
+                  alt={row.imageAlt}
+                  widths={[560, 1120]}
+                  sizes="(min-width: 1024px) 520px, 92vw"
+                  loading="lazy"
+                  class={
+                    row.fit === 'cover'
+                      ? 'aspect-[4/3] w-full object-cover'
+                      : 'max-h-full w-auto object-contain'
+                  }
+                />
+              </div>
+            )}
           </div>
         </article>
       ))
@@ -204,6 +279,113 @@ const { t } = Astro.locals;
     }
   }
 
+  /* ---------- device slider ---------- */
+  .wwd-slider {
+    position: relative;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+  }
+  .wwd-slides {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* The first slide holds the box open; the rest stack on top of it, so the
+     card never changes height as it rotates. */
+  .wwd-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.55s var(--ease-out-soft);
+  }
+  .wwd-slide:first-child {
+    position: relative;
+  }
+  .wwd-slide.is-on {
+    opacity: 1;
+  }
+  /* No-JS and first paint: slide one is visible without waiting for script. */
+  .wwd-slider:not(.js-wwd) .wwd-slide:first-child {
+    opacity: 1;
+  }
+
+  .wwd-arw {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    margin-top: -1rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.86);
+    color: var(--color-heading);
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+    opacity: 0;
+    transition:
+      opacity 0.25s ease,
+      background 0.25s ease;
+  }
+  .wwd-slider:hover .wwd-arw,
+  .wwd-slider:focus-within .wwd-arw {
+    opacity: 1;
+  }
+  .wwd-arw:hover {
+    background: #fff;
+  }
+  .wwd-prev {
+    inset-inline-start: 0.625rem;
+    /* chevron-right is in Icon's MIRRORED set, so it already flips under RTL;
+       this turns it into a "back" arrow in whichever direction that is. */
+    rotate: 180deg;
+  }
+  .wwd-next {
+    inset-inline-end: 0.625rem;
+  }
+  /* Touch has no hover, so the arrows would never appear. */
+  @media (hover: none) {
+    .wwd-arw {
+      opacity: 1;
+    }
+  }
+
+  .wwd-dots {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0.625rem;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+  .wwd-dot {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.55);
+    box-shadow: 0 0 0 1px rgb(4 30 57 / 0.18);
+    cursor: pointer;
+    transition:
+      background 0.25s ease,
+      width 0.25s ease;
+  }
+  .wwd-dot[aria-selected='true'] {
+    width: 1.125rem;
+    background: #fff;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wwd-slide,
+    .wwd-arw,
+    .wwd-dot {
+      transition: none;
+    }
+  }
+
   .wwd-link :global(svg) {
     transition: transform 0.3s var(--ease-out-soft);
   }
@@ -262,5 +444,79 @@ const { t } = Astro.locals;
     });
   }
 
+  /**
+   * The device slider on the connected-hardware card.
+   *
+   * Rotates on its own so all three products are seen without asking for a
+   * click, but the moment someone uses an arrow or a dot it stops for good —
+   * taking control back off a visitor who has just taken it is hostile. Hover
+   * and focus pause it for the same reason: a slide that moves out from under
+   * a pointer mid-read is how these get a bad name.
+   */
+  const ROTATE_MS = 5000;
+
+  function mountWwdSliders() {
+    document.querySelectorAll<HTMLElement>('[data-wwd-slider]').forEach((slider) => {
+      const slides = [...slider.querySelectorAll<HTMLElement>('[data-slide]')];
+      const dots = [...slider.querySelectorAll<HTMLElement>('[data-dot]')];
+      if (slides.length < 2) return;
+
+      // Hands the slide state over from CSS, so slide one is visible from the
+      // first paint and stays visible if this script never runs.
+      slider.classList.add('js-wwd');
+
+      let at = 0;
+      let timer: ReturnType<typeof setInterval> | undefined;
+      const still = matchMedia('(prefers-reduced-motion: reduce)');
+
+      const show = (next: number) => {
+        at = (next + slides.length) % slides.length;
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('is-on', i === at);
+          // Only the visible slide is exposed; the others are decoration until
+          // they come round.
+          if (i === at) slide.removeAttribute('aria-hidden');
+          else slide.setAttribute('aria-hidden', 'true');
+        });
+        dots.forEach((dot, i) => dot.setAttribute('aria-selected', String(i === at)));
+      };
+
+      const stop = () => {
+        clearInterval(timer);
+        timer = undefined;
+      };
+      const start = () => {
+        if (timer || still.matches) return;
+        timer = setInterval(() => show(at + 1), ROTATE_MS);
+      };
+      /** Manual control wins permanently — see the note above. */
+      const take = (next: number) => {
+        stop();
+        slider.dataset.manual = '';
+        show(next);
+      };
+
+      slider.querySelector('[data-prev]')?.addEventListener('click', () => take(at - 1));
+      slider.querySelector('[data-next]')?.addEventListener('click', () => take(at + 1));
+      dots.forEach((dot, i) => dot.addEventListener('click', () => take(i)));
+
+      slider.addEventListener('pointerenter', stop);
+      slider.addEventListener('focusin', stop);
+      const resume = () => {
+        if (!('manual' in slider.dataset)) start();
+      };
+      slider.addEventListener('pointerleave', resume);
+      slider.addEventListener('focusout', (e) => {
+        if (!slider.contains(e.relatedTarget as Node)) resume();
+      });
+
+      show(0);
+      start();
+      // Never leave an interval ticking against a page that has been swapped.
+      document.addEventListener('astro:before-swap', stop, { once: true });
+    });
+  }
+
   document.addEventListener('astro:page-load', mountWhatWeDo);
+  document.addEventListener('astro:page-load', mountWwdSliders);
 </script>

@@ -23,4 +23,4 @@ The gap between a degree and a first job is rarely knowledge — it is not havin
 
 ## How we work
 
-Students in their final year and recent graduates aiming for software or web development roles. Applications go through the [careers page](/careers) — mention the training program in your message.
+Students in their final year and recent graduates aiming for software or web development roles. Applications go through the [careers page](/en/careers) — mention the training program in your message.

@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import Icon from './Icon.astro';
 import { ceo } from '@/config/ceo';
+import { localeHref } from '@/i18n/paths';
 
 /**
  * Leadership block — portrait left, bio right, on the dark ground.
@@ -39,7 +40,7 @@ interface Props {
   ctaHref?: string;
 }
 
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
 const {
   photo = ceo.portrait,
   name = ceo.name,
@@ -47,7 +48,8 @@ const {
   paras = [t('ceoPage.intro1'), t('ceoPage.intro2')],
   kicker = t('nav.leadership'),
   cta = t('ceoPage.cardCta'),
-  ctaHref = '/contact',
+  // Locale-prefixed, or a non-English reader is sent to the English contact page.
+  ctaHref = localeHref(locale, '/contact'),
 } = Astro.props;
 ---
 

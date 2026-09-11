@@ -118,7 +118,10 @@
   "whatWeDo": {
     "eyebrow": "Was wir tun",
     "title": "[[Eine Plattform.]] Alle Abteilungen.",
-    "lead": "Jeder Teil des Systems spricht mit jedem anderen — damit Ihre Kasse, Ihr Lager und Ihr Backoffice dieselben Zahlen sehen."
+    "lead": "Jeder Teil des Systems spricht mit jedem anderen — damit Ihre Kasse, Ihr Lager und Ihr Backoffice dieselben Zahlen sehen.",
+    "prev": "Vorheriges Gerät",
+    "next": "Nächstes Gerät",
+    "slidesLabel": "Gerätereihe"
   },
   "softwareStrip": {
     "eyebrow": "Software, die wir bauen",

@@ -44,20 +44,29 @@ const MIRRORED: readonly IconName[] = ['arrow-right', 'chevron-right'];
 
 // `instagram` is drawn as a line icon despite being a brand mark.
 const isFilled = filledIcons.includes(name) && name !== 'instagram';
-const path = iconPaths[name];
+
+/**
+ * Normally a `<use>` into the shapes <IconDefs> puts in the document once —
+ * the same icon appears hundreds of times on a page, and repeating its path
+ * data each time was 47% of the homepage.
+ *
+ * `draw` is the exception. It stamps pathLength="1" onto each subpath so the
+ * shape can be stroke-animated, and geometry reached through <use> is not
+ * addressable from outside, so those call sites keep their own copy. There are
+ * five of them.
+ */
 const markup = draw
-  ? path.replace(/<(path|circle|rect|line|polyline|polygon|ellipse)\b/g, '$& pathLength="1"')
-  : path;
+  ? iconPaths[name].replace(
+      /<(path|circle|rect|line|polyline|polygon|ellipse)\b/g,
+      '$& pathLength="1"'
+    )
+  : `<use href="#ic-${name}"/>`;
 ---
 
+{/* fill/stroke/stroke-width/linecap/linejoin live in .ic and .ic-fill — see global.css */}
 <svg
-  class:list={[className, MIRRORED.includes(name) && 'rtl-mirror']}
+  class:list={['ic', isFilled && 'ic-fill', className, MIRRORED.includes(name) && 'rtl-mirror']}
   viewBox="0 0 24 24"
-  fill={isFilled ? 'currentColor' : 'none'}
-  stroke={isFilled ? 'none' : 'currentColor'}
-  stroke-width={isFilled ? undefined : 1.75}
-  stroke-linecap="round"
-  stroke-linejoin="round"
   role={label ? 'img' : undefined}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}

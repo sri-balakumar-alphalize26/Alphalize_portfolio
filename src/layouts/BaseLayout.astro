@@ -4,6 +4,7 @@ import Footer from '@/components/Footer.astro';
 import Header from '@/components/Header.astro';
 import Seo from '@/components/Seo.astro';
 import ContactSync from '@/components/ContactSync.astro';
+import IconDefs from '@/components/IconDefs.astro';
 import SplashScreen from '@/components/SplashScreen.astro';
 import { contact, offices, site } from '@/config/site';
 import { localeLabels } from '@/i18n/locales';
@@ -118,6 +119,7 @@ const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabel
   </head>
 
   <body class="flex min-h-dvh flex-col">
+    <IconDefs />
     <SplashScreen />
     <ContactSync />
 
@@ -135,5 +137,93 @@ const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabel
     </main>
 
     <Footer />
+
+    {
+      /*
+        Navigation feedback. The splash used to cover the screen on every
+        in-site click, which was a second of white between a tap and the page —
+        so it now shows on arrival only. This is what replaces it: a 2px bar,
+        no layout shift, and no minimum display time.
+      */
+    }
+    <div id="nav-progress" aria-hidden="true"></div>
   </body>
 </html>
+
+<style is:global>
+  #nav-progress {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    z-index: 300;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-brand-500), var(--color-plum-600));
+    transform: scaleX(0);
+    transform-origin: left center;
+    opacity: 0;
+    pointer-events: none;
+  }
+  :global([dir='rtl']) #nav-progress {
+    transform-origin: right center;
+  }
+  /* Creeps toward 90% while the page is fetched — it cannot know real progress,
+     so it eases out and waits rather than pretending to finish. */
+  #nav-progress.is-loading {
+    opacity: 1;
+    transform: scaleX(0.9);
+    transition:
+      transform 8s cubic-bezier(0.1, 0.8, 0.2, 1),
+      opacity 0.1s;
+  }
+  #nav-progress.is-done {
+    opacity: 0;
+    transform: scaleX(1);
+    transition:
+      transform 0.2s ease-out,
+      opacity 0.3s ease 0.15s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #nav-progress {
+      transition: none !important;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * A navigation that resolves quickly should show nothing at all — a bar that
+   * flashes on every click is worse than no bar. So it waits 150ms before
+   * appearing, and a navigation that finishes first never shows one.
+   */
+  const SHOW_AFTER_MS = 150;
+
+  const bar = () => document.getElementById('nav-progress');
+  let showTimer: ReturnType<typeof setTimeout> | undefined;
+  let hideTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function start() {
+    clearTimeout(showTimer);
+    clearTimeout(hideTimer);
+    showTimer = setTimeout(() => {
+      const el = bar();
+      if (!el) return;
+      el.classList.remove('is-done');
+      // Reflow, or removing and adding the class in one frame is not a change
+      // the browser ever sees and the bar never restarts.
+      void el.offsetWidth;
+      el.classList.add('is-loading');
+    }, SHOW_AFTER_MS);
+  }
+
+  function done() {
+    clearTimeout(showTimer);
+    const el = bar();
+    if (!el || !el.classList.contains('is-loading')) return;
+    el.classList.remove('is-loading');
+    el.classList.add('is-done');
+    hideTimer = setTimeout(() => el.classList.remove('is-done'), 500);
+  }
+
+  document.addEventListener('astro:before-preparation', start);
+  document.addEventListener('astro:page-load', done);
+</script>

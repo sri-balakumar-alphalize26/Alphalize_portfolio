@@ -118,7 +118,10 @@
   "whatWeDo": {
     "eyebrow": "What we do",
     "title": "[[One platform.]] Every department.",
-    "lead": "Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers."
+    "lead": "Every part of the stack talks to every other part — so your counter, your warehouse and your back office all see the same numbers.",
+    "prev": "Previous device",
+    "next": "Next device",
+    "slidesLabel": "Device range"
   },
   "softwareStrip": {
     "eyebrow": "Software we build",

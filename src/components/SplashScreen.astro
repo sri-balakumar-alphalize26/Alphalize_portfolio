@@ -41,6 +41,21 @@ const [a, b] = await Promise.all([
   (function () {
     var el = document.getElementById('splash');
     if (!el) return;
+    /**
+     * Once per browser session, and only on arrival.
+     *
+     * This used to go up on every internal navigation too. That put a
+     * full-screen white hold of MIN_VISIBLE_MS between a tap and the page, so
+     * a link looked like it had not registered and people tapped it two and
+     * three times. It is a first-arrival brand moment, not a page-load
+     * spinner; in-site navigation already has the view-transition cross-fade.
+     */
+    try {
+      if (sessionStorage.getItem('alphalize:splash-seen')) return;
+      sessionStorage.setItem('alphalize:splash-seen', '1');
+    } catch (e) {
+      /* private mode — show it, which is the old behaviour */
+    }
     el.hidden = false;
     el.classList.add('is-playing');
     document.documentElement.classList.add('splash-open');
@@ -53,31 +68,15 @@ const [a, b] = await Promise.all([
   /** Nothing may strand a visitor behind the overlay. */
   const FAILSAFE_MS = 5000;
 
-  let shownAt = Date.now();
+  const shownAt = Date.now();
   let hideTimer: ReturnType<typeof setTimeout>;
-  let failTimer: ReturnType<typeof setTimeout>;
-  let removeTimer: ReturnType<typeof setTimeout>;
 
   const splash = () => document.getElementById('splash');
 
-  function showSplash() {
-    const el = splash();
-    if (!el) return;
-    clearTimeout(hideTimer);
-    clearTimeout(failTimer);
-    clearTimeout(removeTimer);
-    shownAt = Date.now();
-    el.hidden = false;
-    el.classList.remove('is-done');
-    // Restart the fly-in: without the reflow the class is removed and re-added
-    // in the same frame and the browser never sees a change, so on a repeat
-    // showing the halves would sit already converged.
-    el.classList.remove('is-playing');
-    void el.offsetWidth;
-    el.classList.add('is-playing');
-    document.documentElement.classList.add('splash-open');
-    failTimer = setTimeout(hideSplash, FAILSAFE_MS);
-  }
+  /* There is no showSplash any more. The inline script above is the only thing
+     that raises the overlay, once per session on arrival — so nothing here
+     needs to re-raise it, and the reflow dance that made a repeat showing
+     replay its fly-in went with it. */
 
   function hideSplash() {
     const el = splash();
@@ -85,7 +84,7 @@ const [a, b] = await Promise.all([
     if (!el || el.hidden) return;
     el.classList.add('is-done');
     // Match the fade in the stylesheet, then take it out of the a11y tree.
-    removeTimer = setTimeout(() => {
+    setTimeout(() => {
       el.hidden = true;
       el.classList.remove('is-playing');
     }, 420);
@@ -99,14 +98,22 @@ const [a, b] = await Promise.all([
   // Initial load. The inline script above already put the overlay up.
   if (document.readyState === 'complete') scheduleHide();
   else addEventListener('load', scheduleHide, { once: true });
-  failTimer = setTimeout(hideSplash, FAILSAFE_MS);
+  setTimeout(hideSplash, FAILSAFE_MS);
 
-  // Client-side navigation. Cover the fetch from the moment a link is followed,
-  // then again straight after the swap — <ClientRouter /> replaces the body, so
-  // the incoming overlay is a fresh element that arrives still `hidden` and
-  // needs putting back up before the new page paints.
-  document.addEventListener('astro:before-preparation', showSplash);
-  document.addEventListener('astro:after-swap', showSplash);
+  /**
+   * Deliberately NOT re-raised on client-side navigation.
+   *
+   * It used to hook astro:before-preparation and astro:after-swap, so every
+   * in-site link put the overlay back up and held it MIN_VISIBLE_MS before the
+   * next page showed. On a fast connection that is over a second of white
+   * between the tap and the result, which reads as a dead link — the reason
+   * people were tapping two and three times. <ClientRouter /> already
+   * cross-fades between pages; that is the transition for navigation, and this
+   * is the one for arrival.
+   *
+   * scheduleHide stays bound: on the first load the page-load event is what
+   * takes the overlay down.
+   */
   document.addEventListener('astro:page-load', scheduleHide);
 </script>
 

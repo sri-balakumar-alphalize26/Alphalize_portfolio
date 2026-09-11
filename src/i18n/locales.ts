@@ -1,6 +1,7 @@
 /**
- * The nine locales, ported from the 369 site's i18n/routing.ts so the two
- * sites offer the same set in the same order.
+ * The nine locales. Ported from the 369 site's i18n/routing.ts, but no longer
+ * in its order: India sits second, straight after Global, because this is an
+ * Indian company and its home market should not be last in its own picker.
  *
  * ORDER IS LOAD-BEARING. The picker groups by region positionally — a group
  * breaks when the region label changes — so same-region entries have to stay
@@ -8,7 +9,7 @@
  * split them and the picker prints "India" three times with three identical
  * flags. Reordering this array is a UI change.
  */
-export const locales = ['en', 'ar', 'bn', 'zh', 'fr', 'de', 'hi', 'ta', 'ml'] as const;
+export const locales = ['en', 'hi', 'ta', 'ml', 'ar', 'bn', 'zh', 'fr', 'de'] as const;
 
 export type Locale = (typeof locales)[number];
 

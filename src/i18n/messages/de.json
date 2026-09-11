@@ -318,6 +318,42 @@
       }
     }
   },
+  "idlePromo": {
+    "items": {
+      "apps": {
+        "title": "Zehn Android-Apps, fertig gebaut",
+        "body": "Anwesenheit, Lieferung, Außendienst — auf einem Backoffice."
+      },
+      "erp": {
+        "title": "Fünfzehn fertige ERP-Module",
+        "body": "Von der Waage an der Kasse bis zur Offline-Synchronisation im Backoffice."
+      },
+      "bi": {
+        "title": "Ihre Zahlen, ohne Tabellenkalkulation",
+        "body": "Dashboards auf Basis dessen, was Ihre Systeme ohnehin erfassen."
+      },
+      "web": {
+        "title": "Eine Website, gebaut statt aus der Schablone",
+        "body": "Von Grund auf individuell — und schnell bei schwacher Verbindung."
+      },
+      "marketing": {
+        "title": "Marketing, das Rechenschaft ablegt",
+        "body": "Kampagnen, gemessen an Anfragen statt an Impressionen."
+      },
+      "integration": {
+        "title": "Daten umziehen, ohne sie zu verlieren",
+        "body": "Migration und Integration zwischen Ihren bestehenden Systemen."
+      },
+      "training": {
+        "title": "Praktika mit unseren Entwicklern",
+        "body": "Strukturierte Ausbildung in Kollam, an echten Projekten."
+      },
+      "about": {
+        "title": "Die Menschen hinter der Software",
+        "body": "Ein Team in Kollam für ERP, BI und individuelle Software."
+      }
+    }
+  },
   "contactMethods": {
     "call": "Rufen Sie uns an",
     "whatsapp": "Auf WhatsApp schreiben",

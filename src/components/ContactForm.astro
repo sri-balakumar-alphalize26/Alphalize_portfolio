@@ -20,7 +20,15 @@ const [privacyBefore, privacyLink, privacyAfter] = parts(t('contactForm.privacyN
     opens it, exactly as the 369 enquiry form does. Nothing is posted, so the
     enquiry only reaches us once the visitor presses send in WhatsApp. */
 }
-<form class="rounded-card border-brand-100 border bg-white p-6 sm:p-8">
+{
+  /* The id is the target of every "Get a consultation" link on the site — both
+    header CTAs and the idle promo. It lives on the form itself rather than on
+    the wrapping column in contact.astro, because this component does not spread
+    rest props: a rule written there for this element would never carry the
+    scope hash and would be dead CSS, which is the bug 3a18572 fixed in six
+    other components. :target picks up the 6rem scroll-margin from global.css. */
+}
+<form id="get-in-touch" class="rounded-card border-brand-100 border bg-white p-6 sm:p-8">
   <h2 class="text-ink text-xl font-semibold">{t('contactForm.heading')}</h2>
   <p class="text-muted mt-1.5 text-sm">
     {t('contactForm.intro')}
@@ -93,3 +101,136 @@ const [privacyBefore, privacyLink, privacyAfter] = parts(t('contactForm.privacyN
     >{privacyAfter}
   </p>
 </form>
+
+<style>
+  /* Own the anchor offset here rather than leaning on the :target rule in
+     global.css. The in-page case below scrolls by hand, and at that moment the
+     form is not yet :target, so the 6rem would not apply and the sticky header
+     would sit over the heading. */
+  #get-in-touch {
+    position: relative;
+    scroll-margin-top: 6rem;
+  }
+
+  /* Two pulses and done. An infinite ring would breathe under the cursor while
+     someone is typing into the very form it is pointing at — the same reason
+     hdr-pulse stays on the hiring badge and nowhere near an input. Count of 2
+     is lifted from ab-ring in about-anim.css. */
+  #get-in-touch.is-found::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid var(--color-brand-600);
+    opacity: 0;
+    pointer-events: none;
+    animation: cf-found 1.1s ease-out 2;
+  }
+  @keyframes cf-found {
+    0% {
+      opacity: 0.75;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.015);
+    }
+  }
+
+  /* Still say "here it is", just without the motion. */
+  @media (prefers-reduced-motion: reduce) {
+    #get-in-touch.is-found::after {
+      animation: none;
+      opacity: 0.6;
+    }
+  }
+</style>
+
+<script>
+  /**
+   * Point out the form when someone arrives from a "Get a consultation" link.
+   *
+   * Driven by a class, not :target. Tapping the header CTA while already on
+   * this page leaves the hash unchanged, so :target never re-matches, no
+   * hashchange fires and the browser does not even scroll — that path has to be
+   * driven by hand, and it is the one most likely to be hit, because the CTA
+   * sits in the header of the contact page too.
+   */
+  const HASH = '#get-in-touch';
+  /** Two 1.1s pulses, plus a little. */
+  const RING_MS = 2400;
+
+  if (!('__giWired' in window)) {
+    (window as unknown as Record<string, boolean>).__giWired = true;
+
+    let clear: ReturnType<typeof setTimeout> | undefined;
+
+    const form = () => document.getElementById('get-in-touch');
+
+    /**
+     * The form sits inside a [data-ab] unit that contact.astro holds for
+     * 1100ms, so on a cold load it is still fading in. Pulsing into a fade
+     * reads as a glitch rather than a pointer.
+     */
+    function revealed(el: HTMLElement) {
+      if (!document.documentElement.classList.contains('ab-js')) return true;
+      const unit = el.closest<HTMLElement>('[data-ab]');
+      return !unit || unit.classList.contains('in');
+    }
+
+    function flash() {
+      const el = form();
+      if (!el) return;
+      clearTimeout(clear);
+      el.classList.remove('is-found');
+      // Force a reflow, or removing and re-adding in the same frame is
+      // coalesced into no change and the animation never replays.
+      void el.offsetWidth;
+      el.classList.add('is-found');
+      clear = setTimeout(() => el.classList.remove('is-found'), RING_MS);
+    }
+
+    function flashWhenReady(tries = 0) {
+      const el = form();
+      if (!el) return;
+      if (revealed(el) || tries > 30) return setTimeout(flash, 400);
+      setTimeout(() => flashWhenReady(tries + 1), 100);
+    }
+
+    function onArrive() {
+      if (location.hash !== HASH) return;
+      flashWhenReady();
+    }
+
+    document.addEventListener('click', (event) => {
+      const link = (event.target as Element | null)?.closest<HTMLAnchorElement>(
+        'a[href*="' + HASH + '"]'
+      );
+      if (!link) return;
+      const el = form();
+      // Not on the contact page — let it navigate, onArrive picks it up there.
+      if (!el) return;
+
+      event.preventDefault();
+      if (location.hash !== HASH) history.pushState(null, '', link.getAttribute('href'));
+      el.scrollIntoView({ block: 'start' });
+      flash();
+    });
+
+    /* They have found it. Nothing left to point at, and a ring around a field
+       being filled in is just noise. */
+    document.addEventListener('focusin', (event) => {
+      if (!(event.target as Element | null)?.closest('#get-in-touch')) return;
+      const el = form();
+      if (!el) return;
+      clearTimeout(clear);
+      el.classList.remove('is-found');
+    });
+
+    addEventListener('hashchange', onArrive);
+    document.addEventListener('astro:page-load', onArrive);
+    document.addEventListener('astro:before-swap', () => clearTimeout(clear));
+    if (document.readyState !== 'loading') onArrive();
+    else document.addEventListener('DOMContentLoaded', onArrive, { once: true });
+  }
+</script>

@@ -1,0 +1,537 @@
+---
+import Icon from './Icon.astro';
+import { localeHref, splitLocale } from '@/i18n/paths';
+
+/**
+ * A promo that waits for the visitor to stop, rather than for a clock.
+ *
+ * Separate from PromoDeck in every respect — its own element, trigger, storage
+ * and dismissal. The two are not two views of one thing and must not be
+ * unified: the deck is an <aside> that never blocks the page, this is a modal
+ * that deliberately does. Subject overlap between them is expected.
+ *
+ * A <dialog> here, where the deck refuses one. The deck's reasoning is that a
+ * promo must never make the page inert; for an idle popup that inverts, because
+ * the visitor is by definition not interacting with anything. showModal() then
+ * gives Escape, the focus trap, the backdrop and the top layer for free — the
+ * same trade YouTubeRail, AwardBlock and ManageBar make.
+ *
+ * All eight promos render into the page and script reveals one, the way the
+ * deck carries all three cards. The alternative — picking server-side — cannot
+ * work: the rotation has to advance at fire time, and one document outlives
+ * many pages under <ClientRouter>.
+ */
+const { t } = Astro.locals;
+const { locale, path } = splitLocale(Astro.url.pathname);
+const loc = (to: string) => localeHref(locale, to);
+
+/**
+ * The queue. Order is the rotation order; `to` doubles as the identity used to
+ * skip a promo on the page it points at — advertising ERP to someone already
+ * reading the ERP page is the one thing rotation should never do.
+ */
+const items = [
+  { key: 'apps', to: '/services/mobile-app-development' },
+  { key: 'erp', to: '/services/erp-solutions' },
+  { key: 'bi', to: '/services/business-intelligence' },
+  { key: 'web', to: '/services/custom-web-development' },
+  { key: 'marketing', to: '/services/digital-marketing' },
+  { key: 'integration', to: '/services/integration-and-migration-services' },
+  { key: 'training', to: '/services/training-and-internship-program' },
+  { key: 'about', to: '/about' },
+] as const;
+
+/**
+ * An allow-list by exclusion: everything shows it except the pages where an
+ * interruption costs something real.
+ *
+ * `contact` and `careers` carry forms — losing a half-filled enquiry to show an
+ * ad is a straight downgrade, and the typing check cannot help someone who has
+ * paused to find a GST number or dig out a CV. `legal` pages are binding
+ * documents and are read, not browsed.
+ */
+const blocked = ['contact', 'careers', 'legal'];
+const section = path === '/' ? '' : (path.split('/')[1] ?? '');
+const show = !blocked.includes(section);
+---
+
+{
+  show && (
+    <dialog class="ip" data-idle-promo data-here={path} aria-label={t('promo.label')}>
+      {/* First in the DOM on purpose: showModal() focuses the first focusable
+          child, and an advert nobody asked for should point a keyboard user at
+          the way out rather than at itself. */}
+      <button type="button" class="ip-x" data-ip-close aria-label={t('promo.close')}>
+        <Icon name="close" class="size-3.5" />
+      </button>
+
+      <p class="ip-eyebrow">{t('promo.label')}</p>
+
+      {items.map((item) => (
+        <div class="ip-item" data-ip-item data-key={item.key} data-match={item.to} hidden>
+          <h2 class="ip-title">
+            {t(`idlePromo.items.${item.key}.title` as 'idlePromo.items.apps.title')}
+          </h2>
+          <p class="ip-body">
+            {t(`idlePromo.items.${item.key}.body` as 'idlePromo.items.apps.body')}
+          </p>
+          <a class="ip-cta" href={loc(item.to)} data-ip-go>
+            {t('promo.cta')}
+            <Icon name="arrow-right" class="size-4" />
+          </a>
+        </div>
+      ))}
+
+      {/* Straight to the form, not the top of the contact page. */}
+      <a class="ip-alt" href={loc('/contact#get-in-touch')} data-ip-consult>
+        {t('common.getConsultation')}
+      </a>
+    </dialog>
+  )
+}
+
+<script>
+  import { readJson, readRaw, writeJson, writeRaw } from './manage';
+
+  /**
+   * One set of document-level listeners, registered once and never removed.
+   * Nothing closes over an element; every handler re-queries, because
+   * <ClientRouter> rebuilds this dialog on each navigation and a handler
+   * holding the old node would be pointing two pages back.
+   */
+  const FLAG = '__idlePromoWired';
+
+  if (!(FLAG in window)) {
+    (window as unknown as Record<string, boolean>)[FLAG] = true;
+
+    /** Untouched this long before it will consider firing. */
+    const IDLE_MS = 45_000;
+    /** Minimum time on the page first, so nobody is ambushed on arrival. */
+    const DWELL_MS = 15_000;
+    /** Someone who has not scrolled is deciding whether to leave, not reading. */
+    const MIN_DEPTH = 0.4;
+    const MIN_WIDTH = 380;
+    const TICK_MS = 1_000;
+    const MUTE_MS = 86_400_000;
+    const MAX_PER_VISIT = 3;
+    /**
+     * Extra wait before the 2nd and 3rd, indexed by how many have already
+     * shown. Rotating the content solves repetition of message, not repetition
+     * of interruption — a modal returning every 45s reads as broken however
+     * fresh the copy is.
+     */
+    const GAPS = [0, 120_000, 300_000];
+    /** A dismissal this quick was a reflex, not a decision. */
+    const FAST_MS = 2_000;
+
+    const KEY = 'alphalize:idle-promo';
+    const QUEUE_KEY = 'alphalize:idle-promo-queue';
+    const SEEN_KEY = 'alphalize:idle-promo-seen';
+
+    /**
+     * Fail closed. readRaw swallows the exception and returns null, which is
+     * indistinguishable from "never dismissed" — so in a private window an ad
+     * we cannot remember dismissing would come back on every single page.
+     * Probing here rather than changing the shared helper, which four other
+     * components depend on.
+     */
+    const storageOk = (() => {
+      try {
+        localStorage.setItem(KEY + ':probe', '1');
+        localStorage.removeItem(KEY + ':probe');
+        return true;
+      } catch {
+        return false;
+      }
+    })();
+
+    const readSession = (k: string) => {
+      try {
+        return sessionStorage.getItem(k);
+      } catch {
+        return null;
+      }
+    };
+    const writeSession = (k: string, v: string) => {
+      try {
+        sessionStorage.setItem(k, v);
+      } catch {
+        /* private mode — the module-scope count still holds for this document */
+      }
+    };
+
+    const dev = import.meta.env.DEV && new URLSearchParams(location.search).has('promo');
+    const idleMs = dev ? 1_500 : IDLE_MS;
+    const dwellMs = dev ? 0 : DWELL_MS;
+    const minDepth = dev ? 0 : MIN_DEPTH;
+
+    const fine = matchMedia('(hover: hover) and (pointer: fine)');
+
+    let lastActivity = Date.now();
+    let enteredAt = Date.now();
+    let depth = 0;
+    let shownAt = 0;
+    let shownCount = Number(readSession(SEEN_KEY) ?? '0') || 0;
+    let fastDismissals = 0;
+    /** Set when the visitor has told us, one way or another, to stop. */
+    let stopped = false;
+    /** True while a CTA click is closing the dialog, so it is not read as a dismissal. */
+    let converted = false;
+    let currentKey = '';
+    let tick: ReturnType<typeof setInterval> | undefined;
+    let openedAt = 0;
+    let frame = 0;
+
+    const dialog = () => document.querySelector<HTMLDialogElement>('[data-idle-promo]');
+
+    function muted() {
+      if (!storageOk) return true;
+      const raw = readRaw(KEY);
+      if (!raw) return false;
+      if (raw === 'never') return true;
+      const when = Number(raw);
+      if (!Number.isFinite(when)) return false;
+      // A deadline further out than the mute itself is a clock that has moved.
+      // Treat it as expired rather than silencing this visitor for ever.
+      if (when - Date.now() > MUTE_MS) return false;
+      return when > Date.now();
+    }
+
+    const mute = (until: string) => {
+      if (storageOk) writeRaw(KEY, until);
+    };
+
+    /* ----- eligibility ------------------------------------------------- */
+
+    function typing() {
+      const el = document.activeElement as HTMLElement | null;
+      if (!el) return false;
+      return /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable;
+    }
+
+    /** A muted autoplay loop is decoration; sound or fullscreen is attention. */
+    function watching() {
+      if (document.fullscreenElement) return true;
+      return [...document.querySelectorAll('video')].some((v) => !v.paused && !v.muted);
+    }
+
+    function busy() {
+      // Our own dialog is excluded — it being open is handled before this runs.
+      if (document.querySelector('dialog[open]:not([data-idle-promo])')) return true;
+      // The mobile drawer locks the page behind it exactly this way.
+      return document.body.style.overflow === 'hidden';
+    }
+
+    function eligible(dlg: HTMLDialogElement) {
+      if (stopped || dlg.open || muted()) return false;
+      if (shownCount >= MAX_PER_VISIT) return false;
+      if (document.visibilityState !== 'visible') return false;
+      if (Date.now() - enteredAt < dwellMs) return false;
+      if (shownAt && Date.now() - shownAt < (GAPS[shownCount] ?? 0)) return false;
+      if (depth < minDepth) return false;
+      if (innerWidth < MIN_WIDTH) return false;
+      return !typing() && !watching() && !busy();
+    }
+
+    /* ----- the queue --------------------------------------------------- */
+
+    type Queue = { i: number; out: string[] };
+    const queue = () => readJson<Queue>(QUEUE_KEY, { i: 0, out: [] });
+
+    /**
+     * Next promo that is neither retired nor pointing at the page we are on.
+     * The index is stored, so the rotation carries across navigations and
+     * across visits — a returning visitor picks up where they left off rather
+     * than seeing the first one again.
+     */
+    function pick(dlg: HTMLDialogElement) {
+      const all = [...dlg.querySelectorAll<HTMLElement>('[data-ip-item]')];
+      if (!all.length) return null;
+      const here = dlg.dataset.here ?? '';
+      const q = queue();
+
+      for (let step = 0; step < all.length; step += 1) {
+        const at = (q.i + step) % all.length;
+        const el = all[at];
+        if (!el) continue;
+        if (q.out.includes(el.dataset.key ?? '')) continue;
+        if (el.dataset.match === here) continue;
+        if (storageOk) writeJson(QUEUE_KEY, { i: (at + 1) % all.length, out: q.out });
+        return el;
+      }
+      return null;
+    }
+
+    function retire(key: string) {
+      if (!storageOk || !key) return;
+      const q = queue();
+      if (q.out.includes(key)) return;
+      writeJson(QUEUE_KEY, { i: q.i, out: [...q.out, key] });
+    }
+
+    /* ----- show and close ---------------------------------------------- */
+
+    function fire() {
+      const dlg = dialog();
+      if (!dlg) return;
+      const item = pick(dlg);
+      if (!item) return;
+
+      dlg.querySelectorAll<HTMLElement>('[data-ip-item]').forEach((el) => {
+        el.hidden = el !== item;
+      });
+      currentKey = item.dataset.key ?? '';
+
+      /* Every exit lands here — Escape, the backdrop, the X and both CTAs — so
+         a dismissal is recorded in exactly one place. Bound to the dialog
+         rather than delegated: `close` does not bubble, and binding it per
+         showing means it cannot outlive the node <ClientRouter> replaces. */
+      dlg.addEventListener(
+        'close',
+        () => {
+          if (converted) {
+            converted = false;
+            return;
+          }
+          fastDismissals = Date.now() - openedAt < FAST_MS ? fastDismissals + 1 : 0;
+          // Twice in a row, that fast, is a clear answer.
+          if (fastDismissals >= 2) {
+            stopped = true;
+            mute(String(Date.now() + MUTE_MS));
+          }
+        },
+        { once: true }
+      );
+
+      dlg.showModal();
+      openedAt = Date.now();
+      shownAt = openedAt;
+      shownCount += 1;
+      writeSession(SEEN_KEY, String(shownCount));
+      // Out of promos for this visit; do not start again tomorrow morning.
+      if (shownCount >= MAX_PER_VISIT) mute(String(Date.now() + MUTE_MS));
+    }
+
+    /* ----- activity ----------------------------------------------------- */
+
+    const poke = () => {
+      lastActivity = Date.now();
+    };
+
+    function measure() {
+      const doc = document.documentElement;
+      const room = doc.scrollHeight - innerHeight;
+      // A page too short to scroll must not be permanently ineligible.
+      depth = room <= 0 ? 1 : Math.min(1, scrollY / room);
+    }
+
+    function onScroll() {
+      poke();
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    }
+
+    /**
+     * One store per event, so a mousemove costs almost nothing; the expensive
+     * predicates run at most once a second off the tick instead. Capture phase,
+     * so a stopPropagation() anywhere in the tree cannot hide real activity.
+     */
+    const opts = { passive: true, capture: true } as const;
+    addEventListener('mousemove', poke, opts);
+    addEventListener('keydown', poke, opts);
+    addEventListener('touchstart', poke, opts);
+    addEventListener('click', poke, opts);
+    addEventListener('scroll', onScroll, opts);
+    document.addEventListener('visibilitychange', poke);
+
+    function start() {
+      if (tick) return;
+      tick = setInterval(() => {
+        const dlg = dialog();
+        if (!dlg) return;
+        if (Date.now() - lastActivity < idleMs) return;
+        if (eligible(dlg)) fire();
+      }, TICK_MS);
+    }
+
+    /** Pointer left past the top edge — heading for the tab bar. Desktop only. */
+    document.addEventListener('mouseout', (event) => {
+      if (!fine.matches || event.relatedTarget || event.clientY > 8) return;
+      const dlg = dialog();
+      if (dlg && eligible(dlg)) fire();
+    });
+
+    document.addEventListener('click', (event) => {
+      const dlg = dialog();
+      if (!dlg) return;
+      const target = event.target as Element | null;
+
+      // A click landing on the dialog itself is a click on the backdrop.
+      if (target === dlg) return dlg.close();
+      if (!target?.closest('[data-idle-promo]')) return;
+      if (target.closest('[data-ip-close]')) return dlg.close();
+
+      if (target.closest('[data-ip-go]')) {
+        // They took it. That promo has done its job and should not come back,
+        // and nothing more should interrupt this visit.
+        converted = true;
+        retire(currentKey);
+        stopped = true;
+        dlg.close();
+        return;
+      }
+
+      if (target.closest('[data-ip-consult]')) {
+        // A live enquiry. Interrupting this person again could cost the lead.
+        converted = true;
+        mute('never');
+        stopped = true;
+        dlg.close();
+      }
+    });
+
+    /* ----- page lifecycle ------------------------------------------------ */
+
+    function onPage() {
+      enteredAt = Date.now();
+      lastActivity = Date.now();
+      measure();
+      start();
+    }
+
+    document.addEventListener('astro:page-load', onPage);
+    document.addEventListener('astro:before-swap', () => {
+      // The dialog is about to be replaced; close it so nothing is left in the
+      // top layer pointing at a detached node.
+      const dlg = dialog();
+      if (dlg?.open) {
+        converted = true;
+        dlg.close();
+      }
+    });
+
+    onPage();
+  }
+</script>
+
+<style>
+  /* Tailwind preflight zeroes margins, which takes away the `margin: auto` a
+     modal <dialog> centres itself with and pins it to the inline-start edge.
+     Same note as AwardBlock and YouTubeRail. */
+  .ip[open] {
+    margin: auto;
+  }
+
+  .ip {
+    position: relative;
+    width: min(22rem, calc(100vw - 2rem));
+    padding: 1.5rem;
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-card);
+    background: #fff;
+    box-shadow: var(--shadow-lift);
+    color: var(--color-ink);
+  }
+  .ip[open] {
+    animation: ip-in 0.28s var(--ease-out-soft) both;
+  }
+  .ip::backdrop {
+    background: rgb(15 23 42 / 0.55);
+    backdrop-filter: blur(2px);
+  }
+  .ip[open]::backdrop {
+    animation: ip-veil 0.28s ease both;
+  }
+
+  @keyframes ip-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+    }
+  }
+  @keyframes ip-veil {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .ip-x {
+    position: absolute;
+    inset-block-start: 0.75rem;
+    inset-inline-end: 0.75rem;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    color: var(--color-muted);
+  }
+  .ip-x:hover {
+    background: var(--color-brand-50);
+    color: var(--color-ink);
+  }
+
+  .ip-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.11em;
+    color: var(--color-muted);
+  }
+
+  .ip-title {
+    margin-block-start: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+  .ip-body {
+    margin-block-start: 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .ip-cta,
+  .ip-alt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    border-radius: var(--radius-btn);
+    padding-block: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .ip-cta {
+    margin-block-start: 1.25rem;
+    background: var(--color-brand-600);
+    color: #fff;
+  }
+  .ip-cta:hover {
+    background: var(--color-brand-700);
+  }
+  .ip-alt {
+    margin-block-start: 0.5rem;
+    border: 1px solid var(--color-brand-100);
+    color: var(--color-ink);
+  }
+  .ip-alt:hover {
+    background: var(--color-brand-50);
+  }
+
+  /* No RTL rule for the arrow: Icon.astro already tags arrow-right as
+     .rtl-mirror and global.css flips it. Adding one here would flip it back. */
+
+  .ip-item[hidden] {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ip[open],
+    .ip[open]::backdrop {
+      animation: none;
+    }
+  }
+</style>

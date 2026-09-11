@@ -289,11 +289,15 @@ const cards = [
       startRotate();
     });
 
-    // Never leave a timer running against a page that has been swapped out.
-    document.addEventListener('astro:before-swap', () => {
-      clearTimeout(revealTimer);
-      stopRotate();
-    });
+    /* The rotate interval paints an aside that is about to be replaced, so it
+       stops here; astro:page-load starts a fresh one. The reveal timer is
+       deliberately NOT cleared — it belongs to the document, not the page (see
+       the note at the top), and reveal() re-queries the DOM rather than closing
+       over any node. Clearing it here meant anyone who clicked a link inside
+       the first 15 seconds never saw the deck at all: it is armed once and
+       never re-armed, and <ClientRouter> keeps the document alive across
+       navigations, so one cancellation lasted the whole visit. */
+    document.addEventListener('astro:before-swap', stopRotate);
   }
 </script>
 

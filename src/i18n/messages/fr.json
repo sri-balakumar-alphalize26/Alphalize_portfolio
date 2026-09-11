@@ -318,6 +318,42 @@
       }
     }
   },
+  "idlePromo": {
+    "items": {
+      "apps": {
+        "title": "Dix applications Android, déjà prêtes",
+        "body": "Présence, livraison, rapports terrain — sur un seul back-office."
+      },
+      "erp": {
+        "title": "Quinze modules ERP prêts à l’emploi",
+        "body": "De la balance du comptoir à la synchronisation hors ligne au back-office."
+      },
+      "bi": {
+        "title": "Vos chiffres, sans tableur",
+        "body": "Des tableaux de bord bâtis sur ce que vos systèmes enregistrent déjà."
+      },
+      "web": {
+        "title": "Un site sur mesure, pas un gabarit",
+        "body": "Entièrement personnalisé, et rapide en connexion faible."
+      },
+      "marketing": {
+        "title": "Un marketing qui rend des comptes",
+        "body": "Des campagnes mesurées en demandes, pas en impressions."
+      },
+      "integration": {
+        "title": "Déplacez vos données sans les perdre",
+        "body": "Migration et intégration entre les systèmes que vous utilisez déjà."
+      },
+      "training": {
+        "title": "Des stages avec nos ingénieurs",
+        "body": "Une formation structurée à Kollam, sur de vrais projets."
+      },
+      "about": {
+        "title": "Les personnes derrière le logiciel",
+        "body": "Une équipe à Kollam : ERP, BI et logiciels sur mesure."
+      }
+    }
+  },
   "contactMethods": {
     "call": "Appelez-nous",
     "whatsapp": "Discuter sur WhatsApp",

@@ -318,6 +318,42 @@
       }
     }
   },
+  "idlePromo": {
+    "items": {
+      "apps": {
+        "title": "Ten Android apps, already built",
+        "body": "Attendance, delivery, field reporting — all on one back office."
+      },
+      "erp": {
+        "title": "Fifteen ready-made ERP modules",
+        "body": "From the weighing scale at the counter to offline sync in the back office."
+      },
+      "bi": {
+        "title": "Your numbers, without the spreadsheet",
+        "body": "Dashboards built on what your systems already record."
+      },
+      "web": {
+        "title": "A website built, not templated",
+        "body": "Custom front to back, and quick on a weak connection."
+      },
+      "marketing": {
+        "title": "Marketing that reports back",
+        "body": "Campaigns measured in enquiries rather than impressions."
+      },
+      "integration": {
+        "title": "Move your data without losing it",
+        "body": "Migration and integration between the systems you already run."
+      },
+      "training": {
+        "title": "Internships with our engineers",
+        "body": "Structured training in Kollam, on real projects."
+      },
+      "about": {
+        "title": "The people behind the software",
+        "body": "A Kollam team building ERP, BI and custom software."
+      }
+    }
+  },
   "contactMethods": {
     "call": "Call us",
     "whatsapp": "Chat on WhatsApp",

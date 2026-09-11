@@ -58,6 +58,33 @@ export default defineConfig({
     // @tailwindcss/vite resolves its own Vite types, which differ from Astro's
     // pinned copy by a patch version; the plugin object itself is compatible.
     plugins: [/** @type {any} */ (tailwindcss())],
+
+    /**
+     * Pre-bundle the view-transition router at startup.
+     *
+     * <ClientRouter /> pulls these in lazily, on the FIRST client-side
+     * navigation — so Vite does not see them during its startup pass and
+     * discovers them minutes into a session, mid-request. That triggers a
+     * second optimize, which invalidates the module graph while requests are
+     * in flight. Vite's usual answer is a full page reload; under the
+     * Cloudflare adapter the request is being served inside workerd, and it
+     * deadlocked instead — the server stayed LISTENING and simply stopped
+     * answering, leaving the browser spinning on every subsequent page.
+     *
+     * Declaring them here moves that work into the one startup pass. Despite
+     * the "virtual-modules" name these are real files under
+     * node_modules/astro/dist/, so the optimizer can pre-bundle them.
+     *
+     * Dev-server only — optimizeDeps has no effect on the build.
+     */
+    optimizeDeps: {
+      include: [
+        'astro/virtual-modules/transitions-router.js',
+        'astro/virtual-modules/transitions-events.js',
+        'astro/virtual-modules/transitions-swap-functions.js',
+        'astro/virtual-modules/transitions-types.js',
+      ],
+    },
   },
   image: {
     responsiveStyles: true,

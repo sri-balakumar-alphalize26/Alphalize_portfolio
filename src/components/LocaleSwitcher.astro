@@ -132,7 +132,23 @@ const regions = localeRegions();
                     lang={locale}
                     dir={label.dir}
                     class:list={['ls-item', active && 'ls-item-on']}
-                    data-astro-prefetch="false"
+                    {
+                    /*
+                      `reload` stays: a locale change has to rewrite <html lang>
+                      and dir, and the view-transition router only swaps the
+                      body — without it Arabic would arrive rendering
+                      left-to-right.
+
+                      But a full load with no prefetch was the slowest path on
+                      the site, and it was the one people use most visibly.
+                      `hover` warms the document as the pointer reaches a
+                      language, so the reload that follows comes from cache. Not
+                      the site-wide `viewport` default: this panel holds nine
+                      links, and opening it would fetch nine whole pages to use
+                      one. Astro's hover strategy also fires on touchstart, so a
+                      tap still gets the head start.
+                    */ }
+                    data-astro-prefetch="hover"
                     data-astro-reload
                   >
                     {label.language}

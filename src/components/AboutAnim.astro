@@ -22,9 +22,11 @@
 import '@/styles/about-anim.css';
 ---
 
-{/* Set the flag before first paint, otherwise the page renders visible and
+{
+  /* Set the flag before first paint, otherwise the page renders visible and
     then snaps to the hidden start state. Skipped under reduced motion so
-    those users never see the hidden state at all. */}
+    those users never see the hidden state at all. */
+}
 <script is:inline>
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
     document.documentElement.classList.add('ab-js');

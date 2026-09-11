@@ -12,6 +12,11 @@ interface Props {
   noindex?: boolean;
   /** JSON-LD objects to embed. Serialised as-is. */
   jsonLd?: Record<string, unknown>[];
+  /**
+   * Site-root-absolute path to a 1200x630 share image, e.g. '/og/ceo.png'.
+   * Omit for the default card.
+   */
+  ogImagePath?: string;
 }
 
 const {
@@ -21,6 +26,7 @@ const {
   ogType = 'website',
   noindex = false,
   jsonLd = [],
+  ogImagePath,
 } = Astro.props;
 
 /**
@@ -57,7 +63,13 @@ const alternates = liveLocales.map((l) => ({
 const isHome = cleanPath === '/';
 // Home keeps the bare brand name; every other page is suffixed.
 const fullTitle = isHome ? title : `${title} | ${site.name}`;
-const ogImage = new URL('/og-default.png', site.url).href;
+/**
+ * Every page shared the same card until now. A page may pass its own, but the
+ * 1200x630 below is asserted rather than measured, so an override has to be
+ * that size — which is why this takes a path to an image we control and not an
+ * arbitrary URL.
+ */
+const ogImage = new URL(ogImagePath ?? '/og-default.png', site.url).href;
 ---
 
 <title>{fullTitle}</title>
@@ -105,7 +117,18 @@ const ogImage = new URL('/og-default.png', site.url).href;
 <meta name="twitter:image" content={ogImage} />
 
 {
+  /*
+    `<` is escaped, for the same reason the i18n client payload escapes it in
+    BaseLayout: these blocks carry translated strings, and one containing
+    "</script>" would end the block early and spill the rest of the JSON into
+    the document as markup. JSON.stringify does not escape it, and a valid
+    JSON-LD document is unchanged by the substitution — < is just `<`.
+  */
   jsonLd.map((block) => (
-    <script type="application/ld+json" set:html={JSON.stringify(block)} is:inline />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(block).replace(/</g, '\\u003c')}
+      is:inline
+    />
   ))
 }

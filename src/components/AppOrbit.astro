@@ -75,12 +75,20 @@ const yellowDots = [0, 120, 240].map((deg) => polar(21, deg));
   </ul>
 
   <div class="centre pointer-events-none absolute inset-0 grid place-items-center">
+    {
+      /* The homepage LCP candidate: the biggest thing above the fold. `eager`
+         only says "do not defer"; it still queues at default priority behind
+         137KB of blocking CSS. fetchpriority tells the browser this is the one
+         image worth fetching first — it was the only priority signal missing
+         anywhere on the page. */
+    }
     <Image
       src={logo}
       alt=""
       width={360}
       densities={[1, 2]}
       loading="eager"
+      fetchpriority="high"
       class="h-auto w-[30%]"
     />
   </div>
@@ -183,8 +191,13 @@ const yellowDots = [0, 120, 240].map((deg) => polar(21, deg));
     .ring-inner {
       animation: ao-fade 0.8s ease 0.6s both;
     }
+    /* No delay, and no fade from transparent. This is the LCP element, and an
+       element at opacity 0 has not been painted as far as the metric is
+       concerned — the old 0.2s delay plus a 0.9s fade meant LCP could not land
+       before ~1.1s however fast the image arrived. It scales up instead, which
+       is visible from the first frame and keeps the entrance. */
     .centre {
-      animation: ao-centre 0.9s var(--pop) 0.2s both;
+      animation: ao-centre 0.5s var(--pop) both;
     }
     .card {
       animation: ao-pop 0.7s var(--pop) var(--delay) both;
@@ -226,8 +239,7 @@ const yellowDots = [0, 120, 240].map((deg) => polar(21, deg));
   }
   @keyframes ao-centre {
     from {
-      opacity: 0;
-      transform: scale(0.4);
+      transform: scale(0.62);
     }
   }
   @keyframes ao-pop {

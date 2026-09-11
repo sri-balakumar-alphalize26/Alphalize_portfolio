@@ -23,7 +23,13 @@ const number = waNumber(await readContact(env));
     <div class="wa-set">
       <p class="wa-set-h">Contact details</p>
       <label class="sr-only" for="wa-phone">Phone</label>
-      <input id="wa-phone" type="tel" name="phoneDisplay" placeholder="+91 70252 05503" data-wa-phone />
+      <input
+        id="wa-phone"
+        type="tel"
+        name="phoneDisplay"
+        placeholder="+91 70252 05503"
+        data-wa-phone
+      />
       <label class="sr-only" for="wa-email">Email</label>
       <input id="wa-email" type="email" name="email" placeholder="hr@alphalize.com" data-wa-email />
       <button type="button" class="btn btn-primary wa-btn" data-wa-save>Save</button>

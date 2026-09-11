@@ -24,10 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
     windowSeconds: 600,
   });
   if (!limit.allowed) {
-    return json(
-      { ok: false, error: 'Too many submissions. Please try again shortly.' },
-      429
-    );
+    return json({ ok: false, error: 'Too many submissions. Please try again shortly.' }, 429);
   }
 
   let form: FormData;
@@ -59,7 +56,11 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!parsed.success) {
     return json(
-      { ok: false, error: 'Please check the highlighted fields.', fields: fieldErrors(parsed.error) },
+      {
+        ok: false,
+        error: 'Please check the highlighted fields.',
+        fields: fieldErrors(parsed.error),
+      },
       400
     );
   }
@@ -94,5 +95,4 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 /** Anything other than POST is not useful here. */
-export const ALL: APIRoute = () =>
-  json({ ok: false, error: 'Method not allowed.' }, 405);
+export const ALL: APIRoute = () => json({ ok: false, error: 'Method not allowed.' }, 405);

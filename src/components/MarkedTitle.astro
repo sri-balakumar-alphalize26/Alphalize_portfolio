@@ -24,11 +24,13 @@ const { title, marker = 'underline', color = 'blue', delay = 0 } = Astro.props;
 const parts = splitMarks(title);
 ---
 
-{/* The old version built a fragment from title.slice() calls either side of a
+{
+  /* The old version built a fragment from title.slice() calls either side of a
     <Marker>, and had to stay on one line — the segments were adjacent literal
     expressions, so a newline between them rendered as a stray space before
     punctuation. A single .map() has no adjacent literals, so this is safe to
-    wrap and prettier may format it freely. Verified against the built HTML. */}
+    wrap and prettier may format it freely. Verified against the built HTML. */
+}
 {
   parts.map((part, i) =>
     i % 2 ? (

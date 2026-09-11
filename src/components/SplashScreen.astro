@@ -63,8 +63,20 @@ const [a, b] = await Promise.all([
 </script>
 
 <script>
-  /** Long enough to see the halves converge; below this it reads as a glitch. */
-  const MIN_VISIBLE_MS = 1200;
+  /**
+   * The overlay covers the viewport, so nothing behind it can be the Largest
+   * Contentful Paint until it goes — this constant sets a hard floor under LCP
+   * on every first visit, and LCP is a ranking signal. At 1200ms plus the fade
+   * that floor was about 1.6s, which no amount of hosting or preloading can get
+   * under.
+   *
+   * 300ms still reads as a deliberate beat rather than a flash. The fly-in was
+   * shortened to 280ms to match: at 1.1s the halves were still in flight when
+   * the overlay went, so the one thing the splash exists to show would never
+   * have been seen. The number here and the animation duration below are a
+   * pair — change one and the other has to follow.
+   */
+  const MIN_VISIBLE_MS = 300;
   /** Nothing may strand a visitor behind the overlay. */
   const FAILSAFE_MS = 5000;
 
@@ -87,7 +99,7 @@ const [a, b] = await Promise.all([
     setTimeout(() => {
       el.hidden = true;
       el.classList.remove('is-playing');
-    }, 420);
+    }, 240);
   }
 
   function scheduleHide() {
@@ -136,7 +148,7 @@ const [a, b] = await Promise.all([
     place-items: center;
     background: #fff;
     opacity: 1;
-    transition: opacity 0.4s var(--ease-out-soft);
+    transition: opacity 0.22s var(--ease-out-soft);
   }
   .splash.is-done {
     opacity: 0;
@@ -178,18 +190,18 @@ const [a, b] = await Promise.all([
 
   @media (prefers-reduced-motion: no-preference) {
     .splash.is-playing .splash-a {
-      animation: splash-in-a 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: splash-in-a 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
     .splash.is-playing .splash-b {
-      animation: splash-in-b 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      animation: splash-in-b 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
     /* Loops only while the page is still loading — the overlay is removed the
        moment it is ready. */
     .splash.is-playing .splash-logo {
-      animation: splash-pulse 1.4s ease-in-out 1.1s infinite;
+      animation: splash-pulse 1.4s ease-in-out 0.28s infinite;
     }
     .splash.is-playing .splash-ring {
-      animation: splash-ring 1.4s ease-out 1.1s infinite;
+      animation: splash-ring 1.4s ease-out 0.28s infinite;
     }
   }
 

@@ -5,7 +5,13 @@
 
 export const site = {
   name: 'Alphalize',
-  legalName: 'Alphalize',
+  /**
+   * The registered entity, not the trading name. Read by the footer copyright,
+   * the three legal documents and the Organization JSON-LD — all three of which
+   * should name the company that actually holds the rights and the obligations.
+   * `name` stays the short form everywhere it is a label rather than a party.
+   */
+  legalName: 'Alphalize Technologies Private Limited',
   url: 'https://www.alphalize.com',
   /**
    * The sibling brand — connected devices and robotics, the same operation
@@ -39,7 +45,9 @@ export type Office = {
   postalCode: string;
   country: string;
   countryCode: string;
-  /** Decimal degrees. Drives the footer map pin; nothing else reads them. */
+  /** Decimal degrees. The footer map pin, and the GeoCoordinates in the
+      LocalBusiness JSON-LD — so these are now a public claim about where the
+      office is, not just where to draw a dot. */
   lon: number;
   lat: number;
 };

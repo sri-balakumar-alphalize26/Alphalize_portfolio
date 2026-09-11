@@ -8,6 +8,8 @@ import SectionHeading from '@/components/SectionHeading.astro';
 import YouTubeRail from '@/components/YouTubeRail.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { ceo, talks } from '@/config/ceo';
+import { site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
 
 /**
  * The Managing Director's page, from the 369 /ceo.
@@ -21,12 +23,31 @@ import { ceo, talks } from '@/config/ceo';
  * about-anim.ts: html.ab-js arms the hidden states, .in releases them.
  */
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
+
+/**
+ * The person, tied to the company. Every field here already existed in
+ * config/ceo.ts and was going only to the page, not to search engines — which
+ * is why a search for the name returned nothing about this site.
+ */
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${site.url}/#ceo`,
+  name: ceo.name,
+  jobTitle: t('ceoPage.role'),
+  description: t('ceoPage.intro1').slice(0, 155),
+  url: new URL(localeHref(locale, '/ceo'), site.url).href,
+  image: new URL(ceo.portrait.src, site.url).href,
+  worksFor: { '@id': `${site.url}/#organization` },
+  sameAs: [ceo.talks.channel],
+};
 ---
 
 <BaseLayout
   title={`${ceo.name} — ${t('ceoPage.role')}`}
   description={t('ceoPage.intro1').slice(0, 155)}
+  jsonLd={[person]}
 >
   <AboutAnim />
 

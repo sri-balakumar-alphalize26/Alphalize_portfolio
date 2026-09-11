@@ -6,13 +6,29 @@ import PageHero from '@/components/PageHero.astro';
 import TrustedPartners from '@/components/TrustedPartners.astro';
 import WhyChooseUs from '@/components/WhyChooseUs.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { offices } from '@/config/site';
+import { offices, site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
 
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
+
+/** Names what this page is and ties it to the company it describes. */
+const aboutPage = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  url: new URL(localeHref(locale, '/about'), site.url).href,
+  name: t('aboutPage.metaTitle'),
+  description: t('aboutPage.metaDescription'),
+  isPartOf: { '@id': `${site.url}/#website` },
+  about: { '@id': `${site.url}/#organization` },
+};
 ---
 
-<BaseLayout title={t('aboutPage.metaTitle')} description={t('aboutPage.metaDescription')}>
+<BaseLayout
+  title={t('aboutPage.metaTitle')}
+  description={t('aboutPage.metaDescription')}
+  jsonLd={[aboutPage]}
+>
   <AboutAnim />
 
   <PageHero

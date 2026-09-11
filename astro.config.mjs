@@ -3,7 +3,32 @@ import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
-import { defaultLocale, liveLocales, locales } from './src/i18n/locales.ts';
+import { execSync } from 'node:child_process';
+import { defaultLocale, liveLocales, localeLabels, locales } from './src/i18n/locales.ts';
+
+/**
+ * One `lastmod` for the whole sitemap: the date of the last commit.
+ *
+ * Deliberately not `new Date()`. A build-time stamp changes on every rebuild
+ * even when nothing changed, and Google's own guidance is that a lastmod it
+ * finds to be consistently inaccurate gets ignored outright — an unreliable
+ * signal is worse than none. The last commit is the honest answer to "when did
+ * this site last change", and it stays put across rebuilds of the same tree.
+ *
+ * Per-page dates would be better still, but mapping 145 URLs back to their
+ * source file (a page, a content collection entry, or a translation catalogue)
+ * is fragile enough to be its own source of wrong answers.
+ *
+ * Falls back to build time where git is unavailable — a source tarball, or a
+ * CI checkout with no history.
+ */
+const lastmod = (() => {
+  try {
+    return new Date(execSync('git log -1 --format=%cI', { encoding: 'utf8' }).trim()).toISOString();
+  } catch {
+    return new Date().toISOString();
+  }
+})();
 
 // https://astro.build/config
 export default defineConfig({
@@ -52,6 +77,35 @@ export default defineConfig({
        * altogether. One entry per live locale.
        */
       customPages: liveLocales.map((locale) => `https://www.alphalize.com/${locale}/contact`),
+
+      /**
+       * Emit `<xhtml:link rel="alternate" hreflang>` on every entry.
+       *
+       * The <head> has carried correct hreflang since the locale move, but the
+       * sitemap carried none — 145 bare <loc> entries — so the two signals were
+       * never reinforcing each other, which is exactly what a nine-locale site
+       * needs them to do. The `hreflang` field in locales.ts has always
+       * documented itself as feeding this; it simply was not wired up.
+       *
+       * Keys are the path segment, values the hreflang. Read from localeLabels
+       * rather than the locale array, because `zh` must advertise `zh-Hans` —
+       * it names the script, not the territory — and the array-shorthand form
+       * of this option would emit a bare `zh`.
+       */
+      i18n: {
+        defaultLocale,
+        locales: Object.fromEntries(liveLocales.map((l) => [l, localeLabels[l].hreflang])),
+      },
+
+      /**
+       * `/` is a Worker route that 302s to /en (see src/pages/index.astro), and
+       * @astrojs/sitemap lists it because the route has a pathname. Submitting
+       * a redirecting URL earns a "Page with redirect" exclusion in Search
+       * Console, so it is dropped. Every locale root is listed on its own.
+       */
+      filter: (page) => page !== 'https://www.alphalize.com/',
+
+      serialize: (item) => ({ ...item, lastmod }),
     }),
   ],
   vite: {

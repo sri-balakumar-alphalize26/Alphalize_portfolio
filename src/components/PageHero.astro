@@ -3,6 +3,8 @@ import { Heading } from '@alphalize/astro-marker';
 import Icon from './Icon.astro';
 import MarkedTitle from './MarkedTitle.astro';
 import { stripMarks } from './marks';
+import { localeHref } from '@/i18n/paths';
+import { site } from '@/config/site';
 
 interface Props {
   eyebrow?: string;
@@ -20,6 +22,20 @@ interface Props {
 const { eyebrow, title, lead, crumbs = [], anim = false } = Astro.props;
 
 /**
+ * The Home crumb was `href="/"` with the literal word "Home", on every interior
+ * page in all nine locales.
+ *
+ * Both halves were wrong. `/` is not locale-negotiating — src/pages/index.astro
+ * 302s to /en unconditionally — so an Arabic reader clicking Home landed on the
+ * English homepage with the locale silently gone, which is the same failure
+ * b3c5b43 set out to eliminate. check-links.mjs misses it because it whitelists
+ * `/` on the assumption that the negotiation described in that file's own
+ * comment already exists; it is still an intention, not behaviour.
+ */
+const { locale, t } = Astro.locals;
+const homeHref = localeHref(locale, '/');
+
+/**
  * The breadcrumb repeats the title as plain text, so it needs the words without
  * the strokes.
  *
@@ -31,7 +47,39 @@ const { eyebrow, title, lead, crumbs = [], anim = false } = Astro.props;
  * underline.
  */
 const plainTitle = stripMarks(title);
+
+/**
+ * The same trail again, for search engines.
+ *
+ * Emitted here rather than passed up to BaseLayout because this component is
+ * the only thing that knows the crumbs — a page would otherwise have to declare
+ * them twice and the two copies would drift.
+ *
+ * The current page carries no `item`: it is where the reader already is, and
+ * Google's guidance is to leave the last entry unlinked. `<` is escaped for the
+ * reason Seo.astro escapes it — these labels are translated strings.
+ */
+const breadcrumbs = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { name: t('nav.home'), href: homeHref },
+    ...crumbs.map((c) => ({ name: c.label, href: c.href })),
+    { name: plainTitle, href: undefined },
+  ].map((entry, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: entry.name,
+    ...(entry.href ? { item: new URL(entry.href, site.url).href } : {}),
+  })),
+};
 ---
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(breadcrumbs).replace(/</g, '\\u003c')}
+/>
 
 <section
   class="cc-white border-brand-100 relative isolate overflow-hidden border-b"
@@ -50,7 +98,7 @@ const plainTitle = stripMarks(title);
       style={anim ? '--d:0ms' : undefined}
     >
       <ol class="text-muted flex flex-wrap items-center gap-1.5 text-xs">
-        <li><a href="/" class="hover:text-plum-600">Home</a></li>
+        <li><a href={homeHref} class="hover:text-plum-600">{t('nav.home')}</a></li>
         {
           crumbs.map((c) => (
             <>

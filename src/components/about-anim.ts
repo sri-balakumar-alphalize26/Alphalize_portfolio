@@ -63,7 +63,7 @@ export function initAboutAnim(root: ParentNode = document) {
         setTimeout(() => el.classList.add('done'), 2600);
       }
     },
-    { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+    { threshold: 0.12, rootMargin: '0px 0px -6% 0px' }
   );
 
   sections.forEach((s) => {
@@ -78,7 +78,7 @@ export function initAboutAnim(root: ParentNode = document) {
         const r = s.getBoundingClientRect();
         if (r.top < innerHeight && r.bottom > 0) s.classList.add('in');
       }),
-    4000,
+    4000
   );
 }
 

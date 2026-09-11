@@ -59,6 +59,20 @@ import chilanka400 from '@fontsource/chilanka/malayalam-400.css?url';
  * browser fetches only the slices the page's characters actually fall in —
  * typically four to eight, around 110-220 KB.
  *
+ * THE SLICED SHEET IS `400.css`, NOT `chinese-simplified-400.css`.
+ *
+ * The names read backwards. `chinese-simplified-400.css` is 321 bytes with ONE
+ * @font-face and no unicode-range at all — the *whole* Simplified range in a
+ * single 1 142 552-byte file. `400.css` is the 105 KB sheet with 101 slices of
+ * ~32 KB each, which is what the paragraph above describes.
+ *
+ * This imported the subset-named pair until now, so /zh shipped 2 314 796 bytes
+ * of font — both weights whole — while claiming in this very comment to be
+ * doing the opposite. The sheets themselves are larger (~105 KB per weight
+ * against 321 bytes), but they are text: the unicode-range lists are close to
+ * pure repetition and compress to a small fraction, and Cloudflare compresses
+ * them. Fonts are woff2 and already compressed, so nothing recovers those.
+ *
  * Corpus subsetting with pyftsubset would beat that (one ~80 KB file, since all
  * Chinese copy on a static site is a closed character set), but it needs a
  * Python step in the build. This gets the same correctness with no new tooling,
@@ -72,8 +86,8 @@ import chilanka400 from '@fontsource/chilanka/malayalam-400.css?url';
  * marker strokes carry the personality instead; they are SVG and survive any
  * script unchanged.
  */
-import han400 from '@fontsource/noto-sans-sc/chinese-simplified-400.css?url';
-import han700 from '@fontsource/noto-sans-sc/chinese-simplified-700.css?url';
+import han400 from '@fontsource/noto-sans-sc/400.css?url';
+import han700 from '@fontsource/noto-sans-sc/700.css?url';
 
 /** Stylesheets to link for a locale, beyond the Latin faces every page loads. */
 export const scriptFonts: Partial<Record<Locale, readonly string[]>> = {

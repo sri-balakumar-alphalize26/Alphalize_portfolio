@@ -8,10 +8,12 @@ import IconDefs from '@/components/IconDefs.astro';
 import IdlePromo from '@/components/IdlePromo.astro';
 import PromoDeck from '@/components/PromoDeck.astro';
 import SplashScreen from '@/components/SplashScreen.astro';
-import { contact, offices, site } from '@/config/site';
-import { localeLabels } from '@/i18n/locales';
+import { contact, offices, site, socials } from '@/config/site';
+import { liveLocales, localeLabels } from '@/i18n/locales';
+import brandLogo from '@/assets/brand/logo.png';
 import { scriptFonts } from '@/styles/fonts-per-script';
 import inter400 from '@alphalize/astro-marker/fonts/inter-latin-400-normal.woff2?url';
+import inter600 from '@alphalize/astro-marker/fonts/inter-latin-600-normal.woff2?url';
 import caveat700 from '@alphalize/astro-marker/fonts/caveat-latin-700-normal.woff2?url';
 import '@/styles/global.css';
 
@@ -22,21 +24,70 @@ interface Props {
   ogType?: 'website' | 'article';
   noindex?: boolean;
   jsonLd?: Record<string, unknown>[];
+  /** Site-root-absolute path to a 1200x630 share image. Omit for the default. */
+  ogImagePath?: string;
 }
 
-const { title, description, canonicalPath, ogType, noindex, jsonLd = [] } = Astro.props;
+const {
+  title,
+  description,
+  canonicalPath,
+  ogType,
+  noindex,
+  jsonLd = [],
+  ogImagePath,
+} = Astro.props;
 
-// Sitewide Organization graph — emitted once, on every page.
+/* Set by src/middleware.ts, from the [locale] route segment. Read by the
+   WebSite node below, so it is destructured before the graphs rather than
+   after them. */
+const { locale, t } = Astro.locals;
+
+/**
+ * Sitewide Organization graph — emitted once, on every page.
+ *
+ * Also typed LocalBusiness. There is one office, it has a street address and
+ * coordinates, and the work is sold locally as much as remotely, so the local
+ * pack is worth being eligible for. Both types on one node rather than two
+ * nodes, so there is a single entity at a single @id for everything else on
+ * the site to reference.
+ */
+const head = offices[0];
+
 const organization = {
   '@context': 'https://schema.org',
-  '@type': 'Organization',
+  '@type': ['Organization', 'LocalBusiness'],
   '@id': `${site.url}/#organization`,
-  name: site.legalName,
+  name: site.name,
+  legalName: site.legalName,
   url: site.url,
-  logo: `${site.url}/favicon.png`,
+  /**
+   * A real logo, not the favicon. Google wants at least 112px on the shorter
+   * side for a logo to be usable in a rich result and favicon.png is 40x40, so
+   * the old value was silently failing that check. Imported through
+   * astro:assets, so the dimensions below are measured rather than asserted.
+   */
+  logo: {
+    '@type': 'ImageObject',
+    url: new URL(brandLogo.src, site.url).href,
+    width: brandLogo.width,
+    height: brandLogo.height,
+  },
+  image: new URL(brandLogo.src, site.url).href,
   email: `${contact.emailUser}@${contact.emailDomain}`,
   telephone: contact.phone,
   description: site.description,
+  foundingDate: site.founded,
+  /** The four accounts in the footer. The strongest entity signal Google takes. */
+  sameAs: socials.map((s) => s.href),
+  contactPoint: {
+    '@type': 'ContactPoint',
+    contactType: 'customer service',
+    telephone: contact.phone,
+    email: `${contact.emailUser}@${contact.emailDomain}`,
+    areaServed: 'IN',
+    availableLanguage: liveLocales.map((l) => localeLabels[l].hreflang),
+  },
   address: offices.map((o) => ({
     '@type': 'PostalAddress',
     streetAddress: o.street,
@@ -45,9 +96,42 @@ const organization = {
     postalCode: o.postalCode,
     addressCountry: o.countryCode,
   })),
+  /* Already in site.ts, where they drive the footer map pin and nothing else. */
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: head.lat,
+    longitude: head.lon,
+  },
+  /**
+   * Prints as "Open now - Closes 6:30 pm" beside the listing, so these are a
+   * claim about the office rather than a default. Sunday closed by omission.
+   */
+  openingHoursSpecification: [
+    {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      opens: '09:30',
+      closes: '18:30',
+    },
+  ],
 };
-/* Set by src/middleware.ts, from the [locale] route segment. */
-const { locale, t } = Astro.locals;
+
+/**
+ * The site itself, so search engines have a node for the property as distinct
+ * from the company that publishes it. No potentialAction: there is no site
+ * search to advertise, and claiming one that does not exist is worse than
+ * omitting it.
+ */
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${site.url}/#website`,
+  url: site.url,
+  name: site.name,
+  description: site.description,
+  inLanguage: localeLabels[locale].hreflang,
+  publisher: { '@id': `${site.url}/#organization` },
+};
 
 /**
  * Dev-only direction override: `?dir=rtl` on any page renders it mirrored.
@@ -74,8 +158,14 @@ const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabel
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta name="theme-color" content="#004b80" />
 
-    <!-- Fonts are self-hosted (packages/astro-marker); preload the two above-the-fold faces. -->
+    <!--
+      Fonts are self-hosted (packages/astro-marker); preload the above-the-fold
+      faces. Inter 600 is --font-display, i.e. every h1-h4 on the site including
+      the one that is usually the LCP text — it was discovered only after the
+      CSS parsed, which is a round trip later than the body face beside it.
+    -->
     <link rel="preload" href={inter400} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={inter600} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={caveat700} as="font" type="font/woff2" crossorigin />
 
     {
@@ -95,7 +185,8 @@ const dir = forcedDir === 'rtl' || forcedDir === 'ltr' ? forcedDir : localeLabel
       canonicalPath={canonicalPath}
       ogType={ogType}
       noindex={noindex}
-      jsonLd={[organization, ...jsonLd]}
+      ogImagePath={ogImagePath}
+      jsonLd={[organization, website, ...jsonLd]}
     />
 
     {

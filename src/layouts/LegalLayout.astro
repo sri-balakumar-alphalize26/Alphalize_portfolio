@@ -2,7 +2,7 @@
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import BaseLayout from './BaseLayout.astro';
-import { legalNav } from '@/config/site';
+import { legalNav, site } from '@/config/site';
 import { stripMarks } from '@/components/marks';
 import { localeHref, splitLocale } from '@/i18n/paths';
 import { localeLabels } from '@/i18n/locales';
@@ -47,10 +47,29 @@ const updatedText = new Intl.DateTimeFormat(DATE_TAG[locale] ?? localeLabels[loc
 }).format(updated);
 /** Machine-readable, and locale-independent. */
 const updatedIso = updated.toISOString().slice(0, 10);
+
+/**
+ * The three legal documents carried no structured data at all, because this
+ * layout never accepted a `jsonLd` prop to forward.
+ *
+ * `dateModified` is the date the pill already shows the reader — the one field
+ * here that genuinely helps, since a policy is judged on how current it is.
+ */
+const legalPage = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  url: new URL(Astro.url.pathname, site.url).href,
+  name: plainTitle,
+  description,
+  dateModified: updatedIso,
+  inLanguage: localeLabels[locale].hreflang,
+  isPartOf: { '@id': `${site.url}/#website` },
+  publisher: { '@id': `${site.url}/#organization` },
+};
 ---
 
-<BaseLayout title={plainTitle} description={description}>
-  <PageHero title={title} eyebrow="Legal" />
+<BaseLayout title={plainTitle} description={description} jsonLd={[legalPage]}>
+  <PageHero title={title} eyebrow={t('common.legal')} />
 
   <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
     <article class="lg:col-span-8">
@@ -84,7 +103,7 @@ const updatedIso = updated.toISOString().slice(0, 10);
 
     <aside class="lg:col-span-4">
       <nav class="lg:sticky lg:top-28" aria-label="Legal pages">
-        <h2 class="text-ink text-sm font-semibold tracking-wider uppercase">Legal</h2>
+        <h2 class="text-ink text-sm font-semibold tracking-wider uppercase">{t('common.legal')}</h2>
         <ul class="divide-brand-100 mt-3 divide-y">
           {
             legalNav.map((l) => (

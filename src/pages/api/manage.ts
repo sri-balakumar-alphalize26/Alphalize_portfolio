@@ -1,11 +1,6 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
-import {
-  isValidEmail,
-  isValidPhone,
-  readContact,
-  writeContact,
-} from '@/lib/contact-settings';
+import { isValidEmail, isValidPhone, readContact, writeContact } from '@/lib/contact-settings';
 import {
   changePasscode,
   clearCookie,

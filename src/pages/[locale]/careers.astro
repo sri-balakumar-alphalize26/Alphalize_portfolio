@@ -8,8 +8,9 @@ import ManageBar from '@/components/ManageBar.astro';
 import PageHero from '@/components/PageHero.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { offices, site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
 
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
 
 /* Newest first — getLocalized orders by `order`, which jobs do not use. */
 const jobs = (await getLocalized('jobs', Astro.locals.locale, (j) => j.data.open)).sort(
@@ -26,15 +27,56 @@ const positions = [
 
 const india = offices.find((o) => o.id === 'kollam')!;
 
-// JobPosting markup makes these roles eligible for the Google Jobs experience.
+/**
+ * JobPosting markup makes these roles eligible for the Google Jobs experience.
+ *
+ * Four things were wrong and are fixed here:
+ *
+ *  - `url` was `${site.url}/careers#apply` — no locale segment, so it 301s, and
+ *    identical for every posting, so all of them claimed the same page. Now the
+ *    locale-correct careers URL with the row's own anchor (JobList emits the id).
+ *  - No `validThrough`. Google expires a posting it cannot date, and drops it
+ *    from the jobs experience entirely.
+ *  - `description` was the one-line summary. The responsibilities and
+ *    requirements are already in the collection and are what a candidate is
+ *    actually shown; Google wants the full text.
+ *  - `hiringOrganization` was a bare `@id` with no `@type`, in a different
+ *    <script> block from the node it points at.
+ */
+const DAY = 86_400_000;
+/** Six months from posting, unless the role says otherwise. */
+const VALID_MS = 180 * DAY;
+
+const list = (heading: string, items: readonly string[]) =>
+  items.length
+    ? `<p><strong>${heading}</strong></p><ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`
+    : '';
+
 const jsonLd = jobs.map((job) => ({
   '@context': 'https://schema.org',
   '@type': 'JobPosting',
+  identifier: {
+    '@type': 'PropertyValue',
+    name: site.name,
+    value: job.entry.id,
+  },
   title: job.entry.data.title,
-  description: job.entry.data.summary,
+  description: [
+    `<p>${job.entry.data.summary}</p>`,
+    list(t('jobList.whatYouWillDo'), job.entry.data.responsibilities),
+    list(t('jobList.whatWeLookFor'), job.entry.data.requirements),
+  ]
+    .filter(Boolean)
+    .join(''),
   datePosted: job.entry.data.postedAt.toISOString().slice(0, 10),
+  validThrough: new Date(job.entry.data.postedAt.getTime() + VALID_MS).toISOString().slice(0, 10),
   employmentType: job.entry.data.employmentType,
-  hiringOrganization: { '@id': `${site.url}/#organization` },
+  hiringOrganization: {
+    '@type': 'Organization',
+    '@id': `${site.url}/#organization`,
+    name: site.legalName,
+    sameAs: site.url,
+  },
   jobLocation: {
     '@type': 'Place',
     address: {
@@ -47,7 +89,7 @@ const jsonLd = jobs.map((job) => ({
     },
   },
   directApply: true,
-  url: `${site.url}/careers#apply`,
+  url: new URL(localeHref(locale, `/careers#job-${job.entry.id}`), site.url).href,
 }));
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
 ---

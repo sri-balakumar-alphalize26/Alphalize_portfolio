@@ -29,8 +29,24 @@ const width = Math.round(size * (markA.width / markA.height));
 ---
 
 <span class:list={['bm', className]} aria-hidden="true">
-  <Image class="bm-half" src={markA} alt="" width={width} height={size} densities={[1, 2]} />
-  <Image class="bm-half" src={markB} alt="" width={width} height={size} densities={[1, 2]} />
+  <Image
+    class="bm-half"
+    src={markA}
+    alt=""
+    width={width}
+    height={size}
+    densities={[1, 2]}
+    loading="eager"
+  />
+  <Image
+    class="bm-half"
+    src={markB}
+    alt=""
+    width={width}
+    height={size}
+    densities={[1, 2]}
+    loading="eager"
+  />
 </span>
 
 <style>

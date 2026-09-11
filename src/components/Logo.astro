@@ -54,9 +54,30 @@ const vars = [
 ---
 
 <a class:list={['logo', className]} href={href} aria-label="Alphalize — home" style={vars}>
+  {
+    /* Every image here is in the header, which is above the fold on every page of
+     the site. <Image> defaults to loading="lazy", so the logo was being deferred
+     behind content nobody has scrolled to yet — the nav painted last. */
+  }
   <span class="mark" aria-hidden="true">
-    <Image class="half half-a" src={markA} alt="" width={72} height={61} densities={[1, 2]} />
-    <Image class="half half-b" src={markB} alt="" width={72} height={61} densities={[1, 2]} />
+    <Image
+      class="half half-a"
+      src={markA}
+      alt=""
+      width={72}
+      height={61}
+      densities={[1, 2]}
+      loading="eager"
+    />
+    <Image
+      class="half half-b"
+      src={markB}
+      alt=""
+      width={72}
+      height={61}
+      densities={[1, 2]}
+      loading="eager"
+    />
   </span>
 
   <span class="word" aria-hidden="true">
@@ -69,6 +90,7 @@ const vars = [
           width={Math.round(l.w / 4)}
           height={Math.round(WORDMARK_H / 4)}
           densities={[1, 2]}
+          loading="eager"
           style={`left:${((l.left / WORDMARK_W) * 100).toFixed(4)}%; width:${((l.w / WORDMARK_W) * 100).toFixed(4)}%`}
         />
       ))

@@ -44,10 +44,16 @@ const rendered = await Promise.all(
     lead={t('jobList.lead')}
   />
 
+  {
+    /* Each row carries an id so its JobPosting can advertise its own URL.
+       Google wants one distinct URL per posting; before this every posting on
+       the page claimed the same /careers#apply. */
+  }
   <ul class="job-list mt-10">
     {
       rendered.map(({ job, Content }, i) => (
         <li
+          id={`job-${job.id}`}
           class="job-row rounded-card border-brand-100 border bg-white"
           style={`--d:${640 + i * 150}ms`}
         >

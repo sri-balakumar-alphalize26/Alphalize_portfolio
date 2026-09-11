@@ -7,7 +7,8 @@ import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import WhatsAppManage from '@/components/WhatsAppManage.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { offices } from '@/config/site';
+import { offices, site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
 import { readContact, telHref, waNumber } from '@/lib/contact-settings';
 import { isLocale } from '@/i18n/locales';
 
@@ -36,7 +37,7 @@ const wa = waNumber(details);
  * bare `.done` and `.in` classes globally, and `.rail`, `.node` and `.tile` are
  * generic enough to collide with a future component.
  */
-const { t } = Astro.locals;
+const { locale, t } = Astro.locals;
 
 const methods = [
   {
@@ -64,9 +65,24 @@ const methods = [
     copy: email,
   },
 ];
+
+/** Tells search engines this is the page to surface for "contact Alphalize". */
+const contactPage = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  url: new URL(localeHref(locale, '/contact'), site.url).href,
+  name: t('contactPage.metaTitle'),
+  description: t('contactPage.metaDescription'),
+  isPartOf: { '@id': `${site.url}/#website` },
+  about: { '@id': `${site.url}/#organization` },
+};
 ---
 
-<BaseLayout title={t('contactPage.metaTitle')} description={t('contactPage.metaDescription')}>
+<BaseLayout
+  title={t('contactPage.metaTitle')}
+  description={t('contactPage.metaDescription')}
+  jsonLd={[contactPage]}
+>
   <AboutAnim />
 
   <PageHero

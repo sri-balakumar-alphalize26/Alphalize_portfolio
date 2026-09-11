@@ -1,0 +1,39 @@
+# Cache rules for Cloudflare Assets.
+#
+# The /_astro/* rule has to be written out here. The Cloudflare adapter injects
+# it only when it is generating this file from scratch — the moment a source
+# `public/_headers` exists it stops, and the year-long immutable caching on
+# every hashed asset silently disappears. Checked against a build: with this
+# file present and the rule omitted, dist/client/_headers contained only `/*`.
+#
+# Everything on this site is prerendered except `/`, the two form pages and
+# `/api/*`. Without an HTML rule, every page view invoked the Worker and came
+# back `cf-cache-status: DYNAMIC` — the edge held nothing, so a visitor in
+# Muscat paid a round trip to origin for HTML that had not changed in a week.
+#
+# Reading the HTML values below:
+#
+#   max-age=0, must-revalidate   the BROWSER always checks back, so nobody is
+#                                served a stale page out of their own cache
+#   s-maxage=600                 the EDGE serves it for ten minutes
+#   stale-while-revalidate       past that, the edge answers immediately with
+#                                the old copy and refreshes behind the request,
+#                                so no visitor ever waits for a revalidation
+#
+# The cost: copy edited through manage mode takes up to ten minutes to reach
+# other people rather than appearing at once. That is the trade for edge
+# caching and there is no setting that gives both. It is tolerable here because
+# ContactSync patches the phone number and email into the page client-side, so
+# the details most likely to be corrected in a hurry are not frozen in the HTML.
+# If page copy ever needs to go live instantly, lower s-maxage.
+#
+# /api/* is deliberately absent. Those routes set `cache-control: no-store` on
+# their own responses, and an origin header beats a rule in this file.
+
+# Hashed filenames, so the content behind one can never change.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Everything else: pages.
+/*
+  Cache-Control: public, max-age=0, must-revalidate, s-maxage=600, stale-while-revalidate=86400

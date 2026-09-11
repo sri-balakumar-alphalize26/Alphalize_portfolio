@@ -37,6 +37,9 @@
     "terms": "Allgemeine Geschäftsbedingungen",
     "disclaimer": "Haftungsausschluss"
   },
+  "legal": {
+    "updatedLabel": "Zuletzt aktualisiert"
+  },
   "common": {
     "skipToContent": "Zum Inhalt springen",
     "getConsultation": "Beratung anfragen",

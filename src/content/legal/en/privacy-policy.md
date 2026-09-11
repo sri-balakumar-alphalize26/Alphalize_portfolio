@@ -1,7 +1,7 @@
 ---
 title: "Privacy [[Policy]]"
 description: "How Alphalize collects, uses and protects the personal information you submit through this website."
-updated: "8 September 2026"
+updated: 2026-09-08
 order: 1
 ---
 

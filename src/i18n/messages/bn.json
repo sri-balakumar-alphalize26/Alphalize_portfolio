@@ -37,6 +37,9 @@
     "terms": "শর্তাবলি",
     "disclaimer": "দাবি অস্বীকার"
   },
+  "legal": {
+    "updatedLabel": "সর্বশেষ হালনাগাদ"
+  },
   "common": {
     "skipToContent": "মূল বিষয়বস্তুতে যান",
     "getConsultation": "পরামর্শ নিন",

@@ -1,15 +1,18 @@
 ---
+import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import BaseLayout from './BaseLayout.astro';
 import { legalNav } from '@/config/site';
 import { stripMarks } from '@/components/marks';
 import { localeHref, splitLocale } from '@/i18n/paths';
+import { localeLabels } from '@/i18n/locales';
 
 interface Props {
   /** Phrases to wrap in a marker stroke are marked inline — see marks.ts. */
   title: string;
   description: string;
-  updated: string;
+  /** The date the page last changed. Formatted here, per locale. */
+  updated: Date;
   /** 'en' when this locale has no translation — marks the prose, not the page. */
   lang?: string;
 }
@@ -25,6 +28,25 @@ const { path } = splitLocale(Astro.url.pathname);
 /** Prefix an internal path with this page's locale. */
 const { locale, t } = Astro.locals;
 const loc = (to: string) => localeHref(locale, to);
+
+/**
+ * Two overrides on the locale's own BCP-47 tag:
+ *   en → en-GB, or the date reads "September 8, 2026" in a British-spelled site
+ *   ar → Western digits, rather than the Arabic-Indic set Intl defaults to
+ * timeZone pins the day — a server west of UTC would otherwise render the 7th.
+ */
+const DATE_TAG: Partial<Record<typeof locale, string>> = {
+  en: 'en-GB',
+  ar: 'ar-u-nu-latn',
+};
+const updatedText = new Intl.DateTimeFormat(DATE_TAG[locale] ?? localeLabels[locale].hreflang, {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+}).format(updated);
+/** Machine-readable, and locale-independent. */
+const updatedIso = updated.toISOString().slice(0, 10);
 ---
 
 <BaseLayout title={plainTitle} description={description}>
@@ -32,8 +54,30 @@ const loc = (to: string) => localeHref(locale, to);
 
   <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
     <article class="lg:col-span-8">
-      <p class="text-muted text-xs">Last updated: {updated}</p>
-      <div class="prose-content mt-4" lang={lang} dir={lang ? 'ltr' : undefined}>
+      {
+        /*
+          Two-tone pill: label panel, then the date, with the brand blue down
+          the leading edge. `border-s` rather than border-left, so the bar moves
+          to the right in Arabic. It wraps rather than holding one line —
+          "Last updated" is long in Tamil and German, and the two halves
+          together overrun a 390px phone; wrapping stacks them instead of
+          pushing the pill off the page.
+        */
+      }
+      <span
+        class="border-brand-100 border-s-brand-500 inline-flex max-w-full flex-wrap items-stretch overflow-hidden rounded-[10px] border border-s-[3px] bg-white align-middle"
+      >
+        <span
+          class="bg-brand-50 text-ink inline-flex items-center gap-[7px] px-3.5 py-2.5 text-[13px] font-bold whitespace-nowrap"
+        >
+          <Icon name="clock" class="text-brand-600 size-[15px] shrink-0" />
+          {t('legal.updatedLabel')}
+        </span>
+        <span class="text-muted inline-flex items-center px-4 py-2.5 text-[13.5px] tabular-nums">
+          <time datetime={updatedIso}>{updatedText}</time>
+        </span>
+      </span>
+      <div class="prose-content mt-10" lang={lang} dir={lang ? 'ltr' : undefined}>
         <slot />
       </div>
     </article>

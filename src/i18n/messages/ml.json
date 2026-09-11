@@ -37,6 +37,9 @@
     "terms": "നിബന്ധനകളും വ്യവസ്ഥകളും",
     "disclaimer": "നിരാകരണം"
   },
+  "legal": {
+    "updatedLabel": "അവസാനം പുതുക്കിയത്"
+  },
   "common": {
     "skipToContent": "ഉള്ളടക്കത്തിലേക്ക് പോകുക",
     "getConsultation": "ഒരു കൺസൾട്ടേഷൻ നേടുക",

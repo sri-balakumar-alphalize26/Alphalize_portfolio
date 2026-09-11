@@ -37,6 +37,9 @@
     "terms": "Conditions générales",
     "disclaimer": "Avertissement"
   },
+  "legal": {
+    "updatedLabel": "Dernière mise à jour"
+  },
   "common": {
     "skipToContent": "Aller au contenu",
     "getConsultation": "Demander un conseil",

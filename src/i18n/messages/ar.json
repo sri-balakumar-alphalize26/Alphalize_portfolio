@@ -37,6 +37,9 @@
     "terms": "الشروط والأحكام",
     "disclaimer": "إخلاء المسؤولية"
   },
+  "legal": {
+    "updatedLabel": "آخر تحديث"
+  },
   "common": {
     "skipToContent": "الانتقال إلى المحتوى",
     "getConsultation": "احصل على استشارة",

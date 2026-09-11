@@ -118,8 +118,14 @@ const legal = defineCollection({
     /** May carry [[marker brackets]] — see components/marks.ts. */
     title: z.string(),
     description: z.string(),
-    /** Shown as "Last updated"; a plain string so each locale can format it. */
-    updated: z.string(),
+    /**
+     * A date, not a display string. It used to be prose ("8 September 2026"),
+     * which meant every locale printed the English wording — and a translated
+     * page would have had to hand-copy the date, where the first edit that
+     * missed one leaves a locale quietly claiming the wrong date. One value,
+     * formatted per locale by LegalLayout.
+     */
+    updated: z.coerce.date(),
     /** Order in the sidebar. Matches legalNav in config/site.ts. */
     order: z.number().int(),
   }),

@@ -1,7 +1,7 @@
 ---
 title: "Terms & [[Conditions]]"
 description: "The terms you agree to when you use alphalize.com."
-updated: "8 September 2026"
+updated: 2026-09-08
 order: 2
 ---
 

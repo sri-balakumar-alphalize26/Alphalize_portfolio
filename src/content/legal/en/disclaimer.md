@@ -1,7 +1,7 @@
 ---
 title: "Disclaimer"
 description: "The limits of what this website tells you, and what it does not promise."
-updated: "8 September 2026"
+updated: 2026-09-08
 order: 3
 ---
 

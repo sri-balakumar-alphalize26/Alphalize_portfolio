@@ -37,6 +37,9 @@
     "terms": "Terms & Conditions",
     "disclaimer": "Disclaimer"
   },
+  "legal": {
+    "updatedLabel": "Last updated"
+  },
   "common": {
     "skipToContent": "Skip to content",
     "getConsultation": "Get a consultation",

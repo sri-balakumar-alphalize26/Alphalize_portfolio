@@ -30,7 +30,8 @@ interface Props {
   class?: string;
 }
 
-const { class: className } = Astro.props;
+/** `rest` carries the caller's `data-astro-cid-*` — see the note in Flag.astro. */
+const { class: className, ...rest } = Astro.props;
 const { locale, t } = Astro.locals;
 
 /**
@@ -42,7 +43,7 @@ const { locale, t } = Astro.locals;
 const panelId = `bs-panel-${crypto.randomUUID().slice(0, 8)}`;
 ---
 
-<div class:list={['bs', className]} data-brand-switcher>
+<div class:list={['bs', className]} data-brand-switcher {...rest}>
   <slot />
 
   <button
@@ -330,7 +331,8 @@ const panelId = `bs-panel-${crypto.randomUUID().slice(0, 8)}`;
   .bs-row:hover .bs-tile {
     background: #fff;
   }
-  /* :global — one child is a component root, the other the <img> <Image> makes. */
+  /* :global — one child is a component root, the other the <img> <Image> makes.
+     Anchored on .bs-tile, which this file owns, so the rule stays scoped. */
   .bs-tile :global(.bs-img) {
     display: block;
     width: 100%;

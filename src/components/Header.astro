@@ -1123,8 +1123,9 @@ const email = `${contact.emailUser}@${contact.emailDomain}`;
   :global(html:not(.splash-open)) .cta,
   :global(html:not(.splash-open)) .hdr-ls,
   /* The button, never .brand — the logo has its own lg-up / lg-wipe entrance
-     and would otherwise run two at once. Reached through :global because
-     Astro's scope hash lands on a child component's root element only. */
+     and would otherwise run two at once. The button is reached through :global
+     because it lives inside BrandSwitcher's template, not this one; `.brand`
+     itself matches because BrandSwitcher spreads the cid onto its root. */
   :global(html:not(.splash-open)) .brand :global(.bs-btn),
   :global(html:not(.splash-open)) .burger {
     animation: hdr-in 0.5s var(--ease-out-soft) calc(220ms + var(--d, 0ms)) backwards;

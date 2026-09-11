@@ -1,9 +1,9 @@
 [
   {
-    "id": "athul-pos-speed",
+    "id": "prasanth-tools-rental",
     "order": 1,
-    "name": "Athul",
-    "quote": "The POS has made our billing so much faster that queues at the counter almost never build up now. Everything from item selection to printing the bill happens in a few taps, and the staff picked it up without much training. It has been running steadily every single day since we installed it.",
+    "name": "Prasanth",
+    "quote": "Every tool that goes out is checked out against a customer and a rental period, and the cost is worked out for us when it comes back. We were running all of this in registers before and losing track of what was still outside. Now a single screen tells us what is pending, and following up on returns takes minutes.",
     "rating": 5
   },
   {
@@ -14,29 +14,50 @@
     "rating": 5
   },
   {
-    "id": "alshabith-restaurant",
+    "id": "athul-spa-kiosk",
     "order": 3,
-    "name": "Alshabith",
-    "quote": "The restaurant application handles our dine-in, takeaway and kitchen orders in one place, which is exactly what we were missing before. Orders reach the kitchen the moment the waiter takes them, so nothing gets forgotten during the rush hours. Our table turnaround has clearly improved since we started using it.",
+    "name": "Athul",
+    "quote": "The reception kiosk handles walk-ins on its own — the customer picks a service, answers only the questions that service needs, and signs the disclaimer on the tablet. The booking is waiting in Odoo for our receptionist to approve by the time they sit down. Our front desk is no longer the queue it used to be.",
     "rating": 5
   },
   {
-    "id": "srisaan-tools-rental",
+    "id": "shahib-desktop-billing",
     "order": 4,
-    "name": "Srisaan",
-    "quote": "The tools rental management app keeps track of every item that goes out and comes back, along with the rental period and the customer details. Earlier we were maintaining all this in registers and losing track of returns, and now everything is visible in one screen. Following up on pending returns has become very simple.",
+    "name": "Shahib",
+    "quote": "The billing application runs on the counter PC itself, so it stays quick even on the older machines we did not want to replace yet. When the connection drops it keeps taking bills and syncs everything back once we are online again. That alone has saved us more days of trading than I can count.",
     "rating": 5
   },
   {
-    "id": "rajin-kumar-notifications",
+    "id": "gabriel-machial-rollout-training",
     "order": 5,
-    "name": "Rajin Kumar",
-    "quote": "The WhatsApp and email connection is wonderful — invoices and order confirmations go out to the customer automatically the moment we finish the billing. We no longer have to save numbers, download PDFs and forward them one by one. Customers appreciate getting everything instantly on the channel they actually use.",
+    "name": "Gabriel Machial",
+    "quote": "They trained our people at each stage of the rollout rather than handing everything over in one session at the end. Each team learnt its own part while that part was going live, so nobody was sitting in front of a screen they had never seen. Adoption did not stall the way it did with the system we used before.",
+    "rating": 5
+  },
+  {
+    "id": "sri-custom-web-app",
+    "order": 6,
+    "name": "Sri",
+    "quote": "We had a workflow no off-the-shelf product covered, and they built the web application around it instead of asking us to change how we work. The parts we were doing by hand between three tools now happen in one place. It behaves the way our operation actually runs, which is the whole reason we went custom.",
+    "rating": 5
+  },
+  {
+    "id": "krithik-support",
+    "order": 7,
+    "name": "Krithik",
+    "quote": "We never have to explain our setup from scratch, because the same people who built it are the ones who answer the phone. A small change stays a small change instead of turning into a proposal and a wait. It is much closer to having our own IT team than to raising tickets with a vendor.",
+    "rating": 5
+  },
+  {
+    "id": "anushiya-handover-docs",
+    "order": 8,
+    "name": "Anushiya",
+    "quote": "They handed over documented deployment steps along with the code, so our own team can run and update the system without calling anyone. Everything we need is written down in plain language rather than locked in someone's head. That is the difference between owning the software and renting it.",
     "rating": 5
   },
   {
     "id": "shamnad-support",
-    "order": 6,
+    "order": 9,
     "name": "Shamnad",
     "quote": "The support they give is easily the best part of working with them. Whenever we raise an issue, someone responds quickly and stays on it until it is completely resolved, no matter what time of day it is. That kind of reliability is rare and it is the main reason we continue with them.",
     "rating": 5

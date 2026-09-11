@@ -19,11 +19,11 @@ import { isLive, localeLabels, localeRegions } from '@/i18n/locales';
  * streaming client navigation that needs one; here it is an ordinary document
  * load, and the browser draws its own progress.
  *
- * NOT YET WIRED. Only the locales in `liveLocales` have pages behind them, and
- * today that is English alone. The other eight render greyed with a "Soon" tag
- * rather than as links, because eight guaranteed 404s in a menu is worse than
- * saying "not yet" — and it would hand dead URLs to anything crawling the page.
- * They become links as each locale's content lands; see liveLocales.
+ * Only the locales in `liveLocales` are rendered as links; any other renders
+ * greyed with a "Soon" tag instead, because a guaranteed 404 in a menu is worse
+ * than saying "not yet" and would hand dead URLs to anything crawling the page.
+ * All nine are live today, so that branch is currently unreachable — it stays
+ * for the next locale added ahead of its content.
  */
 interface Props {
   /** Flag and chevron only — the names move into the panel. For narrow bars. */
@@ -31,7 +31,13 @@ interface Props {
   class?: string;
 }
 
-const { compact = false, class: className } = Astro.props;
+/**
+ * `rest` carries the caller's `data-astro-cid-*` — see the note in Flag.astro.
+ * Header styles this root through the class it passes (`.hdr-ls`), and that
+ * rule hides the switcher below 1024px where the drawer carries its own copy.
+ * Without the spread it matched nothing and both copies showed at every width.
+ */
+const { compact = false, class: className, ...rest } = Astro.props;
 
 /**
  * The locale of the page this is rendering on, and the locale-free path under
@@ -41,16 +47,23 @@ const { compact = false, class: className } = Astro.props;
 const { locale: current, path: here } = splitLocale(Astro.url.pathname);
 const meta = localeLabels[current];
 
+/**
+ * Unique per render. Header mounts this twice — once in the bar, once in the
+ * mobile drawer — so a hardcoded id put two of them in every document and left
+ * one trigger's aria-controls pointing at the other one's panel.
+ */
+const panelId = `ls-panel-${crypto.randomUUID().slice(0, 8)}`;
+
 const regions = localeRegions();
 ---
 
-<div class:list={['ls', className]} data-locale-switcher>
+<div class:list={['ls', className]} data-locale-switcher {...rest}>
   <button
     type="button"
     class:list={['ls-btn', compact && 'ls-btn-compact']}
     aria-expanded="false"
     aria-haspopup="listbox"
-    aria-controls="ls-panel"
+    aria-controls={panelId}
     data-locale-trigger
   >
     <Flag locale={current} class="ls-flag" />
@@ -74,7 +87,7 @@ const regions = localeRegions();
     panel cannot be scrolled to.
   */
   }
-  <ul class="ls-panel" id="ls-panel" role="listbox" aria-label="Language">
+  <ul class="ls-panel" id={panelId} role="listbox" aria-label="Language">
     {
       regions.map((group) => (
         <li role="group" aria-label={group.region}>
@@ -359,7 +372,11 @@ const regions = localeRegions();
     background: var(--color-brand-50);
     color: var(--color-plum-600);
   }
+  /* Three signals for the current locale, as the 369 picker does it: the tint,
+     the weight and the colour, plus the check. Weight and colour alone are
+     easy to miss in a list where several rows are in scripts you cannot read. */
   .ls-item-on {
+    background: var(--color-brand-50);
     font-weight: 600;
     color: var(--color-brand-700);
   }

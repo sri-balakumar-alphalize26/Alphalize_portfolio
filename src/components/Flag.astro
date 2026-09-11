@@ -10,7 +10,14 @@ interface Props {
   class?: string;
 }
 
-const { locale, class: className } = Astro.props;
+/**
+ * `rest` carries the caller's `data-astro-cid-*`, which Astro passes as a prop
+ * but does not put on this root by itself. Without spreading it, a rule the
+ * parent writes for the class it passed here — `.ls-flag { width: 1.15rem }` —
+ * compiles against the parent's scope and matches nothing. `<Image>` spreads
+ * for the same reason; hand-written components have to do it themselves.
+ */
+const { locale, class: className, ...rest } = Astro.props;
 const icon = isIconFlag(locale);
 ---
 
@@ -18,6 +25,7 @@ const icon = isIconFlag(locale);
   viewBox="0 0 24 16"
   aria-hidden="true"
   class:list={['fl', icon && 'fl-icon', className]}
+  {...rest}
   set:html={flags[locale]}
 />
 
@@ -25,6 +33,12 @@ const icon = isIconFlag(locale);
   .fl {
     display: block;
     flex: none;
+    /* A default size, the way Icon.astro defaults its class to `size-6`. An
+       <svg> with no width/height and no CSS falls back to the 300x150 default
+       object size — at this 3:2 viewBox, a 225px flag. A consumer's sizing
+       rule going missing should be a small slip, not that. */
+    width: 1.5rem;
+    height: 1rem;
     /* A hairline ring so a white-edged flag (Oman, France) still reads as an
        object against the white panel rather than bleeding into it. */
     border-radius: 2px;

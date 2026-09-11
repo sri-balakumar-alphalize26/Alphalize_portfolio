@@ -38,9 +38,10 @@ const width = Math.round(size * (markA.width / markA.height));
     position: relative;
     display: block;
   }
-  /* :global because <Image> is a component — Astro's scope hash lands on it,
-     not on the <img> it renders. Same reason Logo.astro writes
-     `.mark :global(.half)`. */
+  /* :global to keep this independent of how <Image> forwards props. It does
+     spread the caller's `data-astro-cid-*` onto the <img>, so a scoped rule
+     would in fact match — but that is Image's behaviour, not a guarantee of
+     the class prop. Same shape as Logo.astro's `.mark :global(.half)`. */
   .bm :global(.bm-half) {
     position: absolute;
     inset: 0;

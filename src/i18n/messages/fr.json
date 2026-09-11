@@ -64,6 +64,7 @@
   "testimonials": {
     "eyebrow": "Avis clients",
     "title": "Ce que disent nos [[clients]]",
+    "lead": "Loueurs de matériel, spas, comptoirs de caisse et back-offices font tourner nos logiciels chaque jour.",
     "footer": "Vous avez travaillé avec nous ?"
   },
   "whyCards": {

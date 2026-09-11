@@ -14,7 +14,15 @@ interface Props {
   draw?: boolean;
 }
 
-const { name, class: className = 'size-6', label, draw = false } = Astro.props;
+/**
+ * `rest` carries the caller's `data-astro-cid-*`. Astro passes it as a prop but
+ * does not put it on this root, and this component has no <style> of its own,
+ * so without the spread the rendered <svg> has no scope attribute at all and
+ * every rule a parent writes for the class it passed — `.ls-chev`, `.bs-check`
+ * — matches nothing. The `size-6` default below only covers callers that pass
+ * no class; one that passes `class="ls-chev"` replaces it and is then unsized.
+ */
+const { name, class: className = 'size-6', label, draw = false, ...rest } = Astro.props;
 
 /**
  * Icons that mean "forward" and "back" rather than "left" and "right", so they
@@ -53,5 +61,6 @@ const markup = draw
   role={label ? 'img' : undefined}
   aria-label={label}
   aria-hidden={label ? undefined : 'true'}
+  {...rest}
   set:html={markup}
 />

@@ -19,10 +19,11 @@ const reviews = (await getCollection('testimonials')).sort((a, b) => a.data.orde
 const palette = ['blue', 'orange', 'yellow'];
 const cards = reviews.map((review, i) => ({ ...review.data, color: palette[i % palette.length] }));
 
-// Every column carries all six reviews, each starting at a different point in
-// the list — two-per-column would loop far too visibly. Speeds differ so the
-// columns never travel in lockstep, and the middle one runs the other way.
-const columns = [0, 2, 4].map((offset, i) => ({
+// Every column carries all nine reviews, each starting at a different point in
+// the list — two-per-column would loop far too visibly. Offsets are the list in
+// exact thirds, so no two columns show the same card side by side. Speeds differ
+// so the columns never travel in lockstep, and the middle one runs the other way.
+const columns = [0, 3, 6].map((offset, i) => ({
   items: [...cards.slice(offset), ...cards.slice(0, offset)],
   duration: [46, 58, 52][i],
   reverse: i === 1,
@@ -40,7 +41,7 @@ const loc = (to: string) => localeHref(locale, to);
     title={t('testimonials.title')}
     marker="underline"
     color="blue"
-    lead="Shops, restaurants and showrooms running our software and hardware every day."
+    lead={t('testimonials.lead')}
   />
 
   <div

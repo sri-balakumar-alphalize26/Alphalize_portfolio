@@ -34,13 +34,17 @@ const {
   placeholder,
   invalidMessage = 'Enter a valid mobile number for the selected country.',
   class: className,
+  // Carries the caller's `data-astro-cid-*` — see the note in Flag.astro. This
+  // component's styles are `is:global`, so it has no scope attribute of its own
+  // and the spread is the only way a parent rule can reach this root.
+  ...rest
 } = Astro.props;
 
 const id = `f-${name}`;
 const errorId = `${id}-error`;
 ---
 
-<div class={className} data-phone-field data-invalid-message={invalidMessage}>
+<div class={className} data-phone-field data-invalid-message={invalidMessage} {...rest}>
   <label for={id} class="text-ink block text-sm font-medium">
     {label}
     {required && <span class="text-red-600" aria-hidden="true"> *</span>}

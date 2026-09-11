@@ -25,6 +25,9 @@ const {
   hint,
   options = [],
   class: className,
+  // Carries the caller's `data-astro-cid-*` — see the note in Flag.astro.
+  // CareersForm styles this root through `.apply-f` for its focus underline.
+  ...rest
 } = Astro.props;
 
 const id = `f-${name}`;
@@ -37,7 +40,7 @@ const base =
 const { t } = Astro.locals;
 ---
 
-<div class={className}>
+<div class={className} {...rest}>
   <label for={id} class="text-ink block text-sm font-medium">
     {label}
     {

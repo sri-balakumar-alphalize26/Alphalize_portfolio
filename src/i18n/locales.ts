@@ -5,11 +5,11 @@
  *
  * ORDER IS LOAD-BEARING. The picker groups by region positionally — a group
  * breaks when the region label changes — so same-region entries have to stay
- * adjacent. India's three languages (hi, ta, ml) are contiguous on purpose;
- * split them and the picker prints "India" three times with three identical
- * flags. Reordering this array is a UI change.
+ * adjacent. India's three languages (ml, ta, hi — Malayalam first, the
+ * company's home state) are contiguous on purpose; split them and the picker
+ * prints "India" three times with three identical flags. Reordering this array is a UI change.
  */
-export const locales = ['en', 'hi', 'ta', 'ml', 'ar', 'bn', 'zh', 'fr', 'de'] as const;
+export const locales = ['en', 'ml', 'ta', 'hi', 'ar', 'bn', 'zh', 'fr', 'de'] as const;
 
 export type Locale = (typeof locales)[number];
 

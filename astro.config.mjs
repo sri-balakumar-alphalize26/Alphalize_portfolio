@@ -109,6 +109,12 @@ export default defineConfig({
     }),
   ],
   vite: {
+    // `astro preview` runs Vite's preview server, which rejects any Host header
+    // it does not know. When the site is served through preview behind the real
+    // hostname, the request is blocked without these.
+    preview: {
+      allowedHosts: ['alphalize.com', 'www.alphalize.com', 'localhost'],
+    },
     // @tailwindcss/vite resolves its own Vite types, which differ from Astro's
     // pinned copy by a patch version; the plugin object itself is compatible.
     plugins: [/** @type {any} */ (tailwindcss())],

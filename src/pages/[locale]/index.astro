@@ -11,14 +11,21 @@ import WelcomeIntro from '@/components/WelcomeIntro.astro';
 import WhatWeDo from '@/components/WhatWeDo.astro';
 import WhyCards from '@/components/WhyCards.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { site } from '@/config/site';
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
+
+/**
+ * Metadata from the catalogue, not from src/config/site.ts.
+ *
+ * The title was a template literal and the description was the `site.description`
+ * CONSTANT, so all nine home pages carried identical English metadata — nine
+ * hreflang alternates that read as one page rather than as translations of each
+ * other. Both strings exist translated in all nine catalogues; they simply were
+ * not being read.
+ */
+const { t } = Astro.locals;
 ---
 
-<BaseLayout
-  title={`${site.name} — ERP Solutions & Business Intelligence`}
-  description={site.description}
->
+<BaseLayout title={t('site.metaTitle')} description={t('site.description')}>
   <Hero />
 
   <WhatWeDo />

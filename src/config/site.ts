@@ -22,6 +22,18 @@ export const site = {
   description:
     'Alphalize builds customised ERP solutions, business intelligence dashboards and custom software that take your business to the next level of automation.',
   founded: '2023',
+  /**
+   * Cloudflare Web Analytics site token, from the dashboard (Analytics &
+   * Logs → Web Analytics → the site → JS snippet; the `token` in the
+   * data-cf-beacon attribute). Cookieless, so no consent banner — which is why
+   * it was chosen over GA4 with fr and de live. Empty emits nothing.
+   */
+  cfAnalyticsToken: '',
+  /**
+   * Google Search Console HTML-tag verification: the `content` value of the
+   * <meta name="google-site-verification"> it hands out. Empty emits nothing.
+   */
+  googleSiteVerification: '',
 } as const;
 
 export const contact = {

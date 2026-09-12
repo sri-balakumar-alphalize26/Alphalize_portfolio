@@ -62,6 +62,7 @@ const body = (entry.rendered?.html ?? '').replace(
   description={entry.data.description}
   updated={entry.data.updated}
   lang={translated ? undefined : 'en'}
+  ogImagePath={`/og/legal/${Astro.params.slug}.png`}
 >
   {
     /*

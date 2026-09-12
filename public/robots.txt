@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# Indexing, not access — the session cookie is what actually protects these.
+# /api/cv/* streams applicant CVs, /careers/applications is the applicant inbox
+# (one path per locale), and ?manage=1 is a real URL a crawler could follow.
+Disallow: /api/
+Disallow: /*/careers/applications
+Disallow: /*?manage=
+
 Sitemap: https://www.alphalize.com/sitemap-index.xml

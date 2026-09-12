@@ -6,8 +6,10 @@ import PageHero from '@/components/PageHero.astro';
 import ServiceCard from '@/components/ServiceCard.astro';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { site } from '@/config/site';
+import { localeHref } from '@/i18n/paths';
 
-const services = await getLocalized('services', Astro.locals.locale);
+const { locale, t } = Astro.locals;
+const services = await getLocalized('services', locale);
 
 const jsonLd = [
   {
@@ -18,18 +20,27 @@ const jsonLd = [
       '@type': 'ListItem',
       position: i + 1,
       name: s.entry.data.title,
-      url: `${site.url}/services/${s.slug}`,
+      /**
+       * Through localeHref, like every other JSON-LD URL on the site.
+       *
+       * This used to be `${site.url}/services/${s.slug}` — no locale segment —
+       * so all nine locales published the English URL here, and each one 301s
+       * through public/_redirects before it resolves. A list that advertises
+       * nine identical English URLs tells a crawler the nine pages are one
+       * page, which is the opposite of what the hreflang set says.
+       */
+      url: new URL(localeHref(locale, `/services/${s.slug}`), site.url).href,
     })),
   },
 ];
 export { localeStaticPaths as getStaticPaths } from '@/i18n/paths';
-const { t } = Astro.locals;
 ---
 
 <BaseLayout
   title={t('servicesPage.metaTitle')}
   description={t('servicesPage.metaDescription')}
   jsonLd={jsonLd}
+  ogImagePath="/og/services.png"
 >
   <PageHero
     eyebrow={t('servicesPage.eyebrow')}

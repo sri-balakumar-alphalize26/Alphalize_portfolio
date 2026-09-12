@@ -1,0 +1,24 @@
+{
+  "name": "Alphalize — ERP Solutions & Business Intelligence",
+  "short_name": "Alphalize",
+  "description": "Alphalize builds customised ERP solutions, business intelligence dashboards and custom software that take your business to the next level of automation.",
+  "start_url": "/en",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#004b80",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -74,6 +74,12 @@ const ogImage = new URL(ogImagePath ?? '/og-default.png', site.url).href;
 
 <title>{fullTitle}</title>
 <meta name="description" content={description} />
+{
+  /* Search Console ownership. Emitted only once the string in site.ts is set. */
+  site.googleSiteVerification && (
+    <meta name="google-site-verification" content={site.googleSiteVerification} />
+  )
+}
 <link rel="canonical" href={canonical} />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 

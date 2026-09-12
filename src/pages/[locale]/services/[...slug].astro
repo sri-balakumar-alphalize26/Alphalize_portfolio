@@ -86,7 +86,13 @@ if (apps.length) {
 }
 ---
 
-<BaseLayout title={title} description={seoDescription ?? summary} ogType="article" jsonLd={jsonLd}>
+<BaseLayout
+  title={title}
+  description={seoDescription ?? summary}
+  ogType="article"
+  jsonLd={jsonLd}
+  ogImagePath={`/og/services/${slug}.png`}
+>
   <AboutAnim />
 
   <PageHero

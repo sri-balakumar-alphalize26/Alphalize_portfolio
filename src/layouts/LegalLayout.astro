@@ -15,9 +15,11 @@ interface Props {
   updated: Date;
   /** 'en' when this locale has no translation — marks the prose, not the page. */
   lang?: string;
+  /** Site-root-absolute path to a 1200x630 share image. Omit for the default. */
+  ogImagePath?: string;
 }
 
-const { title, description, updated, lang } = Astro.props;
+const { title, description, updated, lang, ogImagePath } = Astro.props;
 // The hero draws the strokes; <title> and og:title want the words only.
 const plainTitle = stripMarks(title);
 // Locale-free and extension-free, so it can be compared against the plain
@@ -68,7 +70,12 @@ const legalPage = {
 };
 ---
 
-<BaseLayout title={plainTitle} description={description} jsonLd={[legalPage]}>
+<BaseLayout
+  title={plainTitle}
+  description={description}
+  jsonLd={[legalPage]}
+  ogImagePath={ogImagePath}
+>
   <PageHero title={title} eyebrow={t('common.legal')} />
 
   <div class="container-page grid gap-12 py-16 lg:grid-cols-12 lg:py-20">
